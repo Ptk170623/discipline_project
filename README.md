@@ -36,6 +36,7 @@ PRAZO: +90
 ## Estudo com IA
 
 Cada parte traz prompts prontos (dividir em partes, sessão de estudo, revisão) e um cartão de revisão.
+Com uma **base de prática** configurada, os prompts pedem demonstração do conceito nessa base e um mini-projeto por parte.
 O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
 
 ## Onde ficam os dados

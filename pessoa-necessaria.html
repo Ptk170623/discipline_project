@@ -324,6 +324,7 @@ try{var raw=document.getElementById('pn-data').textContent.trim();if(raw&&raw!==
 if(!state||typeof state!=='object')state=exampleState();
 ['cap','proj','reviews','log'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(typeof state.persona!=='string')state.persona='';
+if(typeof state.base!=='string')state.base='';
 
 var ui={route:'home',cal:today().slice(0,7),sel:today(),modal:null,editPersona:false,revAll:false,clearAsk:false};
 (function restore(){var s=ssGet('pn-ui');if(!s)return;try{var o=JSON.parse(s);['route','cal','sel','revAll'].forEach(function(k){if(o[k]!=null)ui[k]=o[k];});if(o.modal&&o.modal.kind==='part')ui.modal={kind:'part',k:o.modal.k,item:o.modal.item,id:o.modal.id};}catch(e){}})();
@@ -571,6 +572,7 @@ function renderList(k){
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
    '<div class="page-head"><h1 class="disp">'+KIND[k].many+'</h1>'+(canE()?'<span class="row"><button class="btn" data-act="imp-open" data-k="'+k+'">Importar arquivo</button><button class="btn primary" data-act="item-new" data-k="'+k+'">'+(k==='cap'?'+ Nova capacidade':'+ Novo projeto')+'</button></span>':'')+'</div>'+
+   (k==='cap'&&(canE()||state.base)?'<div class="aibar"><span class="books"><b>Base de prática:</b> '+(state.base?esc(firstLine(state.base)):'não configurada. Ela é usada nos prompts para demonstrações e mini-projetos.')+'</span>'+(canE()?'<button class="btn sm" data-act="base-open">'+(state.base?'Editar base':'Configurar base')+'</button>':'')+'</div>':'')+
    (list.length?'<div class="cards">'+cards+'</div>':'<div class="empty-state"><p>Nenhum'+(k==='cap'?'a capacidade':' projeto')+' ainda.</p>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'">Cadastrar o primeiro</button>':'')+'</div>');
 }
 function renderItem(k,it){
@@ -584,7 +586,7 @@ function renderItem(k,it){
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
-   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+'</span>'+(canE()?'<button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>':'')+'</div>':'')+
+   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+'</span>'+(canE()?'<button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>':'')+'</div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
@@ -602,6 +604,7 @@ function renderModal(){
   else if(m.kind==='bulk')h=bulkForm(m);
   else if(m.kind==='import')h=importModal(m);
   else if(m.kind==='prompt')h=promptModal(m);
+  else if(m.kind==='base')h=baseModal(m);
   if(!h){ui.modal=null;root.innerHTML='';return;}
   root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'||m.kind==='prompt'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
 }
@@ -641,6 +644,7 @@ function studyBlock(m,it,p,r){
    '<li>Escrever a definição com as próprias palavras, do zero <span>· sessão com IA</span></li>'+
    '<li>Comparar com a definição correta <span>· sessão com IA</span></li>'+
    '<li>Atualizar a definição <span>· vira o cartão de revisão</span></li>'+
+   '<li>Praticar: demonstração e mini-projeto na base de prática <span>· sessão com IA</span></li>'+
    '<li>Explicar de novo com repetição espaçada <span>· revisões D+1, D+7 e D+30 deste app</span></li></ol></details>';
   return h;
 }
@@ -650,6 +654,7 @@ function itemForm(m){
    '<div class="field"><label for="f-name">Nome</label><input type="text" id="f-name" name="name" required maxlength="120" value="'+esc(it?it.name:'')+'" placeholder="'+(m.k==='cap'?'Ex.: Inglês — conversação':'Ex.: App de finanças')+'" autofocus></div>'+
    '<div class="field"><label for="f-due">Prazo de término</label><input type="date" id="f-due" name="due" value="'+esc(it?it.due||'':'')+'"></div>'+
    '<div class="field"><label for="f-books">Livros de referência</label><textarea id="f-books" name="books" style="min-height:84px" placeholder="Um livro por linha">'+esc(it?it.books||'':'')+'</textarea><span class="hint">Entram nos prompts de estudo com IA.</span></div>'+
+   (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
    '<div class="row"><button class="btn primary" type="submit">'+(it?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
    (it?(m.confirm?'<div class="confirm">Excluir “'+esc(it.name)+'” e suas '+it.parts.length+' partes? O histórico do calendário continua.<div class="row"><button class="btn danger solid sm" type="button" data-act="item-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="item-del-ask" style="align-self:flex-start">Excluir '+one+'</button>'):'')+
    '</form>';
@@ -677,6 +682,21 @@ function bulkForm(m){
 }
 
 /* ---------- prompts de estudo com IA ---------- */
+function baseOf(it){return String((it&&it.base)||state.base||'').trim();}
+function firstLine(t){return String(t||'').trim().split('\n')[0].slice(0,90);}
+var RUN_HINT='Como executar: se você puder rodar código (Python, SQL etc.) com acesso à base, rode de verdade e mostre os resultados reais. Se não puder, escreva o código completo e pronto para eu rodar e peça que eu cole a saída antes de continuar.';
+function promptBase(){
+  return ['Vou usar a base de dados que anexei como base de prática para aprender com IA. Outro agente vai usar a sua descrição para montar demonstrações e mini-projetos sem ver os dados de novo.','',
+  'Analise a base e escreva uma descrição com:',
+  '1. Nome da base e do que ela trata (a primeira linha deve ser só o nome).',
+  '2. Formato e como acessar (arquivos, tabelas, banco, repositório).',
+  '3. Tabelas e colunas, com tipo e significado de cada uma.',
+  '4. Tamanho aproximado (linhas por tabela).',
+  '5. Chaves e relações entre tabelas.',
+  '6. Particularidades: valores ausentes, unidades, formatos de data, categorias.',
+  '7. Três perguntas interessantes que a base permite responder.','',
+  'Responda só com a descrição, em texto simples, com no máximo 40 linhas.'].join('\n');
+}
 function booksOf(it){return String(it&&it.books||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean);}
 var DOMAIN_HINT='Se o conceito for de matemática ou estatística, inclua um exemplo numérico resolvido passo a passo. Se for de uma ferramenta (como git), mostre comandos reais e o que acontece em cada um.';
 function promptPlan(it){
@@ -687,20 +707,23 @@ function promptPlan(it){
     L.push('Livro(s) de referência: '+(books.length?books.join('; '):'[escreva aqui os livros]'));
     L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido (sugira um prazo realista)'));
     if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
+    if(baseOf(it))L.push('','Base de prática que o agente de ensino terá disponível:','---',baseOf(it),'---');
   }else{
     L.push('Minha lista (capacidade — livros — prazo, se houver):','[cole aqui, uma capacidade por linha]');
+    if(state.base)L.push('','Base de prática que o agente de ensino terá disponível:','---',state.base,'---');
   }
   L.push('Data de hoje: '+fmtY(today()),'','Regras:');
   L.push('1. Identifique os conceitos e subconceitos centrais dos livros e coloque em ordem de dependência (pré-requisitos primeiro).');
   L.push('2. Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados) que dá para aprender em uma sessão de 30 a 60 minutos com IA.');
   L.push('3. Deixe de fora prefácio, história, digressões e argumentação do autor que não sejam necessárias para entender e usar o conceito.');
   L.push('4. Em cada parte, escreva uma nota com o valor prático do conceito (para que serve na prática) e os subconceitos que ela cobre.');
-  L.push('5. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana para cada capacidade.');
-  if(!it)L.push('6. Se a lista tiver muitas capacidades, faça uma por resposta e espere eu escrever "próxima".');
+  L.push('5. Para cada parte, proponha um mini-projeto prático de 20 a 60 minutos com objetivo e entrega concreta (uma consulta, um cálculo, um gráfico, um script, um comando). '+((it?baseOf(it):state.base)?'Use a base de prática acima; se o conceito não couber nela, proponha um exercício prático equivalente.':'Use dados pequenos e realistas que eu consiga reproduzir.'));
+  L.push('6. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana para cada capacidade.');
+  if(!it)L.push('7. Se a lista tiver muitas capacidades, faça uma por resposta e espere eu escrever "próxima".');
   L.push('','Responda APENAS com um bloco de código neste formato, que é o formato de importação do meu app (sem texto antes ou depois):','');
   L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
   L.push('LIVROS: '+(books.length?books.join('; '):'Livro 1; Livro 2'));
-  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Valor prático: ... · Subconceitos: ...');
+  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Valor prático: ... · Subconceitos: ...','  > Mini-projeto: ...');
   return L.join('\n');
 }
 function promptStudy(it,p){
@@ -711,20 +734,26 @@ function promptStudy(it,p){
   L.push('Conceito desta sessão: '+p.name);
   if(p.note)L.push('Notas do plano: '+p.note.replace(/\n+/g,' · '));
   if(done.length)L.push('Conceitos que já estudei nesta capacidade: '+done.slice(-12).join('; '));
+  var base=baseOf(it);
+  if(base)L.push('','Quero aprender na prática. Esta é a base de prática que você tem disponível:','---',base,'---',RUN_HINT);
+  else L.push('','Quero aprender na prática: use exemplos com dados pequenos e realistas que eu consiga reproduzir. '+RUN_HINT);
   L.push('');
   L.push('Etapa 1 — Valor prático: mostre em poucas linhas para que esse conceito serve na prática, com uma situação concreta em que ele faz diferença.');
   L.push('Etapa 2 — Mapa: liste o conceito principal e os subconceitos que vamos cobrir, sem explicar ainda.');
   L.push('Etapa 3 — Minha tentativa: peça para eu explicar o conceito com o que eu já sei ou imagino. Não corrija ainda.');
   L.push('Etapa 4 — Ensino: explique com intuição primeiro, depois a definição formal e exemplos concretos. '+DOMAIN_HINT+' Diga o que estava certo e errado na minha tentativa. Termine com 2 perguntas curtas para eu checar se entendi.');
-  L.push('Etapa 5 — Minha definição: peça para eu escrever uma definição do conceito com minhas palavras, do zero, sem copiar a sua.');
-  L.push('Etapa 6 — Comparação: mostre uma definição correta e concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
-  L.push('Etapa 7 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
+  L.push('Etapa 5 — Demonstração na prática: demonstre o conceito '+(base?'na base de prática':'com um exemplo prático')+', com código ou consultas e a interpretação dos resultados. Mostre também um erro comum e o que ele produz.');
+  L.push('Etapa 6 — Minha definição: peça para eu escrever uma definição do conceito com minhas palavras, do zero, sem copiar a sua.');
+  L.push('Etapa 7 — Comparação: mostre uma definição correta e concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
+  L.push('Etapa 8 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
+  L.push('Etapa 9 — Mini-projeto: '+(/mini-projeto/i.test(p.note||'')?'use o mini-projeto das notas do plano (ajuste se precisar)':'proponha um mini-projeto de 20 a 60 minutos'+(base?' na base de prática':''))+', com objetivo, entrega, passos sugeridos sem dar a resposta e critérios de pronto. Eu faço e te mando o resultado (código e saída); revise e aponte melhorias. Se eu disser "depois", siga para o cartão e registre o mini-projeto como pendente.');
   L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar:','');
   L.push('CONCEITO: '+p.name);
   L.push('PERGUNTA: (uma pergunta que me obrigue a explicar o conceito, não só a repetir a definição)');
   L.push('MINHA DEFINIÇÃO: (minha versão final, com as minhas palavras)');
   L.push('REFERÊNCIA: (a definição correta, concisa)');
-  L.push('APLICAÇÃO: (um exercício curto ou caso prático para testar o uso do conceito)');
+  L.push('APLICAÇÃO: (um exercício curto'+(base?' na base de prática':' ou caso prático')+' para testar o uso do conceito)');
+  L.push('MINI-PROJETO: (enunciado, e se ficou feito ou pendente)');
   L.push('PONTOS DE ATENÇÃO: (os erros que cometi e confusões comuns)','','Comece pela etapa 1.');
   return L.join('\n');
 }
@@ -733,19 +762,29 @@ function promptReview(it,p,r){
   L.push('Quero fazer uma revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') do conceito "'+p.name+'", da capacidade "'+it.name+'".','');
   if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---');
   else L.push('Ainda não tenho cartão de revisão para este conceito; use o que você sabe sobre ele'+(books.length?' (referência: '+books.join('; ')+')':'')+'.');
+  var rb=baseOf(it);
+  if(rb)L.push('','Base de prática disponível:','---',rb,'---',RUN_HINT);
   L.push('');
   L.push('1. Faça a pergunta do cartão (ou uma pergunta que me obrigue a explicar o conceito) e espere eu responder de memória.');
   L.push('2. Compare minha resposta com a referência'+(p.card?' e com a minha definição do cartão':'')+': o que acertei, o que esqueci e o que confundi.');
-  L.push('3. Faça 1 pergunta de aplicação (um problema, um caso prático ou um comando) e espere minha resposta.');
+  L.push('3. Faça 1 pergunta de aplicação '+(rb?'na base de prática (uma consulta, um cálculo ou um pequeno código para eu escrever)':'(um problema, um caso prático ou um comando)')+' e espere minha resposta. Se o cartão tiver mini-projeto pendente, pergunte se já fiz e revise.');
   L.push('4. Termine com o veredito em uma linha: "REVISÃO FEITA" se eu expliquei e apliquei o essencial sem ajuda, ou "REVISAR DE NOVO" se faltou algo importante, dizendo o que reforçar.');
   L.push('5. Se minha definição melhorou, gere o cartão atualizado no mesmo formato.');
   return L.join('\n');
 }
 function copyText(txt,what){
-  function fallback(){var back=ui.modal&&ui.modal.kind==='part'?ui.modal:null;openModal({kind:'prompt',text:txt,what:what,back:back});setTimeout(selectPrompt,40);}
+  function fallback(){var back=ui.modal&&ui.modal.kind!=='prompt'?ui.modal:null;openModal({kind:'prompt',text:txt,what:what,back:back});setTimeout(selectPrompt,40);}
   try{navigator.clipboard.writeText(txt).then(function(){toast(what+' copiado. Cole numa conversa com o Claude.');},fallback);}catch(e){fallback();}
 }
 function selectPrompt(){var el=document.getElementById('prompt-text');if(!el)return;var rg=document.createRange();rg.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rg);}
+function baseModal(m){
+  var val=m.text!=null?m.text:state.base;
+  return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">Estudo com IA</span><h2 class="disp">Base de prática</h2></div>'+closeBtn()+'</div>'+
+   '<p class="muted" style="font-size:13.5px">Descreva a base de dados que o agente de ensino vai usar para demonstrar os conceitos e montar os mini-projetos. Ela entra nos prompts de todas as capacidades; cada capacidade pode ter a sua própria em Editar.</p>'+
+   '<div class="aibar"><span>Anexe a base numa conversa com o Claude e peça a descrição.</span><button class="btn sm" data-act="pr-base">Copiar prompt: descrever a base</button></div>'+
+   '<div class="field"><label for="base-text">Descrição da base</label><textarea id="base-text" class="mono" spellcheck="false" placeholder="Vendas da loja (vendas.csv e clientes.csv, anexados no Projeto do Claude)&#10;vendas.csv, 12 mil linhas: data, cliente_id, produto, categoria, quantidade, preco_unit&#10;clientes.csv, 900 linhas: cliente_id, cidade, idade, data_cadastro">'+esc(val||'')+'</textarea><span class="hint">A primeira linha vira o nome da base. Diga também como o agente acessa: arquivo anexado, Projeto do Claude, banco local…</span></div>'+
+   '<div class="row"><button class="btn primary" data-act="base-save">Salvar base</button><button class="btn" data-act="modal-close">Cancelar</button></div>';
+}
 function promptModal(m){
   return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">Estudo com IA</span><h2 class="disp">'+esc(m.what)+'</h2></div>'+closeBtn()+'</div>'+
    '<p class="muted" style="font-size:13.5px">O texto está selecionado: copie com o menu do seu aparelho e cole numa conversa com o Claude.</p>'+
@@ -940,6 +979,7 @@ function copyModel(){
   function fallback(){var el=document.getElementById('imp-model');if(!el)return;var rg=document.createRange();rg.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rg);toast('Modelo selecionado: use Copiar do seu aparelho.');}
   try{navigator.clipboard.writeText(MODELO).then(function(){toast('Modelo copiado');},fallback);}catch(e){fallback();}
 }
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='base-text'&&ui.modal&&ui.modal.kind==='base')ui.modal.text=e.target.value;});
 document.addEventListener('input',function(e){if(e.target&&e.target.id==='imp-text'&&ui.modal&&ui.modal.kind==='import'){ui.modal.text=e.target.value;ui.modal.fname=null;}});
 document.addEventListener('change',function(e){
   var t=e.target,m=ui.modal;if(!t||!m||m.kind!=='import')return;
@@ -1011,6 +1051,9 @@ document.addEventListener('click',function(ev){
     case 'imp-copy':copyModel();break;
     case 'imp-dl':if(dl)dl.save({filename:'modelo-pessoa-necessaria.txt',data:MODELO}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Use “Copiar modelo”.');});break;
     case 'imp-do':doImport();break;
+    case 'base-open':openModal({kind:'base'});break;
+    case 'base-save':{var bt=document.getElementById('base-text');state.base=(bt?bt.value:(ui.modal.text||'')).trim();ui.modal=null;commit(state.base?'Base de prática salva':'Base de prática removida');break;}
+    case 'pr-base':copyText(promptBase(),'Prompt de descrição da base');break;
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
     case 'pr-study':{var cs=curPart();if(cs)copyText(promptStudy(cs.item,cs.part),'Prompt da sessão de estudo');break;}
     case 'pr-review-part':{var cr=curPart();if(cr)copyText(promptReview(cr.item,cr.part,reviewOf(cr.part.id)),'Prompt de revisão');break;}
@@ -1028,8 +1071,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,parts:[]};state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim();
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,parts:[]};if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim();if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}

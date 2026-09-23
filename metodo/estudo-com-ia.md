@@ -11,7 +11,26 @@ e não acompanhar o raciocínio do autor. Cada capacidade tem seus livros de ref
 | 4. Definição com as próprias palavras, do zero | Sessão com IA |
 | 5. Comparar com a definição correta | Sessão com IA |
 | 6. Atualizar a definição | Sessão com IA → vira o **cartão de revisão** |
+| Prática: demonstração e mini-projeto | Sessão com IA, na **base de prática** |
 | 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app (prompt de revisão) |
+
+## Base de prática
+
+Em **Capacidades → Configurar base**, descreva a base de dados que o agente de ensino vai usar
+(arquivos, tabelas, colunas, como acessar). Se preferir, anexe a base numa conversa com o Claude e use
+**Copiar prompt: descrever a base**; cole a descrição gerada. Cada capacidade pode ter uma base própria
+em Editar (por exemplo, um repositório de teste para git); em branco, vale a base padrão.
+
+Com a base configurada, os prompts pedem:
+
+- **no plano**, um mini-projeto de 20 a 60 minutos por parte (vira a nota `> Mini-projeto: ...`);
+- **na sessão**, uma demonstração do conceito na base (código ou consultas e a interpretação), um erro comum
+  e o mini-projeto com critérios de pronto, que a IA revisa;
+- **na revisão**, uma pergunta de aplicação na base e a cobrança do mini-projeto que ficou pendente.
+
+Se o agente puder executar código com acesso à base (por exemplo, arquivos anexados numa conversa com execução
+de código, ou o Claude Code na pasta da base), ele roda de verdade; se não puder, ele escreve o código pronto
+para você rodar e pede a saída.
 
 ## O fluxo
 
