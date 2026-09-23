@@ -1,21 +1,41 @@
 [
   {
     "capacidade": "Espanhol — conversação",
+    "livros": [
+      "Gramática básica do espanhol",
+      "Guia de conversação"
+    ],
     "prazo": "+90",
     "partes": [
-      { "nome": "Pronúncia e alfabeto", "prazo": "+7" },
-      { "nome": "Vocabulário do dia a dia (150 palavras)", "prazo": "+14" },
-      { "nome": "Verbos no presente", "prazo": "+30" },
+      {
+        "nome": "Pronúncia e alfabeto",
+        "prazo": "+7",
+        "nota": "Valor prático: ser entendido ao falar · Subconceitos: vogais, ll e y, acentuação"
+      },
+      {
+        "nome": "Vocabulário do dia a dia (150 palavras)",
+        "prazo": "+14"
+      },
+      {
+        "nome": "Verbos no presente",
+        "prazo": "+30"
+      },
       "Diálogos: 5 situações de viagem",
       "Passado simples",
-      { "nome": "Conversa de 10 minutos gravada", "prazo": "+90" }
+      {
+        "nome": "Conversa de 10 minutos gravada",
+        "prazo": "+90"
+      }
     ]
   },
   {
     "projeto": "Blog de estudos",
     "prazo": "15/12/2026",
     "partes": [
-      { "nome": "Escolher plataforma", "prazo": "+5" },
+      {
+        "nome": "Escolher plataforma",
+        "prazo": "+5"
+      },
       "Escrever os 3 primeiros posts",
       "Publicar e divulgar"
     ]

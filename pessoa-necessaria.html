@@ -1,4 +1,4 @@
-<title>Pessoa Necessária</title>
+<title>Foco</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap">
@@ -266,6 +266,18 @@ details.fold > .rev-list{margin-top:10px}
 .warnbox{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px}
 .warnbox ul{margin:6px 0 0;padding-left:18px}
 .check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+/* estudo com IA */
+.aibar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 14px;font-size:14px}
+.aibar .books{color:var(--muted);overflow-wrap:anywhere;min-width:0}
+.aibar .books b{color:var(--ink);font-weight:600}
+.note{background:var(--surface-2);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cardtxt{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;background:var(--surface-2)}
+.stack{display:flex;flex-direction:column;gap:8px}
+.method ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.method li span{color:var(--muted)}
+.rev-open{background:none;border:0;padding:0;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.rev-open:hover b{text-decoration:underline}
+.imp-parts small{display:block;color:var(--muted);font-size:12.5px}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -380,7 +392,7 @@ function scheduleSave(){
   dirty=true;saveErr=false;paintChip();
   clearTimeout(saveTimer);saveTimer=setTimeout(flush,2200);
 }
-function busy(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;if(ui.modal&&ui.modal.kind!=='part')return true;if(ui.modal&&ui.modal.edit)return true;if(ui.editPersona)return true;return false;}
+function busy(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;if(ui.modal&&ui.modal.kind!=='part')return true;if(ui.modal&&(ui.modal.edit||ui.modal.cardEdit))return true;if(ui.editPersona)return true;return false;}
 function stashUi(){ssSet('pn-ui',JSON.stringify({route:ui.route,cal:ui.cal,sel:ui.sel,revAll:ui.revAll,modal:ui.modal}));}
 function flush(force){
   clearTimeout(saveTimer);
@@ -403,7 +415,7 @@ function buildDoc(){
   var css=document.getElementById('pn-css').textContent;
   var js=document.getElementById('pn-js').textContent;
   var data=JSON.stringify(state).replace(/</g,'\\u003c');
-  return '<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>Pessoa Necessária</title>\n'+
+  return '<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>'+esc(document.title||'Pessoa Necessária')+'</title>\n'+
     '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="'+FONT_HREF+'">\n'+
     '<style id="pn-css">'+css+'</style>\n</head>\n<body>\n<div id="app"></div>\n<div id="modal"></div>\n<div id="toast" class="toast" hidden></div>\n'+
     '<script type="application/json" id="pn-data">'+data+'<\/script>\n<script id="pn-js">'+js+'<\/script>\n</body>\n</html>\n';
@@ -512,9 +524,9 @@ function reviews(){
   function row(r,actions){
     var f=findPart(r.part);if(!f)return '';
     var dt,cls;if(!r.due){dt='sem data';cls='soon';}else{var n=diff(t,r.due);if(n<0){dt='atrasada '+(-n)+' '+plural(-n,'dia','dias');cls='late';}else if(n===0){dt='hoje';cls='now';}else{dt=(n===1?'amanhã':'em '+n+' dias')+' · '+fmt(r.due);cls='soon';}}
-    return '<li class="rev-item'+(cls==='late'?' late':'')+'"><span class="stage">'+STAGE[r.stage]+'</span><div class="rev-main"><b>'+esc(f.part.name)+'</b><small>'+esc(f.item.name)+'</small></div><span class="due '+cls+'">'+dt+'</span>'+(canE()&&actions?'<span class="row">'+actions(r)+'</span>':'')+'</li>';
+    return '<li class="rev-item'+(cls==='late'?' late':'')+'"><span class="stage">'+STAGE[r.stage]+'</span><button class="rev-main rev-open" data-act="part-open" data-k="'+f.k+'" data-item="'+f.item.id+'" data-id="'+f.part.id+'"><b>'+esc(f.part.name)+'</b><small>'+esc(f.item.name)+(f.part.card?' · com cartão':'')+'</small></button><span class="due '+cls+'">'+dt+'</span>'+(canE()&&actions?'<span class="row">'+actions(r)+'</span>':'')+'</li>';
   }
-  function actNow(r){return '<button class="btn sm" data-act="rev-again" data-id="'+r.id+'">Revisar de novo</button><button class="btn sm good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita</button>';}
+  function actNow(r){return '<button class="btn ghost sm" data-act="pr-review" data-id="'+r.id+'">Prompt</button><button class="btn sm" data-act="rev-again" data-id="'+r.id+'">Revisar de novo</button><button class="btn sm good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita</button>';}
   function actFut(r){return '<button class="btn sm" data-act="rev-back" data-id="'+r.id+'">Revisar amanhã</button>';}
   var shown=ui.revAll?next:next.slice(0,4);
   return '<section class="rev" aria-label="Revisão espaçada">'+
@@ -572,6 +584,7 @@ function renderItem(k,it){
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
+   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+'</span>'+(canE()?'<button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>':'')+'</div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
@@ -588,8 +601,9 @@ function renderModal(){
   else if(m.kind==='partform')h=partForm(m);
   else if(m.kind==='bulk')h=bulkForm(m);
   else if(m.kind==='import')h=importModal(m);
+  else if(m.kind==='prompt')h=promptModal(m);
   if(!h){ui.modal=null;root.innerHTML='';return;}
-  root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
+  root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'||m.kind==='prompt'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
 }
 function closeBtn(){return '<button class="icon-btn" data-act="modal-close" aria-label="Fechar">'+I.x+'</button>';}
 function partModal(m){
@@ -607,15 +621,35 @@ function partModal(m){
    '<div class="facts"><div><span class="label">Prazo</span><b class="num">'+(p.due?fmt(p.due):'—')+'</b></div><div><span class="label">Status</span><b>'+stTxt+'</b></div><div><span class="label">Sessões</span><b class="num">'+w.length+'</b></div></div>'+
    (todayN?'<p class="chip ok" style="align-self:flex-start">'+todayN+' '+plural(todayN,'sessão registrada','sessões registradas')+' hoje</p>':'')+
    acts+(revTxt?'<div class="revbox">'+esc(revTxt)+'</div>':'')+
+   (p.note?'<div class="note"><span class="label">Valor prático e notas</span>'+esc(p.note)+'</div>':'')+
+   studyBlock(m,it,p,r)+
    '<div style="display:flex;flex-direction:column;gap:8px"><span class="label">Histórico</span>'+
    ((w.length||p.done)?'<ul class="hist">'+(p.done?'<li><span>Concluída</span><span class="num">'+esc(fmtDow(p.done))+'</span></li>':'')+w.map(function(e){return '<li><span>Sessão de trabalho</span><span class="row"><span class="num">'+esc(fmtDow(e.d))+'</span>'+(canE()?'<button class="btn ghost sm" data-act="work-del" data-id="'+e.id+'" aria-label="Apagar sessão de '+fmt(e.d)+'">'+I.x+'</button>':'')+'</span></li>';}).join('')+'</ul>':'<p class="muted" style="font-size:14px">Nenhuma sessão ainda.</p>')+'</div>'+
    (canE()?'<div class="row" style="justify-content:flex-end"><button class="btn sm" data-act="part-edit">Editar parte</button></div>':'');
+}
+function studyBlock(m,it,p,r){
+  var h='<div class="stack"><span class="label">Estudo com IA</span>';
+  if(canE())h+='<div class="row"><button class="btn" data-act="pr-study">Copiar prompt da sessão de estudo</button>'+((p.done||r)?'<button class="btn" data-act="pr-review-part">Copiar prompt de revisão</button>':'')+'</div>';
+  h+='</div><div class="stack"><span class="label">Cartão de revisão</span>';
+  if(m.cardEdit)h+='<textarea id="card-text" class="cardtxt" style="min-height:180px;width:100%;resize:vertical;color:var(--ink)" placeholder="Cole aqui o cartão que a IA gerou no fim da sessão (CONCEITO, PERGUNTA, MINHA DEFINIÇÃO, REFERÊNCIA…)">'+esc(p.card||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="card-save">Salvar cartão</button><button class="btn sm" data-act="card-cancel">Cancelar</button></div>';
+  else if(p.card)h+='<div class="cardtxt">'+esc(p.card)+'</div>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Editar cartão</button></div>':'');
+  else h+='<p class="muted" style="font-size:13.5px">'+(canE()?'No fim da sessão de estudo, a IA gera um cartão com a sua definição e a de referência. Cole aqui: ele entra no prompt de revisão.':'Sem cartão ainda.')+'</p>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Colar cartão</button></div>':'');
+  h+='</div><details class="fold method"><summary>O método, etapa por etapa</summary><ol>'+
+   '<li>Identificar o valor prático do conceito <span>· nota do plano e início da sessão</span></li>'+
+   '<li>Identificar o conceito e os subconceitos <span>· partes do plano</span></li>'+
+   '<li>Tentar explicar antes de aprender <span>· sessão com IA</span></li>'+
+   '<li>Escrever a definição com as próprias palavras, do zero <span>· sessão com IA</span></li>'+
+   '<li>Comparar com a definição correta <span>· sessão com IA</span></li>'+
+   '<li>Atualizar a definição <span>· vira o cartão de revisão</span></li>'+
+   '<li>Explicar de novo com repetição espaçada <span>· revisões D+1, D+7 e D+30 deste app</span></li></ol></details>';
+  return h;
 }
 function itemForm(m){
   var it=m.id?findItem(m.k,m.id):null,one=KIND[m.k].one;
   return '<form data-form="item" class="sheet-body" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">'+(it?'Editar '+one:(m.k==='cap'?'Nova capacidade':'Novo projeto'))+'</h2>'+closeBtn()+'</div>'+
    '<div class="field"><label for="f-name">Nome</label><input type="text" id="f-name" name="name" required maxlength="120" value="'+esc(it?it.name:'')+'" placeholder="'+(m.k==='cap'?'Ex.: Inglês — conversação':'Ex.: App de finanças')+'" autofocus></div>'+
    '<div class="field"><label for="f-due">Prazo de término</label><input type="date" id="f-due" name="due" value="'+esc(it?it.due||'':'')+'"></div>'+
+   '<div class="field"><label for="f-books">Livros de referência</label><textarea id="f-books" name="books" style="min-height:84px" placeholder="Um livro por linha">'+esc(it?it.books||'':'')+'</textarea><span class="hint">Entram nos prompts de estudo com IA.</span></div>'+
    '<div class="row"><button class="btn primary" type="submit">'+(it?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
    (it?(m.confirm?'<div class="confirm">Excluir “'+esc(it.name)+'” e suas '+it.parts.length+' partes? O histórico do calendário continua.<div class="row"><button class="btn danger solid sm" type="button" data-act="item-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="item-del-ask" style="align-self:flex-start">Excluir '+one+'</button>'):'')+
    '</form>';
@@ -625,6 +659,7 @@ function partForm(m){
   return '<form data-form="part" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+esc(it.name)+'</span><h2 class="disp">'+(p?'Editar parte':'Nova parte')+'</h2></div>'+closeBtn()+'</div>'+
    '<div class="field"><label for="p-name">Nome da parte</label><input type="text" id="p-name" name="name" required maxlength="160" value="'+esc(p?p.name:'')+'" placeholder="Ex.: Capítulo 3 — funções" autofocus></div>'+
    '<div class="field"><label for="p-due">Data de término</label><input type="date" id="p-due" name="due" value="'+esc(p?p.due||'':'')+'"></div>'+
+   '<div class="field"><label for="p-note">Valor prático e notas</label><textarea id="p-note" name="note" style="min-height:84px" placeholder="Para que esse conceito serve na prática? Quais subconceitos entram?">'+esc(p?p.note||'':'')+'</textarea></div>'+
    '<div class="row"><button class="btn primary" type="submit">'+(p?'Salvar':'Adicionar')+'</button><button class="btn" type="button" data-act="'+(p?'part-edit-cancel':'modal-close')+'">Cancelar</button></div>'+
    (p?(m.confirm?'<div class="confirm">Excluir a parte “'+esc(p.name)+'”? A revisão ligada a ela sai da lista; o calendário continua com o histórico.<div class="row"><button class="btn danger solid sm" type="button" data-act="part-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="part-del-ask" style="align-self:flex-start">Excluir parte</button>'):'')+
    '</form>';
@@ -641,6 +676,83 @@ function bulkForm(m){
    '<div class="row"><button class="btn primary" type="submit">Adicionar partes</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 
+/* ---------- prompts de estudo com IA ---------- */
+function booksOf(it){return String(it&&it.books||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean);}
+var DOMAIN_HINT='Se o conceito for de matemática ou estatística, inclua um exemplo numérico resolvido passo a passo. Se for de uma ferramenta (como git), mostre comandos reais e o que acontece em cada um.';
+function promptPlan(it){
+  var books=it?booksOf(it):[],L=[];
+  L.push('Quero que você me ajude a dividir o estudo de '+(it?'uma capacidade':'minhas capacidades')+' em partes. Não vou ler os livros: vou usar IA para aprender os conceitos que eles ensinam. O que importa são os conceitos, e não o raciocínio ou a narrativa do autor.','');
+  if(it){
+    L.push('Capacidade: '+it.name);
+    L.push('Livro(s) de referência: '+(books.length?books.join('; '):'[escreva aqui os livros]'));
+    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido (sugira um prazo realista)'));
+    if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
+  }else{
+    L.push('Minha lista (capacidade — livros — prazo, se houver):','[cole aqui, uma capacidade por linha]');
+  }
+  L.push('Data de hoje: '+fmtY(today()),'','Regras:');
+  L.push('1. Identifique os conceitos e subconceitos centrais dos livros e coloque em ordem de dependência (pré-requisitos primeiro).');
+  L.push('2. Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados) que dá para aprender em uma sessão de 30 a 60 minutos com IA.');
+  L.push('3. Deixe de fora prefácio, história, digressões e argumentação do autor que não sejam necessárias para entender e usar o conceito.');
+  L.push('4. Em cada parte, escreva uma nota com o valor prático do conceito (para que serve na prática) e os subconceitos que ela cobre.');
+  L.push('5. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana para cada capacidade.');
+  if(!it)L.push('6. Se a lista tiver muitas capacidades, faça uma por resposta e espere eu escrever "próxima".');
+  L.push('','Responda APENAS com um bloco de código neste formato, que é o formato de importação do meu app (sem texto antes ou depois):','');
+  L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
+  L.push('LIVROS: '+(books.length?books.join('; '):'Livro 1; Livro 2'));
+  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Valor prático: ... · Subconceitos: ...');
+  return L.join('\n');
+}
+function promptStudy(it,p){
+  var books=booksOf(it),done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[];
+  L.push('Quero aprender um conceito com você seguindo o meu método. Faça UMA etapa por vez e espere a minha resposta antes de passar para a próxima. O foco é eu entender e saber usar o conceito, não o raciocínio do autor do livro.','');
+  L.push('Capacidade: '+it.name);
+  if(books.length)L.push('Livro(s) de referência: '+books.join('; '));
+  L.push('Conceito desta sessão: '+p.name);
+  if(p.note)L.push('Notas do plano: '+p.note.replace(/\n+/g,' · '));
+  if(done.length)L.push('Conceitos que já estudei nesta capacidade: '+done.slice(-12).join('; '));
+  L.push('');
+  L.push('Etapa 1 — Valor prático: mostre em poucas linhas para que esse conceito serve na prática, com uma situação concreta em que ele faz diferença.');
+  L.push('Etapa 2 — Mapa: liste o conceito principal e os subconceitos que vamos cobrir, sem explicar ainda.');
+  L.push('Etapa 3 — Minha tentativa: peça para eu explicar o conceito com o que eu já sei ou imagino. Não corrija ainda.');
+  L.push('Etapa 4 — Ensino: explique com intuição primeiro, depois a definição formal e exemplos concretos. '+DOMAIN_HINT+' Diga o que estava certo e errado na minha tentativa. Termine com 2 perguntas curtas para eu checar se entendi.');
+  L.push('Etapa 5 — Minha definição: peça para eu escrever uma definição do conceito com minhas palavras, do zero, sem copiar a sua.');
+  L.push('Etapa 6 — Comparação: mostre uma definição correta e concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
+  L.push('Etapa 7 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
+  L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar:','');
+  L.push('CONCEITO: '+p.name);
+  L.push('PERGUNTA: (uma pergunta que me obrigue a explicar o conceito, não só a repetir a definição)');
+  L.push('MINHA DEFINIÇÃO: (minha versão final, com as minhas palavras)');
+  L.push('REFERÊNCIA: (a definição correta, concisa)');
+  L.push('APLICAÇÃO: (um exercício curto ou caso prático para testar o uso do conceito)');
+  L.push('PONTOS DE ATENÇÃO: (os erros que cometi e confusões comuns)','','Comece pela etapa 1.');
+  return L.join('\n');
+}
+function promptReview(it,p,r){
+  var books=booksOf(it),L=[];
+  L.push('Quero fazer uma revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') do conceito "'+p.name+'", da capacidade "'+it.name+'".','');
+  if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---');
+  else L.push('Ainda não tenho cartão de revisão para este conceito; use o que você sabe sobre ele'+(books.length?' (referência: '+books.join('; ')+')':'')+'.');
+  L.push('');
+  L.push('1. Faça a pergunta do cartão (ou uma pergunta que me obrigue a explicar o conceito) e espere eu responder de memória.');
+  L.push('2. Compare minha resposta com a referência'+(p.card?' e com a minha definição do cartão':'')+': o que acertei, o que esqueci e o que confundi.');
+  L.push('3. Faça 1 pergunta de aplicação (um problema, um caso prático ou um comando) e espere minha resposta.');
+  L.push('4. Termine com o veredito em uma linha: "REVISÃO FEITA" se eu expliquei e apliquei o essencial sem ajuda, ou "REVISAR DE NOVO" se faltou algo importante, dizendo o que reforçar.');
+  L.push('5. Se minha definição melhorou, gere o cartão atualizado no mesmo formato.');
+  return L.join('\n');
+}
+function copyText(txt,what){
+  function fallback(){var back=ui.modal&&ui.modal.kind==='part'?ui.modal:null;openModal({kind:'prompt',text:txt,what:what,back:back});setTimeout(selectPrompt,40);}
+  try{navigator.clipboard.writeText(txt).then(function(){toast(what+' copiado. Cole numa conversa com o Claude.');},fallback);}catch(e){fallback();}
+}
+function selectPrompt(){var el=document.getElementById('prompt-text');if(!el)return;var rg=document.createRange();rg.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rg);}
+function promptModal(m){
+  return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">Estudo com IA</span><h2 class="disp">'+esc(m.what)+'</h2></div>'+closeBtn()+'</div>'+
+   '<p class="muted" style="font-size:13.5px">O texto está selecionado: copie com o menu do seu aparelho e cole numa conversa com o Claude.</p>'+
+   '<pre class="model" id="prompt-text" tabindex="0" style="white-space:pre-wrap">'+esc(m.text)+'</pre>'+
+   '<div class="row"><button class="btn primary" data-act="prompt-copy">Copiar</button>'+(m.back?'<button class="btn" data-act="prompt-back">Voltar</button>':'')+'</div>';
+}
+
 /* ---------- importação ---------- */
 var MODELO=['// Modelo de importação — Pessoa Necessária',
 '// Linhas que começam com // são comentários e são ignoradas.',
@@ -649,11 +761,15 @@ var MODELO=['// Modelo de importação — Pessoa Necessária',
 '// Datas aceitas:  15/12/2026 · 15/12 · 2026-12-15',
 '//   ou contando a partir do dia da importação: +7 (dias) · +2 semanas · +1 mês',
 '// A data da parte vem depois de uma barra vertical:  - Nome da parte | +7',
+'// LIVROS: (opcional) livros de referência, separados por ;',
+'// Uma linha começando com > logo abaixo de uma parte vira a nota dela.',
 '// Parte sem data: o app pode distribuir até o prazo final.',
 '',
 'CAPACIDADE: Espanhol — conversação',
+'LIVROS: Gramática básica do espanhol; Guia de conversação',
 'PRAZO: +90',
 '- Pronúncia e alfabeto | +7',
+'  > Valor prático: ser entendido ao falar · Subconceitos: vogais, ll e y, acentuação',
 '- Vocabulário do dia a dia (150 palavras) | +14',
 '- Verbos no presente | +30',
 '- Diálogos: 5 situações de viagem',
@@ -686,27 +802,32 @@ function parseInput(txt,defKind,fallback){
   if(/^[\[{]/.test(t))return parseJsonInput(t,defKind,fallback,base);
   var out=[],errs=[],cur=null;
   t.replace(/\r/g,'').split('\n').forEach(function(raw,i){
-    var ln=i+1,line=raw.trim();if(!line||/^\/\//.test(line))return;
-    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|prazo(?: final)?)\s*:/);
+    var ln=i+1,line=raw.trim();if(!line||/^\/\//.test(line)||/^```/.test(line))return;
+    if(/^>/.test(line)){var tx=line.replace(/^>\s*/,'');if(cur&&cur.parts.length&&tx){var lp=cur.parts[cur.parts.length-1];lp.note=lp.note?lp.note+'\n'+tx:tx;}return;}
+    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|livros?|prazo(?: final)?)\s*:/);
     if(m){
       var val=bare.slice(bare.indexOf(':')+1).trim();
+      if(m[1].indexOf('livro')===0){
+        if(!cur){errs.push('Linha '+ln+': LIVROS aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
+        cur.books=val.split(';').map(function(x){return x.trim();}).filter(Boolean).join('\n');return;
+      }
       if(m[1].indexOf('prazo')===0){
         if(!cur){errs.push('Linha '+ln+': PRAZO aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
         var d=parseDate(val,base);if(!d.ok){errs.push('Linha '+ln+': a data “'+val+'” não foi reconhecida.');return;}
         cur.due=d.v;return;
       }
       if(!val){errs.push('Linha '+ln+': falta o nome depois de “'+bare.slice(0,bare.indexOf(':')+1)+'”.');cur=null;return;}
-      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,parts:[]};out.push(cur);return;
+      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,books:'',parts:[]};out.push(cur);return;
     }
     if(/^#/.test(line))return;
     var pm=line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/),body=pm?pm[1]:line;
     if(!cur){
       if(!fallback){errs.push('Linha '+ln+': “'+body.slice(0,40)+'” está fora de uma capacidade ou projeto. Comece com CAPACIDADE: nome.');return;}
-      cur={k:defKind,name:fallback,due:null,parts:[]};out.push(cur);
+      cur={k:defKind,name:fallback,due:null,books:'',parts:[]};out.push(cur);
     }
     var name=body,due=null,sep=body.lastIndexOf('|');
     if(sep>=0){name=body.slice(0,sep).trim();var ds=body.slice(sep+1).trim(),dd=parseDate(ds,base);if(dd.ok)due=dd.v;else errs.push('Linha '+ln+': a data “'+ds+'” não foi reconhecida; a parte entra sem data.');}
-    if(name)cur.parts.push({name:name.slice(0,160),due:due});
+    if(name)cur.parts.push({name:name.slice(0,160),due:due,note:''});
   });
   return {items:out,errs:errs};
 }
@@ -720,12 +841,13 @@ function parseJsonInput(t,defKind,fallback,base){
     var name=String(o.nome||o.name||o.capacidade||o.projeto||fallback||'').trim();
     if(!name){errs.push('Item '+(i+1)+': falta o nome.');return;}
     var d=parseDate(o.prazo||o.due||'',base);if(!d.ok)errs.push(name+': o prazo “'+(o.prazo||o.due)+'” não foi reconhecido.');
-    var it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,parts:[]};
+    var lv=o.livros||o.books||'',it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,books:(Array.isArray(lv)?lv:String(lv).split(';')).map(function(x){return String(x).trim();}).filter(Boolean).join('\n'),parts:[]};
     (o.partes||o.parts||[]).forEach(function(p){
       var pn=typeof p==='string'?p:(p&&(p.nome||p.name)),pd=typeof p==='object'&&p?(p.prazo||p.due||''):'';
       pn=String(pn||'').trim();if(!pn)return;
       var r=parseDate(pd,base);if(!r.ok)errs.push(name+' → '+pn+': a data “'+pd+'” não foi reconhecida.');
-      it.parts.push({name:pn.slice(0,160),due:r.ok?r.v:null});
+      var pnote=typeof p==='object'&&p?String(p.nota||p.valor||p.note||'').trim():'';
+      it.parts.push({name:pn.slice(0,160),due:r.ok?r.v:null,note:pnote});
     });
     out.push(it);
   });
@@ -748,9 +870,9 @@ function buildPlan(m){
     var ex=state[it.k].find(function(x){return norm(x.name)===norm(it.name);})||null,target=merge?ex:null;
     var have={};if(target)target.parts.forEach(function(p){have[norm(p.name)]=1;});
     var fresh=[],dups=[];
-    it.parts.forEach(function(p){var q={name:p.name,due:p.due,auto:false};if(have[norm(p.name)]){q.dup=true;dups.push(q);}else{have[norm(p.name)]=1;fresh.push(q);}});
+    it.parts.forEach(function(p){var q={name:p.name,due:p.due,auto:false,note:p.note||''};if(have[norm(p.name)]){q.dup=true;dups.push(q);}else{have[norm(p.name)]=1;fresh.push(q);}});
     if(m.spread!==false)fillDates(fresh,it.due||(target&&target.due)||null);
-    return {k:it.k,name:it.name,due:it.due,target:target,exists:!!ex,fresh:fresh,dups:dups,undated:it.parts.some(function(p){return !p.due;})};
+    return {k:it.k,name:it.name,due:it.due,books:it.books||'',target:target,exists:!!ex,fresh:fresh,dups:dups,undated:it.parts.some(function(p){return !p.due;})};
   });
   return {plan:plan,errs:r.errs};
 }
@@ -760,6 +882,7 @@ function importModal(m){
   if(m.step==='preview')return head+importPreview(m);
   return head+
    '<label class="drop" for="imp-file" id="imp-drop"><b>Escolher arquivo</b><span class="muted" style="font-size:13px">ou arraste aqui um .txt, .md ou .json</span></label><input type="file" id="imp-file" accept=".txt,.md,.json,text/plain,application/json,text/markdown" hidden>'+
+   '<div class="aibar"><span>Não tem o arquivo? A IA monta a partir dos livros.</span><button class="btn sm" data-act="pr-plan" data-k="'+m.k+'"'+(into?' data-id="'+into.id+'"':'')+'>Copiar prompt: dividir em partes</button></div>'+
    '<div class="or">ou cole o texto</div>'+
    '<div class="field"><label for="imp-text">Texto no formato do modelo</label><textarea id="imp-text" class="mono" spellcheck="false" placeholder="'+(into?'- Primeira parte | +7&#10;- Segunda parte | 15/10':'CAPACIDADE: Nome da capacidade&#10;PRAZO: +60&#10;- Primeira parte | +7&#10;- Segunda parte')+'">'+esc(m.text||'')+'</textarea>'+
    (into?'<span class="hint">Linhas sem CAPACIDADE:/PROJETO: entram em “'+esc(into.name)+'”.</span>':'')+'</div>'+
@@ -783,9 +906,9 @@ function importPreview(m){
   if(opts)h+='<div style="display:flex;flex-direction:column;gap:8px">'+opts+'</div>';
   h+=r.plan.map(function(pi){
     var st=pi.target?'Adiciona em '+(pi.k==='cap'?'capacidade existente':'projeto existente')+' · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte nova','partes novas')+(pi.dups.length?' · '+pi.dups.length+' já '+plural(pi.dups.length,'existia','existiam'):''):('Novo · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte','partes'));
-    var rows=pi.fresh.concat(pi.dups).map(function(p){return '<li'+(p.dup?' class="dup"':'')+'><span>'+esc(p.name)+'</span><span class="num'+(p.auto?' auto':'')+'">'+(p.dup?'já existe':(p.due?(p.auto?'≈ ':'')+fmtY(p.due):'sem data'))+'</span></li>';}).join('');
+    var rows=pi.fresh.concat(pi.dups).map(function(p){return '<li'+(p.dup?' class="dup"':'')+'><span>'+esc(p.name)+(p.note&&!p.dup?'<small>'+esc(p.note.replace(/\n+/g,' · ').slice(0,110))+'</small>':'')+'</span><span class="num'+(p.auto?' auto':'')+'">'+(p.dup?'já existe':(p.due?(p.auto?'≈ ':'')+fmtY(p.due):'sem data'))+'</span></li>';}).join('');
     return '<div class="imp-item"><div class="row" style="justify-content:space-between;align-items:flex-start"><span class="row" style="gap:8px;min-width:0"><span class="kchip">'+KIND[pi.k].One+'</span><h3>'+esc(pi.name)+'</h3></span><span class="dl">'+(pi.due?'prazo '+fmtY(pi.due):(pi.target&&pi.target.due?'prazo '+fmtY(pi.target.due):'sem prazo'))+'</span></div>'+
-      '<span class="muted" style="font-size:13px">'+st+'</span>'+(rows?'<ul class="imp-parts">'+rows+'</ul>':'')+'</div>';
+      '<span class="muted" style="font-size:13px">'+st+(pi.books?' · Livros: '+esc(pi.books.replace(/\n/g,'; ')):'')+'</span>'+(rows?'<ul class="imp-parts">'+rows+'</ul>':'')+'</div>';
   }).join('');
   if(r.plan.some(function(pi){return pi.fresh.some(function(p){return p.auto;});}))h+='<p class="muted" style="font-size:13px">≈ data distribuída pelo app</p>';
   var label=nParts?'Importar '+nParts+' '+plural(nParts,'parte','partes'):'Importar';
@@ -803,9 +926,9 @@ function doImport(){
   var m=ui.modal,r=buildPlan(m),last=null,nP=0,nI=0;
   r.plan.forEach(function(pi){
     var t=pi.target;
-    if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,parts:[]};state[pi.k].push(t);nI++;}
-    else if(!t.due&&pi.due)t.due=pi.due;
-    pi.fresh.forEach(function(p){t.parts.push({id:uid(),name:p.name,due:p.due||null,done:null});nP++;});
+    if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,books:pi.books,parts:[]};state[pi.k].push(t);nI++;}
+    else{if(!t.due&&pi.due)t.due=pi.due;if(!t.books&&pi.books)t.books=pi.books;}
+    pi.fresh.forEach(function(p){t.parts.push({id:uid(),name:p.name,due:p.due||null,done:null,note:p.note||''});nP++;});
     last={k:pi.k,id:t.id};
   });
   ui.modal=null;
@@ -888,6 +1011,15 @@ document.addEventListener('click',function(ev){
     case 'imp-copy':copyModel();break;
     case 'imp-dl':if(dl)dl.save({filename:'modelo-pessoa-necessaria.txt',data:MODELO}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Use “Copiar modelo”.');});break;
     case 'imp-do':doImport();break;
+    case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
+    case 'pr-study':{var cs=curPart();if(cs)copyText(promptStudy(cs.item,cs.part),'Prompt da sessão de estudo');break;}
+    case 'pr-review-part':{var cr=curPart();if(cr)copyText(promptReview(cr.item,cr.part,reviewOf(cr.part.id)),'Prompt de revisão');break;}
+    case 'pr-review':{var rv=state.reviews.find(function(x){return x.id===d.id;}),fr=rv&&findPart(rv.part);if(fr)copyText(promptReview(fr.item,fr.part,rv),'Prompt de revisão');break;}
+    case 'prompt-copy':{var pt=ui.modal&&ui.modal.text;if(pt){try{navigator.clipboard.writeText(pt).then(function(){toast('Copiado');},function(){selectPrompt();toast('Use Copiar do seu aparelho: o texto está selecionado.');});}catch(e){selectPrompt();}}break;}
+    case 'prompt-back':{var bk=ui.modal.back;ui.modal=bk;renderModal();break;}
+    case 'card-edit':ui.modal.cardEdit=true;renderModal();var ct=document.getElementById('card-text');if(ct)ct.focus();break;
+    case 'card-cancel':ui.modal.cardEdit=false;renderModal();if(dirty)scheduleSave();break;
+    case 'card-save':{var cp=curPart(),cv=document.getElementById('card-text');if(!cp||!cv)break;cp.part.card=cv.value.trim();ui.modal.cardEdit=false;commit(cp.part.card?'Cartão salvo':'Cartão removido');break;}
   }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ui.modal){if(ui.modal.edit){ui.modal.edit=false;renderModal();}else closeModal();}});
@@ -895,13 +1027,13 @@ document.addEventListener('submit',function(ev){
   var f=ev.target,kind=f.getAttribute('data-form');if(!kind)return;ev.preventDefault();
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
-    var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null;if(!name)return;
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,parts:[]};state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,parts:[]};state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
-    var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null;if(!pn)return;
-    if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
-    else{it2.parts.push({id:uid(),name:pn,due:pd,done:null});ui.modal=null;commit('Parte adicionada');}
+    var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim();if(!pn)return;
+    if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
+    else{it2.parts.push({id:uid(),name:pn,due:pd,done:null,note:pnote});ui.modal=null;commit('Parte adicionada');}
   }else if(kind==='bulk'){
     var it3=findItem(m.k,m.item);if(!it3)return;
     var lines=String(fd.get('lines')||'').split('\n').map(function(s){return s.replace(/^\s*(?:[-•*]|\d+[.)])\s+/,'').trim();}).filter(Boolean);if(!lines.length)return;

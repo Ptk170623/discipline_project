@@ -30,6 +30,13 @@ PRAZO: +90
 - Partes sem data podem ser distribuídas até o prazo final.
 - Se já existir um item com o mesmo nome, as partes novas entram nele e as repetidas são ignoradas.
 - Linhas com `//` são comentários.
+- `LIVROS:` (opcional) guarda os livros de referência; uma linha `> texto` logo abaixo de uma parte vira a nota dela.
+- Blocos de código (```) são ignorados, então dá para colar a resposta da IA inteira.
+
+## Estudo com IA
+
+Cada parte traz prompts prontos (dividir em partes, sessão de estudo, revisão) e um cartão de revisão.
+O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
 
 ## Onde ficam os dados
 
