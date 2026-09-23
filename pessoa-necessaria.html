@@ -244,6 +244,28 @@ details.fold > .rev-list{margin-top:10px}
 .radios label{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:14px}
 .confirm{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;font-size:14px;font-weight:600}
 
+/* import */
+.sheet.wide{max-width:680px}
+.drop{border:2px dashed var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;background:var(--surface-2)}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{color:var(--accent)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.field textarea.mono,.model{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6}
+.model{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto;max-height:280px;white-space:pre;margin:0}
+.imp-item{border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.imp-item h3{font-size:17px;font-weight:700;overflow-wrap:anywhere}
+.kchip{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.imp-parts{list-style:none;margin:0;padding:0;max-height:210px;overflow:auto;display:flex;flex-direction:column;gap:3px}
+.imp-parts li{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:5px 9px;border-radius:8px;background:var(--surface-2)}
+.imp-parts li span:first-child{overflow-wrap:anywhere;min-width:0}
+.imp-parts li span+span{white-space:nowrap}
+.imp-parts .auto{color:var(--muted);font-style:italic}
+.imp-parts li.dup{opacity:.55}
+.imp-parts li.dup span:first-child{text-decoration:line-through}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px}
+.warnbox ul{margin:6px 0 0;padding-left:18px}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -339,11 +361,12 @@ function dueText(due){var t=today();if(!due)return {txt:'sem prazo',cls:'soon'};
 
 /* ---------- modo (edição / leitura) e salvamento ---------- */
 var mode='pending';// pending | edit | view | local
-var art=null,dirty=false,saving=false,retried=false,saveTimer=null,saveErr=false;
+var art=null,dl=null,dirty=false,saving=false,retried=false,saveTimer=null,saveErr=false;
 function canE(){return mode==='edit'||mode==='local';}
 function initCaps(){
   var c=window.claude;
   if(!c||typeof c.use!=='function'){mode='local';render();return;}
+  c.use('downloads').then(function(d){dl=d;if(ui.modal&&ui.modal.kind==='import')renderModal();}).catch(function(){});
   Promise.all([c.use('artifact').catch(function(){return null;}),c.use('user').catch(function(){return null;})]).then(function(r){
     art=r[0];var u=r[1];
     if(!art){mode='view';render();return;}
@@ -535,7 +558,7 @@ function renderList(k){
      periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+'</button>';
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><h1 class="disp">'+KIND[k].many+'</h1>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'">'+(k==='cap'?'+ Nova capacidade':'+ Novo projeto')+'</button>':'')+'</div>'+
+   '<div class="page-head"><h1 class="disp">'+KIND[k].many+'</h1>'+(canE()?'<span class="row"><button class="btn" data-act="imp-open" data-k="'+k+'">Importar arquivo</button><button class="btn primary" data-act="item-new" data-k="'+k+'">'+(k==='cap'?'+ Nova capacidade':'+ Novo projeto')+'</button></span>':'')+'</div>'+
    (list.length?'<div class="cards">'+cards+'</div>':'<div class="empty-state"><p>Nenhum'+(k==='cap'?'a capacidade':' projeto')+' ainda.</p>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'">Cadastrar o primeiro</button>':'')+'</div>');
 }
 function renderItem(k,it){
@@ -549,7 +572,7 @@ function renderItem(k,it){
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
-   '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button></span>':'')+'</div>'+
+   '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
 
@@ -564,8 +587,9 @@ function renderModal(){
   else if(m.kind==='item')h=itemForm(m);
   else if(m.kind==='partform')h=partForm(m);
   else if(m.kind==='bulk')h=bulkForm(m);
+  else if(m.kind==='import')h=importModal(m);
   if(!h){ui.modal=null;root.innerHTML='';return;}
-  root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true">'+h+'</div></div>';
+  root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
 }
 function closeBtn(){return '<button class="icon-btn" data-act="modal-close" aria-label="Fechar">'+I.x+'</button>';}
 function partModal(m){
@@ -616,6 +640,193 @@ function bulkForm(m){
     '<label><input type="radio" name="mode" value="none"> <span>Sem prazo por enquanto</span></label></div></div>'+
    '<div class="row"><button class="btn primary" type="submit">Adicionar partes</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
+
+/* ---------- importação ---------- */
+var MODELO=['// Modelo de importação — Pessoa Necessária',
+'// Linhas que começam com // são comentários e são ignoradas.',
+'// Um arquivo pode ter várias capacidades e projetos, um depois do outro.',
+'//',
+'// Datas aceitas:  15/12/2026 · 15/12 · 2026-12-15',
+'//   ou contando a partir do dia da importação: +7 (dias) · +2 semanas · +1 mês',
+'// A data da parte vem depois de uma barra vertical:  - Nome da parte | +7',
+'// Parte sem data: o app pode distribuir até o prazo final.',
+'',
+'CAPACIDADE: Espanhol — conversação',
+'PRAZO: +90',
+'- Pronúncia e alfabeto | +7',
+'- Vocabulário do dia a dia (150 palavras) | +14',
+'- Verbos no presente | +30',
+'- Diálogos: 5 situações de viagem',
+'- Passado simples',
+'- Conversa de 10 minutos gravada | +90',
+'',
+'PROJETO: Blog de estudos',
+'PRAZO: +60',
+'- Escolher plataforma | +5',
+'- Escrever os 3 primeiros posts',
+'- Publicar e divulgar',''].join('\n');
+function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
+function fmtY(s){var d=parse(s);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();}
+function validDate(y,mo,d){var dt=new Date(y,mo-1,d);if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d)return {ok:false};return {ok:true,v:iso(dt)};}
+var UNIT={'':1,d:1,dia:1,dias:1,s:7,sem:7,semana:7,semanas:7,m:'m',mes:'m',meses:'m'};
+function parseDate(str,base){
+  var s=norm(str),m;if(!s)return {ok:true,v:null};
+  if((m=s.match(/^\+ ?(\d{1,4}) ?([a-z]*)$/))){var u=UNIT[m[2]];if(u===undefined)return {ok:false};return {ok:true,v:u==='m'?addMonths(base,+m[1]):addDays(base,+m[1]*u)};}
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)))return validDate(+m[1],+m[2],+m[3]);
+  if((m=s.match(/^(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2}|\d{4}))?$/))){
+    if(m[3])return validDate(m[3].length===2?2000+(+m[3]):+m[3],+m[2],+m[1]);
+    var y=parse(base).getFullYear(),c=validDate(y,+m[2],+m[1]);
+    if(c.ok&&diff(c.v,base)>60)c=validDate(y+1,+m[2],+m[1]);
+    return c;
+  }
+  return {ok:false};
+}
+function parseInput(txt,defKind,fallback){
+  var base=today(),t=String(txt||'').replace(/^\uFEFF/,'').trim();
+  if(/^[\[{]/.test(t))return parseJsonInput(t,defKind,fallback,base);
+  var out=[],errs=[],cur=null;
+  t.replace(/\r/g,'').split('\n').forEach(function(raw,i){
+    var ln=i+1,line=raw.trim();if(!line||/^\/\//.test(line))return;
+    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|prazo(?: final)?)\s*:/);
+    if(m){
+      var val=bare.slice(bare.indexOf(':')+1).trim();
+      if(m[1].indexOf('prazo')===0){
+        if(!cur){errs.push('Linha '+ln+': PRAZO aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
+        var d=parseDate(val,base);if(!d.ok){errs.push('Linha '+ln+': a data “'+val+'” não foi reconhecida.');return;}
+        cur.due=d.v;return;
+      }
+      if(!val){errs.push('Linha '+ln+': falta o nome depois de “'+bare.slice(0,bare.indexOf(':')+1)+'”.');cur=null;return;}
+      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,parts:[]};out.push(cur);return;
+    }
+    if(/^#/.test(line))return;
+    var pm=line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/),body=pm?pm[1]:line;
+    if(!cur){
+      if(!fallback){errs.push('Linha '+ln+': “'+body.slice(0,40)+'” está fora de uma capacidade ou projeto. Comece com CAPACIDADE: nome.');return;}
+      cur={k:defKind,name:fallback,due:null,parts:[]};out.push(cur);
+    }
+    var name=body,due=null,sep=body.lastIndexOf('|');
+    if(sep>=0){name=body.slice(0,sep).trim();var ds=body.slice(sep+1).trim(),dd=parseDate(ds,base);if(dd.ok)due=dd.v;else errs.push('Linha '+ln+': a data “'+ds+'” não foi reconhecida; a parte entra sem data.');}
+    if(name)cur.parts.push({name:name.slice(0,160),due:due});
+  });
+  return {items:out,errs:errs};
+}
+function parseJsonInput(t,defKind,fallback,base){
+  var errs=[],out=[],data;
+  try{data=JSON.parse(t);}catch(e){return {items:[],errs:['O JSON tem um erro de formato: '+e.message]};}
+  var arr=Array.isArray(data)?data:(data&&Array.isArray(data.itens)?data.itens:[data]);
+  arr.forEach(function(o,i){
+    if(!o||typeof o!=='object'){errs.push('Item '+(i+1)+': formato inválido.');return;}
+    var tipo=norm(o.tipo||o.type),k=tipo?(tipo.indexOf('proj')===0?'proj':'cap'):(o.projeto?'proj':(o.capacidade?'cap':defKind));
+    var name=String(o.nome||o.name||o.capacidade||o.projeto||fallback||'').trim();
+    if(!name){errs.push('Item '+(i+1)+': falta o nome.');return;}
+    var d=parseDate(o.prazo||o.due||'',base);if(!d.ok)errs.push(name+': o prazo “'+(o.prazo||o.due)+'” não foi reconhecido.');
+    var it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,parts:[]};
+    (o.partes||o.parts||[]).forEach(function(p){
+      var pn=typeof p==='string'?p:(p&&(p.nome||p.name)),pd=typeof p==='object'&&p?(p.prazo||p.due||''):'';
+      pn=String(pn||'').trim();if(!pn)return;
+      var r=parseDate(pd,base);if(!r.ok)errs.push(name+' → '+pn+': a data “'+pd+'” não foi reconhecida.');
+      it.parts.push({name:pn.slice(0,160),due:r.ok?r.v:null});
+    });
+    out.push(it);
+  });
+  return {items:out,errs:errs};
+}
+function fillDates(parts,end){
+  var t=today(),i=0;
+  while(i<parts.length){
+    if(parts[i].due){i++;continue;}
+    var j=i;while(j<parts.length&&!parts[j].due)j++;
+    var n=j-i,S=i>0&&parts[i-1].due>t?parts[i-1].due:t,E=j<parts.length?parts[j].due:end,div=j<parts.length?n+1:n;
+    if(E){var span=Math.max(diff(S,E),0);for(var q=0;q<n;q++){parts[i+q].due=addDays(S,Math.round((q+1)*span/div));parts[i+q].auto=true;}}
+    i=j;
+  }
+}
+function importFallback(m){var into=m.into?findItem(m.k,m.into):null;return into?into.name:(m.fname||null);}
+function buildPlan(m){
+  var r=parseInput(m.text,m.k,importFallback(m)),merge=m.into?true:m.merge!==false;
+  var plan=r.items.map(function(it){
+    var ex=state[it.k].find(function(x){return norm(x.name)===norm(it.name);})||null,target=merge?ex:null;
+    var have={};if(target)target.parts.forEach(function(p){have[norm(p.name)]=1;});
+    var fresh=[],dups=[];
+    it.parts.forEach(function(p){var q={name:p.name,due:p.due,auto:false};if(have[norm(p.name)]){q.dup=true;dups.push(q);}else{have[norm(p.name)]=1;fresh.push(q);}});
+    if(m.spread!==false)fillDates(fresh,it.due||(target&&target.due)||null);
+    return {k:it.k,name:it.name,due:it.due,target:target,exists:!!ex,fresh:fresh,dups:dups,undated:it.parts.some(function(p){return !p.due;})};
+  });
+  return {plan:plan,errs:r.errs};
+}
+function importModal(m){
+  var into=m.into?findItem(m.k,m.into):null;
+  var head='<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+(into?esc(into.name):KIND[m.k].many)+'</span><h2 class="disp">'+(into?'Importar partes':'Importar de arquivo')+'</h2></div>'+closeBtn()+'</div>';
+  if(m.step==='preview')return head+importPreview(m);
+  return head+
+   '<label class="drop" for="imp-file" id="imp-drop"><b>Escolher arquivo</b><span class="muted" style="font-size:13px">ou arraste aqui um .txt, .md ou .json</span></label><input type="file" id="imp-file" accept=".txt,.md,.json,text/plain,application/json,text/markdown" hidden>'+
+   '<div class="or">ou cole o texto</div>'+
+   '<div class="field"><label for="imp-text">Texto no formato do modelo</label><textarea id="imp-text" class="mono" spellcheck="false" placeholder="'+(into?'- Primeira parte | +7&#10;- Segunda parte | 15/10':'CAPACIDADE: Nome da capacidade&#10;PRAZO: +60&#10;- Primeira parte | +7&#10;- Segunda parte')+'">'+esc(m.text||'')+'</textarea>'+
+   (into?'<span class="hint">Linhas sem CAPACIDADE:/PROJETO: entram em “'+esc(into.name)+'”.</span>':'')+'</div>'+
+   (m.err?'<div class="warnbox">'+esc(m.err)+'</div>':'')+
+   '<div class="row"><button class="btn primary" data-act="imp-preview">Pré-visualizar</button><button class="btn" data-act="modal-close">Cancelar</button></div>'+
+   '<details class="fold"'+(m.text?'':' open')+'><summary>Modelo do arquivo</summary><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">'+
+     '<pre class="model" id="imp-model" tabindex="0">'+esc(MODELO)+'</pre>'+
+     '<div class="row"><button class="btn sm" data-act="imp-use">Usar este modelo no texto</button><button class="btn sm" data-act="imp-copy">Copiar modelo</button>'+(dl?'<button class="btn sm" data-act="imp-dl">Baixar modelo (.txt)</button>':'')+'</div>'+
+     '<p class="muted" style="font-size:13px">Também aceita JSON: <span class="num" style="font-size:12px">{"capacidade": "Nome", "prazo": "+60", "partes": [{"nome": "Parte 1", "prazo": "+7"}, "Parte 2"]}</span></p>'+
+   '</div></details>';
+}
+function importPreview(m){
+  var r=buildPlan(m),h='',nItems=0,nParts=0;
+  r.plan.forEach(function(pi){if(pi.fresh.length||!pi.target)nItems++;nParts+=pi.fresh.length;});
+  if(r.errs.length)h+='<div class="warnbox"><b>'+r.errs.length+' '+plural(r.errs.length,'aviso','avisos')+'</b><ul>'+r.errs.slice(0,8).map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+(r.errs.length>8?'<li>e mais '+(r.errs.length-8)+'…</li>':'')+'</ul></div>';
+  var back='<button class="btn" data-act="imp-back">Voltar e editar</button>';
+  if(!r.plan.length)return h+'<p class="muted">Nada para importar. Confira se o texto segue o modelo.</p><div class="row">'+back+'</div>';
+  var opts='';
+  if(r.plan.some(function(pi){return pi.undated;}))opts+='<label class="check"><input type="checkbox" id="imp-spread"'+(m.spread!==false?' checked':'')+'> <span>Distribuir datas para as partes sem data, até o prazo final</span></label>';
+  if(!m.into&&r.plan.some(function(pi){return pi.exists;}))opts+='<label class="check"><input type="checkbox" id="imp-merge"'+(m.merge!==false?' checked':'')+'> <span>Quando o nome já existir, adicionar as partes novas nele em vez de criar outro</span></label>';
+  if(opts)h+='<div style="display:flex;flex-direction:column;gap:8px">'+opts+'</div>';
+  h+=r.plan.map(function(pi){
+    var st=pi.target?'Adiciona em '+(pi.k==='cap'?'capacidade existente':'projeto existente')+' · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte nova','partes novas')+(pi.dups.length?' · '+pi.dups.length+' já '+plural(pi.dups.length,'existia','existiam'):''):('Novo · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte','partes'));
+    var rows=pi.fresh.concat(pi.dups).map(function(p){return '<li'+(p.dup?' class="dup"':'')+'><span>'+esc(p.name)+'</span><span class="num'+(p.auto?' auto':'')+'">'+(p.dup?'já existe':(p.due?(p.auto?'≈ ':'')+fmtY(p.due):'sem data'))+'</span></li>';}).join('');
+    return '<div class="imp-item"><div class="row" style="justify-content:space-between;align-items:flex-start"><span class="row" style="gap:8px;min-width:0"><span class="kchip">'+KIND[pi.k].One+'</span><h3>'+esc(pi.name)+'</h3></span><span class="dl">'+(pi.due?'prazo '+fmtY(pi.due):(pi.target&&pi.target.due?'prazo '+fmtY(pi.target.due):'sem prazo'))+'</span></div>'+
+      '<span class="muted" style="font-size:13px">'+st+'</span>'+(rows?'<ul class="imp-parts">'+rows+'</ul>':'')+'</div>';
+  }).join('');
+  if(r.plan.some(function(pi){return pi.fresh.some(function(p){return p.auto;});}))h+='<p class="muted" style="font-size:13px">≈ data distribuída pelo app</p>';
+  var label=nParts?'Importar '+nParts+' '+plural(nParts,'parte','partes'):'Importar';
+  return h+'<div class="row"><button class="btn primary" data-act="imp-do"'+(nItems||nParts?'':' disabled')+'>'+label+'</button>'+back+'</div>';
+}
+function loadImportFile(file){
+  var m=ui.modal;if(!m||m.kind!=='import'||!file)return;
+  if(file.size>512000){m.err='Arquivo grande demais (máximo 500 KB).';renderModal();return;}
+  var rd=new FileReader();
+  rd.onload=function(){if(ui.modal!==m)return;m.text=String(rd.result||'');m.fname=file.name.replace(/\.[^.]+$/,'').trim()||null;m.err=null;m.step='preview';renderModal();};
+  rd.onerror=function(){m.err='Não deu para ler o arquivo. Tente colar o texto.';renderModal();};
+  rd.readAsText(file,'UTF-8');
+}
+function doImport(){
+  var m=ui.modal,r=buildPlan(m),last=null,nP=0,nI=0;
+  r.plan.forEach(function(pi){
+    var t=pi.target;
+    if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,parts:[]};state[pi.k].push(t);nI++;}
+    else if(!t.due&&pi.due)t.due=pi.due;
+    pi.fresh.forEach(function(p){t.parts.push({id:uid(),name:p.name,due:p.due||null,done:null});nP++;});
+    last={k:pi.k,id:t.id};
+  });
+  ui.modal=null;
+  if(last)ui.route=r.plan.length===1?'item:'+last.k+':'+last.id:'list:'+last.k;
+  window.scrollTo(0,0);
+  commit('Importado: '+(nI?nI+' '+plural(nI,'item novo','itens novos')+' · ':'')+nP+' '+plural(nP,'parte','partes'));
+}
+function copyModel(){
+  function fallback(){var el=document.getElementById('imp-model');if(!el)return;var rg=document.createRange();rg.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(rg);toast('Modelo selecionado: use Copiar do seu aparelho.');}
+  try{navigator.clipboard.writeText(MODELO).then(function(){toast('Modelo copiado');},fallback);}catch(e){fallback();}
+}
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='imp-text'&&ui.modal&&ui.modal.kind==='import'){ui.modal.text=e.target.value;ui.modal.fname=null;}});
+document.addEventListener('change',function(e){
+  var t=e.target,m=ui.modal;if(!t||!m||m.kind!=='import')return;
+  if(t.id==='imp-file'&&t.files&&t.files[0])loadImportFile(t.files[0]);
+  else if(t.id==='imp-spread'){m.spread=t.checked;renderModal();}
+  else if(t.id==='imp-merge'){m.merge=t.checked;renderModal();}
+});
+['dragenter','dragover'].forEach(function(n){document.addEventListener(n,function(e){var z=e.target.closest&&e.target.closest('#imp-drop');if(z){e.preventDefault();z.classList.add('over');}});});
+document.addEventListener('dragleave',function(e){var z=e.target.closest&&e.target.closest('#imp-drop');if(z)z.classList.remove('over');});
+document.addEventListener('drop',function(e){var z=e.target.closest&&e.target.closest('#imp-drop');if(!z)return;e.preventDefault();var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];loadImportFile(f);});
 
 /* ---------- ações ---------- */
 function curPart(){var m=ui.modal;if(!m)return null;var it=findItem(m.k,m.item);if(!it)return null;var p=it.parts.find(function(x){return x.id===m.id;});return p?{k:m.k,item:it,part:p}:null;}
@@ -670,6 +881,13 @@ document.addEventListener('click',function(ev){
     case 'part-edit-cancel':if(ui.modal.kind==='part'){ui.modal.edit=false;ui.modal.confirm=false;renderModal();}else closeModal();break;
     case 'part-del-yes':{var mm=ui.modal,it2=findItem(mm.k,mm.item);if(it2){it2.parts=it2.parts.filter(function(p){return p.id!==mm.id;});state.reviews=state.reviews.filter(function(r){return r.part!==mm.id;});}ui.modal=null;commit('Parte excluída');break;}
     case 'modal-close':closeModal();break;
+    case 'imp-open':openModal({kind:'import',k:d.k,into:d.into||null,text:'',step:'input',spread:true,merge:true});break;
+    case 'imp-preview':{var mi=ui.modal,ta2=document.getElementById('imp-text');if(ta2&&ta2.value!==mi.text){mi.text=ta2.value;mi.fname=null;}if(!String(mi.text||'').trim()){mi.err='Escolha um arquivo ou cole o texto primeiro.';renderModal();break;}mi.err=null;mi.step='preview';renderModal();break;}
+    case 'imp-back':ui.modal.step='input';renderModal();break;
+    case 'imp-use':ui.modal.text=MODELO;ui.modal.fname=null;ui.modal.err=null;renderModal();break;
+    case 'imp-copy':copyModel();break;
+    case 'imp-dl':if(dl)dl.save({filename:'modelo-pessoa-necessaria.txt',data:MODELO}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Use “Copiar modelo”.');});break;
+    case 'imp-do':doImport();break;
   }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ui.modal){if(ui.modal.edit){ui.modal.edit=false;renderModal();}else closeModal();}});

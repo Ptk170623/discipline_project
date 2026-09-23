@@ -1,0 +1,23 @@
+// Modelo de importação — Pessoa Necessária
+// Linhas que começam com // são comentários e são ignoradas.
+// Um arquivo pode ter várias capacidades e projetos, um depois do outro.
+//
+// Datas aceitas:  15/12/2026 · 15/12 · 2026-12-15
+//   ou contando a partir do dia da importação: +7 (dias) · +2 semanas · +1 mês
+// A data da parte vem depois de uma barra vertical:  - Nome da parte | +7
+// Parte sem data: o app pode distribuir até o prazo final.
+
+CAPACIDADE: Espanhol — conversação
+PRAZO: +90
+- Pronúncia e alfabeto | +7
+- Vocabulário do dia a dia (150 palavras) | +14
+- Verbos no presente | +30
+- Diálogos: 5 situações de viagem
+- Passado simples
+- Conversa de 10 minutos gravada | +90
+
+PROJETO: Blog de estudos
+PRAZO: +60
+- Escolher plataforma | +5
+- Escrever os 3 primeiros posts
+- Publicar e divulgar

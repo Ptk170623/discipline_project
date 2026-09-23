@@ -8,6 +8,29 @@ https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
 - **Revisão espaçada**: parte de capacidade concluída → D+1. "Revisar de novo" → +1 dia. "Revisão feita" → D+7 → D+30 → lista futura (sem data).
 - **Capacidades** e **Projetos**: prazos, partes, contagem da semana e do mês, registro de sessões e conclusão.
 
+## Importar de arquivo
+
+Em **Capacidades** ou **Projetos**, use **Importar arquivo** (ou **Importar**, dentro de uma
+capacidade, para acrescentar partes a ela). Escolha um `.txt`, `.md` ou `.json`, ou cole o texto;
+o app mostra uma pré-visualização antes de gravar.
+
+Modelos prontos: [`modelos/modelo.txt`](modelos/modelo.txt) e [`modelos/modelo.json`](modelos/modelo.json).
+
+```
+CAPACIDADE: Espanhol — conversação
+PRAZO: +90
+- Pronúncia e alfabeto | +7
+- Verbos no presente | 30/10/2026
+- Passado simples
+```
+
+- `CAPACIDADE:` ou `PROJETO:` começa um item; `PRAZO:` define o prazo final dele.
+- Cada parte é uma linha (com `-`, `*` ou `1.` opcionais); a data vem depois de `|`.
+- Datas: `15/12/2026`, `15/12`, `2026-12-15` ou relativas ao dia da importação: `+7`, `+2 semanas`, `+1 mês`.
+- Partes sem data podem ser distribuídas até o prazo final.
+- Se já existir um item com o mesmo nome, as partes novas entram nele e as repetidas são ignoradas.
+- Linhas com `//` são comentários.
+
 ## Onde ficam os dados
 
 A página guarda os próprios dados (capability `artifact`): cada alteração publica uma nova versão
