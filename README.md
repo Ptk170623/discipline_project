@@ -35,8 +35,9 @@ PRAZO: +90
 
 ## Estudo com IA
 
-Cada parte traz prompts prontos (dividir em partes, sessão de estudo, revisão) e um cartão de revisão.
-Com uma **base de prática** configurada, os prompts pedem demonstração do conceito nessa base e um mini-projeto por parte.
+Fluxo pensado para **um Projeto do Claude por capacidade**, com o livro e o schema das bases anexados:
+o app gera as instruções do Projeto, o prompt de divisão em partes (seguindo a linha do autor), o `partes.txt`,
+e os prompts de sessão e de revisão. A prática é feita com scripts que você roda na sua máquina.
 O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
 
 ## Onde ficam os dados

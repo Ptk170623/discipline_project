@@ -1,52 +1,51 @@
-# Estudo com IA — o método dentro do app
+# Estudo com IA — um Projeto do Claude por capacidade
 
 Para livros em que o objetivo é aprender os **conceitos** (matemática, estatística, ferramentas como git),
-e não acompanhar o raciocínio do autor. Cada capacidade tem seus livros de referência; cada **parte** é um conceito.
+seguindo a **linha de raciocínio do autor** (a ordem, os exemplos, o porquê de cada conceito aparecer ali)
+sem precisar ler o livro inteiro. Cada **parte** do app é um conceito.
+
+## Montagem (uma vez por capacidade)
+
+1. No app, abra a capacidade → **Editar**: preencha os livros (e, se quiser, uma base de prática própria).
+2. No claude.ai, crie um **Projeto** com o nome da capacidade.
+3. Em **Copiar instruções do Projeto**, cole o texto nas instruções do Projeto.
+4. Anexe ao Projeto: o(s) livro(s) e o arquivo de **descrição/schema das bases** (só estrutura, sem dados pessoais).
+5. Numa conversa do Projeto, cole **Copiar prompt: dividir em partes**. A resposta vem no formato de importação:
+   - importe no app (**Importar**, dentro da capacidade);
+   - salve a mesma resposta como **partes.txt** e anexe ao Projeto.
+   Depois de editar partes no app, **Copiar partes.txt** gera o arquivo atualizado (com datas, notas e o que já foi concluído).
+
+Cada parte traz as notas: **Fonte** (capítulo, seção, páginas), **Por que aqui**, **Valor prático** e **Mini-projeto**.
+
+## Cada parte
 
 | Etapa do método | Onde acontece |
 | --- | --- |
-| 1. Identificar o valor prático do conceito | Nota da parte (vem do plano) e início da sessão |
-| 2. Identificar o conceito e os subconceitos | As partes da capacidade (prompt "dividir em partes") |
-| 3. Tentar explicar antes de aprender | Sessão com IA |
-| 4. Definição com as próprias palavras, do zero | Sessão com IA |
-| 5. Comparar com a definição correta | Sessão com IA |
-| 6. Atualizar a definição | Sessão com IA → vira o **cartão de revisão** |
-| Prática: demonstração e mini-projeto | Sessão com IA, na **base de prática** |
-| 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app (prompt de revisão) |
+| 1. Valor prático — e por que o autor trata do conceito ali | Notas do plano e etapa 1 da sessão |
+| 2. Identificar o conceito e os subconceitos | Partes do plano / etapa 2 |
+| 3. Tentar explicar antes de aprender | Sessão (etapa 3) |
+| Ensino na linha do autor | Sessão (etapa 4) |
+| Prática: script nas suas bases, rodado na sua máquina | Sessão (etapa 5) |
+| 4. Definição com as próprias palavras, do zero | Sessão (etapa 6) |
+| 5. Comparar com a definição do autor e uma formal | Sessão (etapa 7) |
+| 6. Atualizar a definição → cartão de revisão | Sessão (etapa 8 e cartão) |
+| Mini-projeto nas suas bases | Sessão (etapa 9) |
+| 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app |
 
-## Base de prática
+- **Estudar:** abra a parte no app → **Copiar prompt da sessão de estudo** → nova conversa **dentro do Projeto**.
+  Ao final, cole o cartão em **Colar cartão** e marque a parte.
+- **Revisar:** no dia, **Prompt** ao lado da revisão → conversa no mesmo Projeto. O veredito
+  (REVISÃO FEITA / REVISAR DE NOVO) é o botão que você aperta no app.
 
-Em **Capacidades → Configurar base**, descreva a base de dados que o agente de ensino vai usar
-(arquivos, tabelas, colunas, como acessar). Se preferir, anexe a base numa conversa com o Claude e use
-**Copiar prompt: descrever a base**; cole a descrição gerada. Cada capacidade pode ter uma base própria
-em Editar (por exemplo, um repositório de teste para git); em branco, vale a base padrão.
+## Prática com os seus dados
 
-Com a base configurada, os prompts pedem:
+O agente do Projeto **não acessa os dados**: ele lê só a descrição/schema e escreve scripts completos
+(Python com pandas, lendo os arquivos pelos caminhos descritos). Você roda na sua máquina, cola a saída e ele
+interpreta. As instruções proíbem pedir ou exibir dados pessoais; os scripts trabalham com agregados.
 
-- **no plano**, um mini-projeto de 20 a 60 minutos por parte (vira a nota `> Mini-projeto: ...`);
-- **na sessão**, uma demonstração do conceito na base (código ou consultas e a interpretação), um erro comum
-  e o mini-projeto com critérios de pronto, que a IA revisa;
-- **na revisão**, uma pergunta de aplicação na base e a cobrança do mini-projeto que ficou pendente.
+## Observações
 
-Se o agente puder executar código com acesso à base (por exemplo, arquivos anexados numa conversa com execução
-de código, ou o Claude Code na pasta da base), ele roda de verdade; se não puder, ele escreve o código pronto
-para você rodar e pede a saída.
-
-## O fluxo
-
-1. **Planejar** — na capacidade, cadastre os livros (Editar → Livros de referência) e toque em
-   **Copiar prompt: dividir em partes**. Cole numa conversa com o Claude. A resposta vem no formato de
-   importação; copie e use **Importar** na mesma capacidade. Cada parte chega com prazo e nota de valor prático.
-   Para várias capacidades de uma vez, use o botão do prompt na tela **Importar arquivo** da lista de Capacidades.
-2. **Estudar** — no dia, abra a parte e toque em **Copiar prompt da sessão de estudo**. A IA conduz as etapas
-   uma a uma e, no fim, gera o cartão (CONCEITO, PERGUNTA, MINHA DEFINIÇÃO, REFERÊNCIA, APLICAÇÃO, PONTOS DE ATENÇÃO).
-   Cole o cartão em **Colar cartão**, marque **Trabalhei nesta parte hoje** e, quando dominar, **Marcar como concluída**.
-3. **Revisar** — no dia seguinte a parte aparece em Revisão espaçada. Toque em **Prompt** ao lado dela: a IA faz a
-   pergunta do cartão, compara com a sua definição e termina com **REVISÃO FEITA** ou **REVISAR DE NOVO** —
-   é o botão que você aperta no app.
-
-## Dica: um Projeto no Claude
-
-Crie um Projeto (por exemplo "Estudos") e deixe todas as sessões dentro dele, uma conversa por conceito.
-Se você tiver os livros em PDF, adicione-os ao conhecimento do Projeto: as explicações passam a seguir o conteúdo
-desses livros. Os prompts do app já trazem tudo o que a IA precisa, então o Projeto é opcional.
+- Em livros grandes, o Projeto tende a buscar trechos relevantes em vez de ler tudo de uma vez; por isso cada
+  parte aponta capítulo/seção/páginas.
+- A base de prática do app entra inteira nas instruções só se for curta; se for longa, entra pelo nome e o
+  arquivo completo vai anexado ao Projeto.

@@ -572,7 +572,7 @@ function renderList(k){
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
    '<div class="page-head"><h1 class="disp">'+KIND[k].many+'</h1>'+(canE()?'<span class="row"><button class="btn" data-act="imp-open" data-k="'+k+'">Importar arquivo</button><button class="btn primary" data-act="item-new" data-k="'+k+'">'+(k==='cap'?'+ Nova capacidade':'+ Novo projeto')+'</button></span>':'')+'</div>'+
-   (k==='cap'&&(canE()||state.base)?'<div class="aibar"><span class="books"><b>Base de prática:</b> '+(state.base?esc(firstLine(state.base)):'não configurada. Ela é usada nos prompts para demonstrações e mini-projetos.')+'</span>'+(canE()?'<button class="btn sm" data-act="base-open">'+(state.base?'Editar base':'Configurar base')+'</button>':'')+'</div>':'')+
+   (k==='cap'&&(canE()||state.base)?'<div class="aibar"><span class="books"><b>Base de prática:</b> '+(state.base?esc(firstLine(state.base)):'não configurada. Ela entra nas instruções do Projeto de cada capacidade.')+'</span>'+(canE()?'<button class="btn sm" data-act="base-open">'+(state.base?'Editar base':'Configurar base')+'</button>':'')+'</div>':'')+
    (list.length?'<div class="cards">'+cards+'</div>':'<div class="empty-state"><p>Nenhum'+(k==='cap'?'a capacidade':' projeto')+' ainda.</p>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'">Cadastrar o primeiro</button>':'')+'</div>');
 }
 function renderItem(k,it){
@@ -586,7 +586,7 @@ function renderItem(k,it){
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
-   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+'</span>'+(canE()?'<button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>':'')+'</div>':'')+
+   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+(canE()?'<br>Projeto no Claude: crie um para '+(k==='cap'?'esta capacidade':'este projeto')+', cole as instruções, anexe o livro e o schema das bases, e rode lá o prompt de divisão.':'')+'</span>'+(canE()?'<span class="row"><button class="btn sm" data-act="pr-proj" data-k="'+k+'" data-id="'+it.id+'">Copiar instruções do Projeto</button><button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>'+(it.parts.length?'<button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes.txt</button>':'')+'</span>':'')+'</div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
@@ -638,13 +638,13 @@ function studyBlock(m,it,p,r){
   else if(p.card)h+='<div class="cardtxt">'+esc(p.card)+'</div>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Editar cartão</button></div>':'');
   else h+='<p class="muted" style="font-size:13.5px">'+(canE()?'No fim da sessão de estudo, a IA gera um cartão com a sua definição e a de referência. Cole aqui: ele entra no prompt de revisão.':'Sem cartão ainda.')+'</p>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Colar cartão</button></div>':'');
   h+='</div><details class="fold method"><summary>O método, etapa por etapa</summary><ol>'+
-   '<li>Identificar o valor prático do conceito <span>· nota do plano e início da sessão</span></li>'+
+   '<li>Identificar por que o autor trata do conceito e o valor prático dele <span>· notas do plano e início da sessão</span></li>'+
    '<li>Identificar o conceito e os subconceitos <span>· partes do plano</span></li>'+
    '<li>Tentar explicar antes de aprender <span>· sessão com IA</span></li>'+
    '<li>Escrever a definição com as próprias palavras, do zero <span>· sessão com IA</span></li>'+
    '<li>Comparar com a definição correta <span>· sessão com IA</span></li>'+
    '<li>Atualizar a definição <span>· vira o cartão de revisão</span></li>'+
-   '<li>Praticar: demonstração e mini-projeto na base de prática <span>· sessão com IA</span></li>'+
+   '<li>Praticar: scripts e mini-projeto nas suas bases, rodados na sua máquina <span>· sessão com IA</span></li>'+
    '<li>Explicar de novo com repetição espaçada <span>· revisões D+1, D+7 e D+30 deste app</span></li></ol></details>';
   return h;
 }
@@ -684,7 +684,6 @@ function bulkForm(m){
 /* ---------- prompts de estudo com IA ---------- */
 function baseOf(it){return String((it&&it.base)||state.base||'').trim();}
 function firstLine(t){return String(t||'').trim().split('\n')[0].slice(0,90);}
-var RUN_HINT='Como executar: se você puder rodar código (Python, SQL etc.) com acesso à base, rode de verdade e mostre os resultados reais. Se não puder, escreva o código completo e pronto para eu rodar e peça que eu cole a saída antes de continuar.';
 function promptBase(){
   return ['Vou usar a base de dados que anexei como base de prática para aprender com IA. Outro agente vai usar a sua descrição para montar demonstrações e mini-projetos sem ver os dados de novo.','',
   'Analise a base e escreva uma descrição com:',
@@ -695,79 +694,97 @@ function promptBase(){
   '5. Chaves e relações entre tabelas.',
   '6. Particularidades: valores ausentes, unidades, formatos de data, categorias.',
   '7. Três perguntas interessantes que a base permite responder.','',
+  'Não inclua nenhum dado pessoal (nomes, CPF, telefones, endereços): só a estrutura.',
   'Responda só com a descrição, em texto simples, com no máximo 40 linhas.'].join('\n');
 }
 function booksOf(it){return String(it&&it.books||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean);}
-var DOMAIN_HINT='Se o conceito for de matemática ou estatística, inclua um exemplo numérico resolvido passo a passo. Se for de uma ferramenta (como git), mostre comandos reais e o que acontece em cada um.';
-function promptPlan(it){
-  var books=it?booksOf(it):[],L=[];
-  L.push('Quero que você me ajude a dividir o estudo de '+(it?'uma capacidade':'minhas capacidades')+' em partes. Não vou ler os livros: vou usar IA para aprender os conceitos que eles ensinam. O que importa são os conceitos, e não o raciocínio ou a narrativa do autor.','');
-  if(it){
-    L.push('Capacidade: '+it.name);
-    L.push('Livro(s) de referência: '+(books.length?books.join('; '):'[escreva aqui os livros]'));
-    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido (sugira um prazo realista)'));
-    if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
-    if(baseOf(it))L.push('','Base de prática que o agente de ensino terá disponível:','---',baseOf(it),'---');
-  }else{
-    L.push('Minha lista (capacidade — livros — prazo, se houver):','[cole aqui, uma capacidade por linha]');
-    if(state.base)L.push('','Base de prática que o agente de ensino terá disponível:','---',state.base,'---');
-  }
-  L.push('Data de hoje: '+fmtY(today()),'','Regras:');
-  L.push('1. Identifique os conceitos e subconceitos centrais dos livros e coloque em ordem de dependência (pré-requisitos primeiro).');
-  L.push('2. Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados) que dá para aprender em uma sessão de 30 a 60 minutos com IA.');
-  L.push('3. Deixe de fora prefácio, história, digressões e argumentação do autor que não sejam necessárias para entender e usar o conceito.');
-  L.push('4. Em cada parte, escreva uma nota com o valor prático do conceito (para que serve na prática) e os subconceitos que ela cobre.');
-  L.push('5. Para cada parte, proponha um mini-projeto prático de 20 a 60 minutos com objetivo e entrega concreta (uma consulta, um cálculo, um gráfico, um script, um comando). '+((it?baseOf(it):state.base)?'Use a base de prática acima; se o conceito não couber nela, proponha um exercício prático equivalente.':'Use dados pequenos e realistas que eu consiga reproduzir.'));
-  L.push('6. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana para cada capacidade.');
-  if(!it)L.push('7. Se a lista tiver muitas capacidades, faça uma por resposta e espere eu escrever "próxima".');
-  L.push('','Responda APENAS com um bloco de código neste formato, que é o formato de importação do meu app (sem texto antes ou depois):','');
-  L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
-  L.push('LIVROS: '+(books.length?books.join('; '):'Livro 1; Livro 2'));
-  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Valor prático: ... · Subconceitos: ...','  > Mini-projeto: ...');
+function kindOf(it){return state.proj.indexOf(it)>=0?'proj':'cap';}
+var DOMAIN_HINT='Em matemática ou estatística, inclua um exemplo numérico resolvido passo a passo; em ferramentas (como git), comandos reais e o que acontece em cada um.';
+function promptProject(it){
+  var k=kindOf(it),one=KIND[k].one,books=booksOf(it),base=baseOf(it),L=[];
+  L.push('Você é meu professor particular para '+(k==='cap'?'a capacidade':'o projeto')+' "'+it.name+'". Eu não vou ler o livro: você vai me ensinar os conceitos dele seguindo a linha de raciocínio do autor.','');
+  L.push('Materiais deste Projeto:');
+  L.push('- Livro(s) anexado(s): '+(books.length?books.join('; '):'[nome do livro]')+'.');
+  L.push('- partes.txt: como '+(k==='cap'?'a capacidade foi dividida':'o projeto foi dividido')+' em partes, com prazo, fonte no livro, por que o conceito aparece ali, valor prático e mini-projeto.');
+  L.push('- Descrição e schema das minhas bases de dados (arquivo anexado)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Resumo: '+firstLine(base)+'.':'.')));
+  L.push('','Como ensinar:');
+  L.push('1. O livro é a fonte principal. Siga a ordem, os exemplos e a forma de explicar do autor, e sempre mostre por que ele apresenta o conceito naquele ponto: que problema resolve e o que prepara para frente. Cite capítulo e seção.');
+  L.push('2. Quando o livro estiver confuso, prolixo ou datado, complemente com a sua explicação, deixando claro o que é do autor e o que é seu.');
+  L.push('3. O objetivo é eu entender e saber usar o conceito, não resumir o livro. '+DOMAIN_HINT);
+  L.push('4. Faça uma etapa por vez e espere a minha resposta antes de seguir.');
+  L.push('','Prática:');
+  L.push('5. Você não tem acesso aos meus dados, só às descrições e ao schema. Escreva scripts completos e prontos para eu rodar na minha máquina (Python com pandas lendo os arquivos pelos caminhos descritos, ou SQL/comandos quando fizer mais sentido). Use só colunas que existem na descrição e diga o que espero ver na saída.');
+  L.push('6. Eu rodo, colo a saída e você interpreta comigo. Se der erro, corrija a partir da mensagem.');
+  L.push('7. Nunca peça nem exiba dados pessoais (nomes, CPF, telefones, endereços). Nos scripts, trabalhe com agregados ou colunas anonimizadas.');
+  L.push('8. Se o conceito não couber nas minhas bases, gere dados de exemplo dentro do próprio script.');
   return L.join('\n');
 }
+function promptPlan(it){
+  var t=today(),L=[];
+  if(!it){
+    L.push('Use o livro anexado a este Projeto para dividir a capacidade "[nome da capacidade]" em partes.','Prazo final: [dd/mm/aaaa, ou sugira um realista]','Data de hoje: '+fmtY(t));
+  }else{
+    L.push('Use o livro anexado a este Projeto ('+(booksOf(it).length?booksOf(it).join('; '):'o livro de referência')+') para dividir '+(kindOf(it)==='cap'?'a capacidade':'o projeto')+' "'+it.name+'" em partes.');
+    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido (sugira um prazo realista)'),'Data de hoje: '+fmtY(t));
+    if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
+  }
+  L.push('','Regras:');
+  L.push('1. Siga a estrutura e a ordem do livro. Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados), na ordem em que o autor constrói o raciocínio, para uma sessão de 30 a 60 minutos.');
+  L.push('2. Deixe de fora o que não ajuda a entender e usar os conceitos (prefácio, histórico longo, digressões), mas preserve a motivação que o autor dá para cada conceito.');
+  L.push('3. Em cada parte, escreva as notas: Fonte (capítulo, seção e páginas), Por que aqui (por que o autor apresenta o conceito nesse ponto), Valor prático e Mini-projeto de 20 a 60 minutos usando as bases descritas neste Projeto (se não couber, um exercício com dados gerados no script).');
+  L.push('4. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana.');
+  L.push('','Responda APENAS com um bloco de código neste formato. Ele é o formato de importação do meu app e também vai virar o arquivo partes.txt deste Projeto:','');
+  L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
+  L.push('LIVROS: '+(it&&booksOf(it).length?booksOf(it).join('; '):'Livro 1; Livro 2'));
+  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Fonte: Cap. X, seção X.Y (pp. N–M)','  > Por que aqui: ...','  > Valor prático: ...','  > Mini-projeto: ...');
+  return L.join('\n');
+}
+function exportParts(it){
+  var L=[(kindOf(it)==='cap'?'CAPACIDADE: ':'PROJETO: ')+it.name];
+  if(booksOf(it).length)L.push('LIVROS: '+booksOf(it).join('; '));
+  if(it.due)L.push('PRAZO: '+fmtY(it.due));
+  it.parts.forEach(function(p){
+    L.push('- '+p.name+(p.due?' | '+fmtY(p.due):''));
+    if(p.done)L.push('  > Status: concluída em '+fmtY(p.done));
+    String(p.note||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){L.push('  > '+x);});
+  });
+  return L.join('\n')+'\n';
+}
 function promptStudy(it,p){
-  var books=booksOf(it),done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[];
-  L.push('Quero aprender um conceito com você seguindo o meu método. Faça UMA etapa por vez e espere a minha resposta antes de passar para a próxima. O foco é eu entender e saber usar o conceito, não o raciocínio do autor do livro.','');
-  L.push('Capacidade: '+it.name);
-  if(books.length)L.push('Livro(s) de referência: '+books.join('; '));
-  L.push('Conceito desta sessão: '+p.name);
+  var done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[];
+  L.push('Sessão de estudo: parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use o livro e o partes.txt anexados a este Projeto e siga as instruções do Projeto.');
   if(p.note)L.push('Notas do plano: '+p.note.replace(/\n+/g,' · '));
-  if(done.length)L.push('Conceitos que já estudei nesta capacidade: '+done.slice(-12).join('; '));
-  var base=baseOf(it);
-  if(base)L.push('','Quero aprender na prática. Esta é a base de prática que você tem disponível:','---',base,'---',RUN_HINT);
-  else L.push('','Quero aprender na prática: use exemplos com dados pequenos e realistas que eu consiga reproduzir. '+RUN_HINT);
-  L.push('');
-  L.push('Etapa 1 — Valor prático: mostre em poucas linhas para que esse conceito serve na prática, com uma situação concreta em que ele faz diferença.');
-  L.push('Etapa 2 — Mapa: liste o conceito principal e os subconceitos que vamos cobrir, sem explicar ainda.');
+  if(done.length)L.push('Partes que já estudei: '+done.slice(-12).join('; '));
+  L.push('','Faça UMA etapa por vez e espere a minha resposta antes de seguir.','');
+  L.push('Etapa 1 — Por que este conceito: seguindo o livro, explique por que o autor apresenta este conceito neste ponto, que problema ele resolve e o que ele prepara. Depois, para que ele me serve na prática.');
+  L.push('Etapa 2 — Mapa: o conceito principal e os subconceitos, organizados como o autor organiza (cite capítulo e seção). Não explique ainda.');
   L.push('Etapa 3 — Minha tentativa: peça para eu explicar o conceito com o que eu já sei ou imagino. Não corrija ainda.');
-  L.push('Etapa 4 — Ensino: explique com intuição primeiro, depois a definição formal e exemplos concretos. '+DOMAIN_HINT+' Diga o que estava certo e errado na minha tentativa. Termine com 2 perguntas curtas para eu checar se entendi.');
-  L.push('Etapa 5 — Demonstração na prática: demonstre o conceito '+(base?'na base de prática':'com um exemplo prático')+', com código ou consultas e a interpretação dos resultados. Mostre também um erro comum e o que ele produz.');
-  L.push('Etapa 6 — Minha definição: peça para eu escrever uma definição do conceito com minhas palavras, do zero, sem copiar a sua.');
-  L.push('Etapa 7 — Comparação: mostre uma definição correta e concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
+  L.push('Etapa 4 — Ensino na linha do autor: explique como o autor explica (a intuição, o argumento e os exemplos dele) e dê a definição formal. Se o livro estiver confuso, complemente deixando claro o que é seu. Diga o que estava certo e errado na minha tentativa e termine com 2 perguntas curtas para eu checar se entendi.');
+  L.push('Etapa 5 — Demonstração prática: escreva um script completo para eu rodar na minha máquina com as bases descritas no Projeto (ou com dados gerados no script, se não couber nelas) e diga o que esperar da saída. Eu rodo, colo a saída e você interpreta comigo.');
+  L.push('Etapa 6 — Minha definição: peça para eu escrever uma definição com minhas palavras, do zero, sem copiar a sua nem a do autor.');
+  L.push('Etapa 7 — Comparação: mostre a definição do autor e uma definição formal concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
   L.push('Etapa 8 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
-  L.push('Etapa 9 — Mini-projeto: '+(/mini-projeto/i.test(p.note||'')?'use o mini-projeto das notas do plano (ajuste se precisar)':'proponha um mini-projeto de 20 a 60 minutos'+(base?' na base de prática':''))+', com objetivo, entrega, passos sugeridos sem dar a resposta e critérios de pronto. Eu faço e te mando o resultado (código e saída); revise e aponte melhorias. Se eu disser "depois", siga para o cartão e registre o mini-projeto como pendente.');
-  L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar:','');
+  L.push('Etapa 9 — Mini-projeto: '+(/mini-projeto/i.test(p.note||'')?'use o mini-projeto das notas do plano (ajuste se precisar)':'proponha um mini-projeto de 20 a 60 minutos nas minhas bases')+'. Dê objetivo, entrega, critérios de pronto e um esqueleto de script sem a resposta. Eu completo, rodo e te mando o código e a saída para revisar. Se eu disser "depois", siga para o cartão e registre o mini-projeto como pendente.');
+  L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar no meu app:','');
   L.push('CONCEITO: '+p.name);
+  L.push('FONTE: (capítulo e seção do livro)');
+  L.push('POR QUE O AUTOR TRATA DISSO: (uma frase)');
   L.push('PERGUNTA: (uma pergunta que me obrigue a explicar o conceito, não só a repetir a definição)');
   L.push('MINHA DEFINIÇÃO: (minha versão final, com as minhas palavras)');
-  L.push('REFERÊNCIA: (a definição correta, concisa)');
-  L.push('APLICAÇÃO: (um exercício curto'+(base?' na base de prática':' ou caso prático')+' para testar o uso do conceito)');
+  L.push('REFERÊNCIA: (a definição do autor ou uma formal, concisa)');
+  L.push('APLICAÇÃO: (um exercício curto nas minhas bases para testar o uso do conceito)');
   L.push('MINI-PROJETO: (enunciado, e se ficou feito ou pendente)');
   L.push('PONTOS DE ATENÇÃO: (os erros que cometi e confusões comuns)','','Comece pela etapa 1.');
   return L.join('\n');
 }
 function promptReview(it,p,r){
-  var books=booksOf(it),L=[];
-  L.push('Quero fazer uma revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') do conceito "'+p.name+'", da capacidade "'+it.name+'".','');
-  if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---');
-  else L.push('Ainda não tenho cartão de revisão para este conceito; use o que você sabe sobre ele'+(books.length?' (referência: '+books.join('; ')+')':'')+'.');
-  var rb=baseOf(it);
-  if(rb)L.push('','Base de prática disponível:','---',rb,'---',RUN_HINT);
-  L.push('');
+  var L=[];
+  L.push('Revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') da parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use o livro e o partes.txt anexados a este Projeto e siga as instruções do Projeto.','');
+  if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---','');
+  else L.push('Ainda não tenho cartão de revisão para esta parte; use o livro como referência.','');
   L.push('1. Faça a pergunta do cartão (ou uma pergunta que me obrigue a explicar o conceito) e espere eu responder de memória.');
-  L.push('2. Compare minha resposta com a referência'+(p.card?' e com a minha definição do cartão':'')+': o que acertei, o que esqueci e o que confundi.');
-  L.push('3. Faça 1 pergunta de aplicação '+(rb?'na base de prática (uma consulta, um cálculo ou um pequeno código para eu escrever)':'(um problema, um caso prático ou um comando)')+' e espere minha resposta. Se o cartão tiver mini-projeto pendente, pergunte se já fiz e revise.');
+  L.push('2. Compare minha resposta com a referência'+(p.card?' e com a minha definição do cartão':'')+' e com a explicação do autor: o que acertei, o que esqueci e o que confundi.');
+  L.push('3. Peça que eu escreva um pequeno script ou consulta de aplicação nas minhas bases (sem me dar o código). Eu rodo na minha máquina e te mando o código e a saída. Se o cartão tiver mini-projeto pendente, pergunte se já fiz e revise.');
   L.push('4. Termine com o veredito em uma linha: "REVISÃO FEITA" se eu expliquei e apliquei o essencial sem ajuda, ou "REVISAR DE NOVO" se faltou algo importante, dizendo o que reforçar.');
   L.push('5. Se minha definição melhorou, gere o cartão atualizado no mesmo formato.');
   return L.join('\n');
@@ -780,9 +797,9 @@ function selectPrompt(){var el=document.getElementById('prompt-text');if(!el)ret
 function baseModal(m){
   var val=m.text!=null?m.text:state.base;
   return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">Estudo com IA</span><h2 class="disp">Base de prática</h2></div>'+closeBtn()+'</div>'+
-   '<p class="muted" style="font-size:13.5px">Descreva a base de dados que o agente de ensino vai usar para demonstrar os conceitos e montar os mini-projetos. Ela entra nos prompts de todas as capacidades; cada capacidade pode ter a sua própria em Editar.</p>'+
+   '<p class="muted" style="font-size:13.5px">Descreva as bases que o agente vai usar para escrever os scripts de prática e os mini-projetos. Uma descrição curta entra inteira nas instruções do Projeto; uma longa entra só pelo nome, e aí anexe o arquivo completo ao Projeto de cada capacidade. Cada capacidade pode ter a sua própria em Editar.</p>'+
    '<div class="aibar"><span>Anexe a base numa conversa com o Claude e peça a descrição.</span><button class="btn sm" data-act="pr-base">Copiar prompt: descrever a base</button></div>'+
-   '<div class="field"><label for="base-text">Descrição da base</label><textarea id="base-text" class="mono" spellcheck="false" placeholder="Vendas da loja (vendas.csv e clientes.csv, anexados no Projeto do Claude)&#10;vendas.csv, 12 mil linhas: data, cliente_id, produto, categoria, quantidade, preco_unit&#10;clientes.csv, 900 linhas: cliente_id, cidade, idade, data_cadastro">'+esc(val||'')+'</textarea><span class="hint">A primeira linha vira o nome da base. Diga também como o agente acessa: arquivo anexado, Projeto do Claude, banco local…</span></div>'+
+   '<div class="field"><label for="base-text">Descrição da base</label><textarea id="base-text" class="mono" spellcheck="false" placeholder="Vendas da loja (vendas.csv e clientes.csv, anexados no Projeto do Claude)&#10;vendas.csv, 12 mil linhas: data, cliente_id, produto, categoria, quantidade, preco_unit&#10;clientes.csv, 900 linhas: cliente_id, cidade, idade, data_cadastro">'+esc(val||'')+'</textarea><span class="hint">A primeira linha vira o nome da base. Inclua os caminhos dos arquivos na sua máquina, para os scripts já saírem prontos. Só estrutura: nada de dados pessoais.</span></div>'+
    '<div class="row"><button class="btn primary" data-act="base-save">Salvar base</button><button class="btn" data-act="modal-close">Cancelar</button></div>';
 }
 function promptModal(m){
@@ -921,7 +938,7 @@ function importModal(m){
   if(m.step==='preview')return head+importPreview(m);
   return head+
    '<label class="drop" for="imp-file" id="imp-drop"><b>Escolher arquivo</b><span class="muted" style="font-size:13px">ou arraste aqui um .txt, .md ou .json</span></label><input type="file" id="imp-file" accept=".txt,.md,.json,text/plain,application/json,text/markdown" hidden>'+
-   '<div class="aibar"><span>Não tem o arquivo? A IA monta a partir dos livros.</span><button class="btn sm" data-act="pr-plan" data-k="'+m.k+'"'+(into?' data-id="'+into.id+'"':'')+'>Copiar prompt: dividir em partes</button></div>'+
+   '<div class="aibar"><span>Não tem o arquivo? Rode este prompt no Projeto do Claude que tem o livro anexado.</span><button class="btn sm" data-act="pr-plan" data-k="'+m.k+'"'+(into?' data-id="'+into.id+'"':'')+'>Copiar prompt: dividir em partes</button></div>'+
    '<div class="or">ou cole o texto</div>'+
    '<div class="field"><label for="imp-text">Texto no formato do modelo</label><textarea id="imp-text" class="mono" spellcheck="false" placeholder="'+(into?'- Primeira parte | +7&#10;- Segunda parte | 15/10':'CAPACIDADE: Nome da capacidade&#10;PRAZO: +60&#10;- Primeira parte | +7&#10;- Segunda parte')+'">'+esc(m.text||'')+'</textarea>'+
    (into?'<span class="hint">Linhas sem CAPACIDADE:/PROJETO: entram em “'+esc(into.name)+'”.</span>':'')+'</div>'+
@@ -1054,6 +1071,8 @@ document.addEventListener('click',function(ev){
     case 'base-open':openModal({kind:'base'});break;
     case 'base-save':{var bt=document.getElementById('base-text');state.base=(bt?bt.value:(ui.modal.text||'')).trim();ui.modal=null;commit(state.base?'Base de prática salva':'Base de prática removida');break;}
     case 'pr-base':copyText(promptBase(),'Prompt de descrição da base');break;
+    case 'pr-proj':{var ip=findItem(d.k,d.id);if(ip)copyText(promptProject(ip),'Instruções do Projeto');break;}
+    case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'partes.txt');break;}
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
     case 'pr-study':{var cs=curPart();if(cs)copyText(promptStudy(cs.item,cs.part),'Prompt da sessão de estudo');break;}
     case 'pr-review-part':{var cr=curPart();if(cr)copyText(promptReview(cr.item,cr.part,reviewOf(cr.part.id)),'Prompt de revisão');break;}
