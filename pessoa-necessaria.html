@@ -331,6 +331,12 @@ button.ach:hover{transform:translateY(-2px);border-color:var(--accent)}
 .achprev{border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;background:var(--accent-soft);color:var(--accent)}
 .achprev.won{background:linear-gradient(140deg,var(--gold-a),var(--gold-b));color:var(--gold-ink)}
 .achprev.lost{background:var(--bad-soft);color:var(--bad)}
+/* fontes, profundidade, fila */
+.planrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--surface-2);border-radius:14px;padding:10px 14px;font-size:14px}
+.planrow b{font-weight:600}
+.waitbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--rev-soft);color:var(--rev);border-radius:14px;padding:12px 16px;font-size:14px;font-weight:600}
+.card.wait{opacity:.8;border-style:dashed}
+.pill{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -586,7 +592,7 @@ function reviews(){
 }
 
 function aggregate(k,area){
-  var t=today(),w=weekRange(t),its=state[k].filter(function(it){return !area||areaOf(it)===area;}),a={items:its.length,total:0,done:0,wkSess:0};
+  var t=today(),w=weekRange(t),its=state[k].filter(function(it){return it.status!=='espera'&&(!area||areaOf(it)===area);}),a={items:its.length,total:0,done:0,wkSess:0};
   its.forEach(function(it){var s=itemStats(it);a.total+=s.total;a.done+=s.done;});
   state.log.forEach(function(e){if(e.k===k&&e.t==='work'&&e.d>=w[0]&&e.d<=w[1]&&(!area||areaOfEntry(e)===area))a.wkSess++;});
   return a;
@@ -608,7 +614,9 @@ function periodBlocks(s){
    '<div class="period"><span class="label">Mês</span><b class="num">'+s.moDone+'<em>/'+s.mo+'</em></b><small>até '+fmt(s.moEnd)+'</small></div></div>';
 }
 function renderList(k,area){
-  var list=state[k].filter(function(it){return areaOf(it)===area;}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;});
+  var all=state[k].filter(function(it){return areaOf(it)===area;}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;});
+  var list=all.filter(function(it){return it.status!=='espera';}),wait=all.filter(function(it){return it.status==='espera';});
+  var waitHtml=wait.length?'<details class="fold"><summary>Em espera <span class="num muted">'+wait.length+'</span></summary><div class="cards" style="margin-top:10px">'+wait.map(function(it){return '<button class="card wait" data-act="nav" data-to="item:'+k+':'+it.id+'"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><h3>'+esc(it.name)+'</h3><span class="pill">em espera</span></div><span class="muted" style="font-size:13px">'+(DEPTH[it.depth]?DEPTH[it.depth].n:'Profundidade não definida')+(spwOf(it)?' · '+spwOf(it)+' sessões/semana':'')+(it.parts.length?' · '+it.parts.length+' '+plural(it.parts.length,'parte','partes'):'')+'</span>'+(booksOf(it)[0]?'<span class="muted" style="font-size:13px">'+esc(booksOf(it)[0])+'</span>':'')+'</button>';}).join('')+'</div></details>':'';
   var cards=list.map(function(it){
     var s=itemStats(it),dt=dueText(it.due),pct=s.total?Math.round(s.done/s.total*100):0;
     return '<button class="card" data-act="nav" data-to="item:'+k+':'+it.id+'"><div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap"><h3>'+esc(it.name)+'</h3><span class="dl '+dt.cls+'">'+(it.due?'prazo '+fmt(it.due):'sem prazo')+'</span></div>'+
@@ -617,7 +625,16 @@ function renderList(k,area){
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="list:'+k+'">'+I.left+' '+KIND[k].many+'</button>'+
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:6px"><span class="label">'+KIND[k].many+'</span><h1 class="disp">'+AREA[area]+'</h1></div>'+(canE()?'<span class="row"><button class="btn" data-act="imp-open" data-k="'+k+'" data-area="'+area+'">Importar arquivo</button><button class="btn primary" data-act="item-new" data-k="'+k+'" data-area="'+area+'">'+(k==='cap'?'+ Nova capacidade':'+ Novo projeto')+'</button></span>':'')+'</div>'+
-   (list.length?'<div class="cards">'+cards+'</div>':'<div class="empty-state"><p>Nenhum'+(k==='cap'?'a capacidade '+(area==='pess'?'pessoal':'profissional'):' projeto '+(area==='pess'?'pessoal':'profissional'))+' ainda.</p>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'" data-area="'+area+'">Cadastrar o primeiro</button>':'')+'</div>');
+   (list.length?'<div class="cards">'+cards+'</div>':'<div class="empty-state"><p>Nenhum'+(k==='cap'?'a capacidade '+(area==='pess'?'pessoal':'profissional'):' projeto '+(area==='pess'?'pessoal':'profissional'))+' ativ'+(k==='cap'?'a':'o')+'.</p>'+(canE()?'<button class="btn primary" data-act="item-new" data-k="'+k+'" data-area="'+area+'">Cadastrar</button>':'')+'</div>')+waitHtml;
+}
+function planRow(k,it){
+  var dp=DEPTH[it.depth],spw=spwOf(it),open=it.parts.filter(function(p){return !p.done;}).length,sug=suggestDue(it),info=[];
+  info.push('<b>Profundidade:</b> '+(dp?dp.n:'não definida'));
+  info.push('<b>Sessões por semana:</b> '+(spw||'não definidas'));
+  var right='';
+  if(sug)right='<span class="row"><span>Prazo pelas partes: <b class="num">'+fmtY(sug)+'</b> <span class="muted">('+open+' '+plural(open,'parte','partes')+' em aberto)</span></span>'+(canE()&&sug!==it.due?'<button class="btn sm" data-act="due-apply" data-k="'+k+'" data-id="'+it.id+'">Usar este prazo</button>':'')+'</span>';
+  else right='<span class="muted">'+(!it.parts.length?'Divida em partes para calcular o prazo.':!spw?'Defina as sessões por semana em Editar para calcular o prazo.':'Todas as partes concluídas.')+'</span>';
+  return '<div class="planrow"><span>'+info.join(' · ')+'</span>'+right+'</div>';
 }
 function renderItem(k,it){
   var s=itemStats(it),dt=dueText(it.due);
@@ -629,8 +646,10 @@ function renderItem(k,it){
   return '<button class="btn ghost back" data-act="nav" data-to="list:'+k+':'+areaOf(it)+'">'+I.left+' '+KIND[k].many+' '+AREA_PL[areaOf(it)]+'</button>'+
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+' · '+AREA[areaOf(it)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
+   (it.status==='espera'?'<div class="waitbar"><span>Em espera: fica fora das contagens até você começar.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
-   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Livros:</b> '+(booksOf(it).length?esc(booksOf(it).join(' · ')):'nenhum cadastrado'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+(canE()?'<br>Projeto no Claude: crie um para '+(k==='cap'?'esta capacidade':'este projeto')+', cole as instruções, anexe o livro e o schema das bases, e rode lá o prompt de divisão.':'')+'</span>'+(canE()?'<span class="row"><button class="btn sm" data-act="pr-proj" data-k="'+k+'" data-id="'+it.id+'">Copiar instruções do Projeto</button><button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>'+(it.parts.length?'<button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes.txt</button>':'')+'</span>':'')+'</div>':'')+
+   planRow(k,it)+
+   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Fonte principal:</b> '+(booksOf(it).length?esc(booksOf(it)[0])+(booksOf(it).length>1?'<br><b>Complementares:</b> '+esc(booksOf(it).slice(1).join(' · ')):''):'nenhuma cadastrada'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+(canE()?'<br>Projeto no Claude: crie um para '+(k==='cap'?'esta capacidade':'este projeto')+', cole as instruções, anexe as fontes e o schema das bases, e rode lá o prompt de divisão.':'')+'</span>'+(canE()?'<span class="row"><button class="btn sm" data-act="pr-proj" data-k="'+k+'" data-id="'+it.id+'">Copiar instruções do Projeto</button><button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>'+(it.parts.length?'<button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes.txt</button>':'')+'</span>':'')+'</div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
@@ -774,7 +793,7 @@ function evalAch(a){
     return res('prog',tot/goal,'Média até agora: '+avg.toFixed(1)+' por dia · meta: '+N+' · '+tot+' de '+goal);
   }
   if(r.type==='partes'){
-    var ps=[];['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(r.area&&r.area!=='all'&&areaOf(it)!==r.area)return;it.parts.forEach(function(p){if(p.due&&p.due>=r.ini&&p.due<=r.fim)ps.push(p);});});});
+    var ps=[];['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(it.status==='espera'||(r.area&&r.area!=='all'&&areaOf(it)!==r.area))return;it.parts.forEach(function(p){if(p.due&&p.due>=r.ini&&p.due<=r.fim)ps.push(p);});});});
     if(!ps.length)return over?res('lost',0,'Nenhuma parte com prazo no período'):res('prog',0,'Nenhuma parte com prazo no período ainda');
     var ok=ps.filter(function(p){return p.done&&p.done<=p.due;}).length,bad=ps.filter(function(p){return (p.done&&p.done>p.due)||(!p.done&&p.due<t);}).length,need2=Math.ceil(N/100*ps.length);
     if(over&&ok>=need2)return res('won',1,ok+' de '+ps.length+' partes entregues no prazo');
@@ -903,7 +922,10 @@ function itemForm(m){
    '<div class="field"><label for="f-name">Nome</label><input type="text" id="f-name" name="name" required maxlength="120" value="'+esc(it?it.name:'')+'" placeholder="'+(m.k==='cap'?'Ex.: Inglês — conversação':'Ex.: App de finanças')+'" autofocus></div>'+
    '<div class="field"><label for="f-due">Prazo de término</label><input type="date" id="f-due" name="due" value="'+esc(it?it.due||'':'')+'"></div>'+
    '<div class="field"><label for="f-area">Área</label><select id="f-area" name="area"><option value="prof"'+((it?areaOf(it):m.area)!=='pess'?' selected':'')+'>Profissional</option><option value="pess"'+((it?areaOf(it):m.area)==='pess'?' selected':'')+'>Pessoal</option></select></div>'+
-   '<div class="field"><label for="f-books">Livros de referência</label><textarea id="f-books" name="books" style="min-height:84px" placeholder="Um livro por linha">'+esc(it?it.books||'':'')+'</textarea><span class="hint">Entram nos prompts de estudo com IA.</span></div>'+
+   '<div class="field"><label for="f-books">Fontes (a primeira é a principal)</label><textarea id="f-books" name="books" style="min-height:96px" placeholder="Livro: Practical Statistics for Data Scientists&#10;Repositório: github.com/DataTalksClub/data-engineering-zoomcamp&#10;Curso: CS50">'+esc(it?it.books||'':'')+'</textarea><span class="hint">Uma por linha. A primeira define a ordem das partes; pode ser livro, repositório do GitHub, curso ou documentação.</span></div>'+
+   '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 180px"><label for="f-depth">Profundidade</label><select id="f-depth" name="depth"><option value="">Não definida</option>'+['conceitual','solido','profundo'].map(function(x){return '<option value="'+x+'"'+(it&&it.depth===x?' selected':'')+'>'+DEPTH[x].n+' · '+DEPTH[x].size.replace('cerca de ','')+'</option>';}).join('')+'</select></div>'+
+   '<div class="field" style="flex:1 1 140px"><label for="f-spw">Sessões por semana</label><input type="number" id="f-spw" name="spw" min="1" max="40" step="1" value="'+esc(it&&it.spw?it.spw:'')+'" placeholder="Ex.: 6"></div></div>'+
+   '<div class="field"><label for="f-status">Situação</label><select id="f-status" name="status"><option value="">Ativa</option><option value="espera"'+(it&&it.status==='espera'?' selected':'')+'>Em espera (próximas ondas)</option></select><span class="hint">O prazo é opcional: dá para deixar em branco e calcular depois pelas partes.</span></div>'+
    (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
    '<div class="row"><button class="btn primary" type="submit">'+(it?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
    (it?(m.confirm?'<div class="confirm">Excluir “'+esc(it.name)+'” e suas '+it.parts.length+' partes? O histórico do calendário continua.<div class="row"><button class="btn danger solid sm" type="button" data-act="item-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="item-del-ask" style="align-self:flex-start">Excluir '+one+'</button>'):'')+
@@ -949,18 +971,24 @@ function promptBase(){
 }
 function booksOf(it){return String(it&&it.books||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean);}
 function kindOf(it){return state.proj.indexOf(it)>=0?'proj':'cap';}
+var DEPTH={conceitual:{n:'Conceitual',goal:'entender e conversar sobre o assunto',size:'cerca de 10 a 15 partes',f:1.2},solido:{n:'Sólido',goal:'usar no trabalho sem travar',size:'cerca de 20 a 35 partes',f:1.2},profundo:{n:'Profundo',goal:'dominar, construir coisas e conseguir ensinar',size:'cerca de 40 a 70 partes, com mini-projetos',f:1.5}};
+function spwOf(it){var n=+(it&&it.spw);return n>0?n:null;}
+function suggestDue(it){var open=it.parts.filter(function(p){return !p.done;}).length,spw=spwOf(it);if(!open||!spw)return null;var f=(DEPTH[it.depth]||{f:1.2}).f;return addDays(today(),Math.ceil(open*f/spw)*7);}
+function srcLines(it){var b=booksOf(it);return {main:b[0]||'',rest:b.slice(1)};}
 var DOMAIN_HINT='Em matemática ou estatística, inclua um exemplo numérico resolvido passo a passo; em ferramentas (como git), comandos reais e o que acontece em cada um.';
 function promptProject(it){
-  var k=kindOf(it),one=KIND[k].one,books=booksOf(it),base=baseOf(it),L=[];
-  L.push('Você é meu professor particular para '+(k==='cap'?'a capacidade':'o projeto')+' "'+it.name+'". Eu não vou ler o livro: você vai me ensinar os conceitos dele seguindo a linha de raciocínio do autor.','');
+  var k=kindOf(it),s=srcLines(it),base=baseOf(it),dp=DEPTH[it.depth],L=[];
+  L.push('Você é meu professor particular para '+(k==='cap'?'a capacidade':'o projeto')+' "'+it.name+'". Eu não vou estudar a fonte inteira sozinho: você vai me ensinar os conceitos dela seguindo a linha de raciocínio do autor (ou a ordem do curso/repositório).','');
+  if(dp)L.push('Profundidade que eu quero: '+dp.n+' ('+dp.goal+').','');
   L.push('Materiais deste Projeto:');
-  L.push('- Livro(s) anexado(s): '+(books.length?books.join('; '):'[nome do livro]')+'.');
-  L.push('- partes.txt: como '+(k==='cap'?'a capacidade foi dividida':'o projeto foi dividido')+' em partes, com prazo, fonte no livro, por que o conceito aparece ali, valor prático e mini-projeto.');
+  L.push('- Fonte principal (anexada): '+(s.main||'[livro, repositório ou curso principal]')+'.');
+  if(s.rest.length)L.push('- Fontes complementares: '+s.rest.join('; ')+'.');
+  L.push('- partes.txt: como '+(k==='cap'?'a capacidade foi dividida':'o projeto foi dividido')+' em partes, com prazo, fonte, por que o conceito aparece ali, valor prático e mini-projeto.');
   L.push('- Descrição e schema das minhas bases de dados (arquivo anexado)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Resumo: '+firstLine(base)+'.':'.')));
   L.push('','Como ensinar:');
-  L.push('1. O livro é a fonte principal. Siga a ordem, os exemplos e a forma de explicar do autor, e sempre mostre por que ele apresenta o conceito naquele ponto: que problema resolve e o que prepara para frente. Cite capítulo e seção.');
-  L.push('2. Quando o livro estiver confuso, prolixo ou datado, complemente com a sua explicação, deixando claro o que é do autor e o que é seu.');
-  L.push('3. O objetivo é eu entender e saber usar o conceito, não resumir o livro. '+DOMAIN_HINT);
+  L.push('1. A fonte principal manda. Siga a ordem, os exemplos e a forma de explicar do autor (se for um repositório ou curso, a ordem dos módulos e os exemplos do código) e sempre mostre por que o conceito aparece naquele ponto: que problema resolve e o que prepara para frente. Cite capítulo e seção, ou módulo e arquivo.');
+  L.push('2. Use as fontes complementares para preencher lacunas. Quando a fonte principal estiver confusa, prolixa ou datada, complemente com a sua explicação, deixando claro o que é do autor e o que é seu.');
+  L.push('3. O objetivo é eu entender e saber usar o conceito, não resumir a fonte. '+DOMAIN_HINT);
   L.push('4. Faça uma etapa por vez e espere a minha resposta antes de seguir.');
   L.push('','Prática:');
   L.push('5. Você não tem acesso aos meus dados, só às descrições e ao schema. Escreva scripts completos e prontos para eu rodar na minha máquina (Python com pandas lendo os arquivos pelos caminhos descritos, ou SQL/comandos quando fizer mais sentido). Use só colunas que existem na descrição e diga o que espero ver na saída.');
@@ -970,28 +998,34 @@ function promptProject(it){
   return L.join('\n');
 }
 function promptPlan(it){
-  var t=today(),L=[];
+  var t=today(),L=[],s=it?srcLines(it):{main:'',rest:[]},dp=it?DEPTH[it.depth]:null,spw=it?spwOf(it):null;
   if(!it){
-    L.push('Use o livro anexado a este Projeto para dividir a capacidade "[nome da capacidade]" em partes.','Prazo final: [dd/mm/aaaa, ou sugira um realista]','Data de hoje: '+fmtY(t));
+    L.push('Use a fonte principal anexada a este Projeto (livro, repositório ou curso) para dividir a capacidade "[nome da capacidade]" em partes.','Profundidade: [Conceitual, Sólido ou Profundo]','Sessões por semana para esta capacidade: [número]','Prazo final: [dd/mm/aaaa, ou calcule pelas partes]','Data de hoje: '+fmtY(t));
   }else{
-    L.push('Use o livro anexado a este Projeto ('+(booksOf(it).length?booksOf(it).join('; '):'o livro de referência')+') para dividir '+(kindOf(it)==='cap'?'a capacidade':'o projeto')+' "'+it.name+'" em partes.');
-    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido (sugira um prazo realista)'),'Data de hoje: '+fmtY(t));
+    L.push('Use a fonte principal anexada a este Projeto ('+(s.main||'a fonte de referência')+')'+(s.rest.length?' e as complementares ('+s.rest.join('; ')+')':'')+' para dividir '+(kindOf(it)==='cap'?'a capacidade':'o projeto')+' "'+it.name+'" em partes.');
+    if(dp)L.push('Profundidade: '+dp.n+' ('+dp.goal+') → '+dp.size+'.');
+    L.push('Sessões por semana para '+(kindOf(it)==='cap'?'esta capacidade':'este projeto')+': '+(spw||4)+' (de 45 a 60 minutos cada).');
+    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido: calcule pelas partes e pelas sessões por semana, com uma folga para revisões e mini-projetos'),'Data de hoje: '+fmtY(t));
     if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
   }
   L.push('','Regras:');
-  L.push('1. Siga a estrutura e a ordem do livro. Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados), na ordem em que o autor constrói o raciocínio, para uma sessão de 30 a 60 minutos.');
-  L.push('2. Deixe de fora o que não ajuda a entender e usar os conceitos (prefácio, histórico longo, digressões), mas preserve a motivação que o autor dá para cada conceito.');
-  L.push('3. Em cada parte, escreva as notas: Fonte (capítulo, seção e páginas), Por que aqui (por que o autor apresenta o conceito nesse ponto), Valor prático e Mini-projeto de 20 a 60 minutos usando as bases descritas neste Projeto (se não couber, um exercício com dados gerados no script).');
-  L.push('4. Distribua as datas de hoje até o prazo final, contando cerca de 4 sessões por semana.');
+  L.push('1. Siga a estrutura e a ordem da fonte principal (os capítulos do livro, ou os módulos do curso/repositório). Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados), na ordem em que o autor constrói o raciocínio, para uma sessão de 45 a 60 minutos.');
+  L.push('2. Deixe de fora o que não ajuda a entender e usar os conceitos (prefácio, histórico longo, digressões), mas preserve a motivação que o autor dá para cada conceito. Ajuste a quantidade de partes à profundidade.');
+  L.push('3. Em cada parte, escreva as notas: Fonte (capítulo, seção e páginas, ou módulo e arquivo), Por que aqui (por que o conceito aparece nesse ponto), Valor prático e Mini-projeto de 20 a 60 minutos usando as bases descritas neste Projeto (se não couber, um exercício com dados gerados no script).');
+  L.push('4. Distribua as datas a partir de hoje respeitando as sessões por semana. Se o prazo final não couber, avise e sugira outro.');
   L.push('','Responda APENAS com um bloco de código neste formato. Ele é o formato de importação do meu app e também vai virar o arquivo partes.txt deste Projeto:','');
   L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
-  L.push('LIVROS: '+(it&&booksOf(it).length?booksOf(it).join('; '):'Livro 1; Livro 2'));
-  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Fonte: Cap. X, seção X.Y (pp. N–M)','  > Por que aqui: ...','  > Valor prático: ...','  > Mini-projeto: ...');
+  L.push('FONTES: '+(it&&booksOf(it).length?booksOf(it).join('; '):'Fonte principal; Fonte complementar'));
+  if(it&&dp)L.push('PROFUNDIDADE: '+dp.n);
+  L.push('SESSOES: '+(spw||'N'));
+  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Fonte: Cap. X, seção X.Y (pp. N–M), ou módulo/arquivo','  > Por que aqui: ...','  > Valor prático: ...','  > Mini-projeto: ...');
   return L.join('\n');
 }
 function exportParts(it){
   var L=[(kindOf(it)==='cap'?'CAPACIDADE: ':'PROJETO: ')+it.name];
-  if(booksOf(it).length)L.push('LIVROS: '+booksOf(it).join('; '));
+  if(booksOf(it).length)L.push('FONTES: '+booksOf(it).join('; '));
+  if(DEPTH[it.depth])L.push('PROFUNDIDADE: '+DEPTH[it.depth].n);
+  if(spwOf(it))L.push('SESSOES: '+spwOf(it));
   if(it.due)L.push('PRAZO: '+fmtY(it.due));
   it.parts.forEach(function(p){
     L.push('- '+p.name+(p.due?' | '+fmtY(p.due):''));
@@ -1002,26 +1036,26 @@ function exportParts(it){
 }
 function promptStudy(it,p){
   var done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[];
-  L.push('Sessão de estudo: parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use o livro e o partes.txt anexados a este Projeto e siga as instruções do Projeto.');
+  L.push('Sessão de estudo: parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use a fonte principal, as complementares e o partes.txt anexados a este Projeto e siga as instruções do Projeto.');
   if(p.note)L.push('Notas do plano: '+p.note.replace(/\n+/g,' · '));
   if(done.length)L.push('Partes que já estudei: '+done.slice(-12).join('; '));
   L.push('','Faça UMA etapa por vez e espere a minha resposta antes de seguir.','');
-  L.push('Etapa 1 — Por que este conceito: seguindo o livro, explique por que o autor apresenta este conceito neste ponto, que problema ele resolve e o que ele prepara. Depois, para que ele me serve na prática.');
-  L.push('Etapa 2 — Mapa: o conceito principal e os subconceitos, organizados como o autor organiza (cite capítulo e seção). Não explique ainda.');
+  L.push('Etapa 1 — Por que este conceito: seguindo a fonte principal, explique por que o conceito aparece neste ponto, que problema ele resolve e o que ele prepara. Depois, para que ele me serve na prática.');
+  L.push('Etapa 2 — Mapa: o conceito principal e os subconceitos, organizados como a fonte organiza (cite capítulo e seção, ou módulo e arquivo). Não explique ainda.');
   L.push('Etapa 3 — Minha tentativa: peça para eu explicar o conceito com o que eu já sei ou imagino. Não corrija ainda.');
-  L.push('Etapa 4 — Ensino na linha do autor: explique como o autor explica (a intuição, o argumento e os exemplos dele) e dê a definição formal. Se o livro estiver confuso, complemente deixando claro o que é seu. Diga o que estava certo e errado na minha tentativa e termine com 2 perguntas curtas para eu checar se entendi.');
+  L.push('Etapa 4 — Ensino na linha do autor: explique como o autor (ou o curso) explica (a intuição, o argumento e os exemplos) e dê a definição formal. Se a fonte estiver confusa, complemente deixando claro o que é seu. Diga o que estava certo e errado na minha tentativa e termine com 2 perguntas curtas para eu checar se entendi.');
   L.push('Etapa 5 — Demonstração prática: escreva um script completo para eu rodar na minha máquina com as bases descritas no Projeto (ou com dados gerados no script, se não couber nelas) e diga o que esperar da saída. Eu rodo, colo a saída e você interpreta comigo.');
   L.push('Etapa 6 — Minha definição: peça para eu escrever uma definição com minhas palavras, do zero, sem copiar a sua nem a do autor.');
-  L.push('Etapa 7 — Comparação: mostre a definição do autor e uma definição formal concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
+  L.push('Etapa 7 — Comparação: mostre a definição da fonte e uma definição formal concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
   L.push('Etapa 8 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
   L.push('Etapa 9 — Mini-projeto: '+(/mini-projeto/i.test(p.note||'')?'use o mini-projeto das notas do plano (ajuste se precisar)':'proponha um mini-projeto de 20 a 60 minutos nas minhas bases')+'. Dê objetivo, entrega, critérios de pronto e um esqueleto de script sem a resposta. Eu completo, rodo e te mando o código e a saída para revisar. Se eu disser "depois", siga para o cartão e registre o mini-projeto como pendente.');
   L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar no meu app:','');
   L.push('CONCEITO: '+p.name);
-  L.push('FONTE: (capítulo e seção do livro)');
-  L.push('POR QUE O AUTOR TRATA DISSO: (uma frase)');
+  L.push('FONTE: (capítulo e seção, ou módulo e arquivo)');
+  L.push('POR QUE A FONTE TRATA DISSO: (uma frase)');
   L.push('PERGUNTA: (uma pergunta que me obrigue a explicar o conceito, não só a repetir a definição)');
   L.push('MINHA DEFINIÇÃO: (minha versão final, com as minhas palavras)');
-  L.push('REFERÊNCIA: (a definição do autor ou uma formal, concisa)');
+  L.push('REFERÊNCIA: (a definição da fonte ou uma formal, concisa)');
   L.push('APLICAÇÃO: (um exercício curto nas minhas bases para testar o uso do conceito)');
   L.push('MINI-PROJETO: (enunciado, e se ficou feito ou pendente)');
   L.push('PONTOS DE ATENÇÃO: (os erros que cometi e confusões comuns)','','Comece pela etapa 1.');
@@ -1029,11 +1063,11 @@ function promptStudy(it,p){
 }
 function promptReview(it,p,r){
   var L=[];
-  L.push('Revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') da parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use o livro e o partes.txt anexados a este Projeto e siga as instruções do Projeto.','');
+  L.push('Revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') da parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use as fontes e o partes.txt anexados a este Projeto e siga as instruções do Projeto.','');
   if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---','');
-  else L.push('Ainda não tenho cartão de revisão para esta parte; use o livro como referência.','');
+  else L.push('Ainda não tenho cartão de revisão para esta parte; use a fonte principal como referência.','');
   L.push('1. Faça a pergunta do cartão (ou uma pergunta que me obrigue a explicar o conceito) e espere eu responder de memória.');
-  L.push('2. Compare minha resposta com a referência'+(p.card?' e com a minha definição do cartão':'')+' e com a explicação do autor: o que acertei, o que esqueci e o que confundi.');
+  L.push('2. Compare a minha resposta com a referência, com a explicação da fonte'+(p.card?' e com a minha definição do cartão':'')+': o que acertei, o que esqueci e o que confundi.');
   L.push('3. Peça que eu escreva um pequeno script ou consulta de aplicação nas minhas bases (sem me dar o código). Eu rodo na minha máquina e te mando o código e a saída. Se o cartão tiver mini-projeto pendente, pergunte se já fiz e revise.');
   L.push('4. Termine com o veredito em uma linha: "REVISÃO FEITA" se eu expliquei e apliquei o essencial sem ajuda, ou "REVISAR DE NOVO" se faltou algo importante, dizendo o que reforçar.');
   L.push('5. Se minha definição melhorou, gere o cartão atualizado no mesmo formato.');
@@ -1067,12 +1101,16 @@ var MODELO=['// Modelo de importação — Pessoa Necessária',
 '// Datas aceitas:  15/12/2026 · 15/12 · 2026-12-15',
 '//   ou contando a partir do dia da importação: +7 (dias) · +2 semanas · +1 mês',
 '// A data da parte vem depois de uma barra vertical:  - Nome da parte | +7',
-'// LIVROS: (opcional) livros de referência, separados por ;',
+'// FONTES: (opcional) livros, repositórios, cursos; separados por ; e a primeira é a principal',
+'// PROFUNDIDADE: Conceitual, Sólido ou Profundo · SESSOES: sessões por semana',
+'// SITUACAO: Em espera (para as próximas ondas) · AREA: Profissional ou Pessoal',
 '// Uma linha começando com > logo abaixo de uma parte vira a nota dela.',
 '// Parte sem data: o app pode distribuir até o prazo final.',
 '',
 'CAPACIDADE: Espanhol — conversação',
-'LIVROS: Gramática básica do espanhol; Guia de conversação',
+'FONTES: Gramática básica do espanhol; Guia de conversação',
+'PROFUNDIDADE: Sólido',
+'SESSOES: 4',
 'PRAZO: +90',
 '- Pronúncia e alfabeto | +7',
 '  > Valor prático: ser entendido ao falar · Subconceitos: vogais, ll e y, acentuação',
@@ -1110,26 +1148,28 @@ function parseInput(txt,defKind,fallback){
   t.replace(/\r/g,'').split('\n').forEach(function(raw,i){
     var ln=i+1,line=raw.trim();if(!line||/^\/\//.test(line)||/^```/.test(line))return;
     if(/^>/.test(line)){var tx=line.replace(/^>\s*/,'');if(cur&&cur.parts.length&&tx){var lp=cur.parts[cur.parts.length-1];lp.note=lp.note?lp.note+'\n'+tx:tx;}return;}
-    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|livros?|prazo(?: final)?)\s*:/);
+    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|livros?|fontes?|prazo(?: final)?|profundidade|sessoes(?: por semana)?|situacao|status|area)\s*:/);
     if(m){
-      var val=bare.slice(bare.indexOf(':')+1).trim();
-      if(m[1].indexOf('livro')===0){
-        if(!cur){errs.push('Linha '+ln+': LIVROS aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
-        cur.books=val.split(';').map(function(x){return x.trim();}).filter(Boolean).join('\n');return;
-      }
+      var val=bare.slice(bare.indexOf(':')+1).trim(),key=m[1],nv=norm(val);
+      if(key!=='capacidade'&&key!=='projeto'&&key.indexOf('prazo')!==0&&!cur){errs.push('Linha '+ln+': '+bare.slice(0,bare.indexOf(':')).toUpperCase()+' aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
+      if(key.indexOf('livro')===0||key.indexOf('fonte')===0){cur.books=val.split(';').map(function(x){return x.trim();}).filter(Boolean).join('\n');return;}
+      if(key==='profundidade'){cur.depth=nv.indexOf('concei')===0?'conceitual':nv.indexOf('sol')===0?'solido':nv.indexOf('prof')===0?'profundo':'';return;}
+      if(key.indexOf('sessoes')===0){var sn=parseInt(nv,10);cur.spw=sn>0?sn:null;return;}
+      if(key==='situacao'||key==='status'){cur.status=nv.indexOf('espera')>=0?'espera':'';return;}
+      if(key==='area'){cur.area=nv.indexOf('pess')===0?'pess':'prof';return;}
       if(m[1].indexOf('prazo')===0){
         if(!cur){errs.push('Linha '+ln+': PRAZO aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
         var d=parseDate(val,base);if(!d.ok){errs.push('Linha '+ln+': a data “'+val+'” não foi reconhecida.');return;}
         cur.due=d.v;return;
       }
       if(!val){errs.push('Linha '+ln+': falta o nome depois de “'+bare.slice(0,bare.indexOf(':')+1)+'”.');cur=null;return;}
-      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,books:'',parts:[]};out.push(cur);return;
+      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,books:'',depth:'',spw:null,status:'',area:null,parts:[]};out.push(cur);return;
     }
     if(/^#/.test(line))return;
     var pm=line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/),body=pm?pm[1]:line;
     if(!cur){
       if(!fallback){errs.push('Linha '+ln+': “'+body.slice(0,40)+'” está fora de uma capacidade ou projeto. Comece com CAPACIDADE: nome.');return;}
-      cur={k:defKind,name:fallback,due:null,books:'',parts:[]};out.push(cur);
+      cur={k:defKind,name:fallback,due:null,books:'',depth:'',spw:null,status:'',area:null,parts:[]};out.push(cur);
     }
     var name=body,due=null,sep=body.lastIndexOf('|');
     if(sep>=0){name=body.slice(0,sep).trim();var ds=body.slice(sep+1).trim(),dd=parseDate(ds,base);if(dd.ok)due=dd.v;else errs.push('Linha '+ln+': a data “'+ds+'” não foi reconhecida; a parte entra sem data.');}
@@ -1147,7 +1187,9 @@ function parseJsonInput(t,defKind,fallback,base){
     var name=String(o.nome||o.name||o.capacidade||o.projeto||fallback||'').trim();
     if(!name){errs.push('Item '+(i+1)+': falta o nome.');return;}
     var d=parseDate(o.prazo||o.due||'',base);if(!d.ok)errs.push(name+': o prazo “'+(o.prazo||o.due)+'” não foi reconhecido.');
-    var lv=o.livros||o.books||'',it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,books:(Array.isArray(lv)?lv:String(lv).split(';')).map(function(x){return String(x).trim();}).filter(Boolean).join('\n'),parts:[]};
+    var lv=o.fontes||o.livros||o.books||'',pv=norm(o.profundidade||o.depth),sv=parseInt(o.sessoes||o.spw,10),av=norm(o.area);
+    var it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,books:(Array.isArray(lv)?lv:String(lv).split(';')).map(function(x){return String(x).trim();}).filter(Boolean).join('\n'),
+      depth:pv.indexOf('concei')===0?'conceitual':pv.indexOf('sol')===0?'solido':pv.indexOf('prof')===0?'profundo':'',spw:sv>0?sv:null,status:norm(o.situacao||o.status).indexOf('espera')>=0?'espera':'',area:av?(av.indexOf('pess')===0?'pess':'prof'):null,parts:[]};
     (o.partes||o.parts||[]).forEach(function(p){
       var pn=typeof p==='string'?p:(p&&(p.nome||p.name)),pd=typeof p==='object'&&p?(p.prazo||p.due||''):'';
       pn=String(pn||'').trim();if(!pn)return;
@@ -1178,7 +1220,7 @@ function buildPlan(m){
     var fresh=[],dups=[];
     it.parts.forEach(function(p){var q={name:p.name,due:p.due,auto:false,note:p.note||''};if(have[norm(p.name)]){q.dup=true;dups.push(q);}else{have[norm(p.name)]=1;fresh.push(q);}});
     if(m.spread!==false)fillDates(fresh,it.due||(target&&target.due)||null);
-    return {k:it.k,name:it.name,due:it.due,books:it.books||'',target:target,exists:!!ex,fresh:fresh,dups:dups,undated:it.parts.some(function(p){return !p.due;})};
+    return {k:it.k,name:it.name,due:it.due,books:it.books||'',depth:it.depth||'',spw:it.spw||null,status:it.status||'',area:it.area||null,target:target,exists:!!ex,fresh:fresh,dups:dups,undated:it.parts.some(function(p){return !p.due;})};
   });
   return {plan:plan,errs:r.errs};
 }
@@ -1214,7 +1256,7 @@ function importPreview(m){
     var st=pi.target?'Adiciona em '+(pi.k==='cap'?'capacidade existente':'projeto existente')+' · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte nova','partes novas')+(pi.dups.length?' · '+pi.dups.length+' já '+plural(pi.dups.length,'existia','existiam'):''):('Novo · '+pi.fresh.length+' '+plural(pi.fresh.length,'parte','partes'));
     var rows=pi.fresh.concat(pi.dups).map(function(p){return '<li'+(p.dup?' class="dup"':'')+'><span>'+esc(p.name)+(p.note&&!p.dup?'<small>'+esc(p.note.replace(/\n+/g,' · ').slice(0,110))+'</small>':'')+'</span><span class="num'+(p.auto?' auto':'')+'">'+(p.dup?'já existe':(p.due?(p.auto?'≈ ':'')+fmtY(p.due):'sem data'))+'</span></li>';}).join('');
     return '<div class="imp-item"><div class="row" style="justify-content:space-between;align-items:flex-start"><span class="row" style="gap:8px;min-width:0"><span class="kchip">'+KIND[pi.k].One+'</span><h3>'+esc(pi.name)+'</h3></span><span class="dl">'+(pi.due?'prazo '+fmtY(pi.due):(pi.target&&pi.target.due?'prazo '+fmtY(pi.target.due):'sem prazo'))+'</span></div>'+
-      '<span class="muted" style="font-size:13px">'+st+(pi.books?' · Livros: '+esc(pi.books.replace(/\n/g,'; ')):'')+'</span>'+(rows?'<ul class="imp-parts">'+rows+'</ul>':'')+'</div>';
+      '<span class="muted" style="font-size:13px">'+st+(pi.area?' · '+AREA[pi.area]:'')+(DEPTH[pi.depth]?' · '+DEPTH[pi.depth].n:'')+(pi.spw?' · '+pi.spw+' sessões/semana':'')+(pi.status==='espera'?' · em espera':'')+(pi.books?' · Fontes: '+esc(pi.books.replace(/\n/g,'; ')):'')+'</span>'+(rows?'<ul class="imp-parts">'+rows+'</ul>':'')+'</div>';
   }).join('');
   if(r.plan.some(function(pi){return pi.fresh.some(function(p){return p.auto;});}))h+='<p class="muted" style="font-size:13px">≈ data distribuída pelo app</p>';
   var label=nParts?'Importar '+nParts+' '+plural(nParts,'parte','partes'):'Importar';
@@ -1232,10 +1274,10 @@ function doImport(){
   var m=ui.modal,r=buildPlan(m),last=null,nP=0,nI=0,into=m.into?findItem(m.k,m.into):null,ar=m.area||(into?areaOf(into):'prof');
   r.plan.forEach(function(pi){
     var t=pi.target;
-    if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,books:pi.books,area:ar,parts:[]};state[pi.k].push(t);nI++;}
-    else{if(!t.due&&pi.due)t.due=pi.due;if(!t.books&&pi.books)t.books=pi.books;}
+    if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,books:pi.books,area:pi.area||ar,depth:pi.depth,spw:pi.spw,status:pi.status,parts:[]};state[pi.k].push(t);nI++;}
+    else{if(!t.due&&pi.due)t.due=pi.due;if(!t.books&&pi.books)t.books=pi.books;if(!t.depth&&pi.depth)t.depth=pi.depth;if(!t.spw&&pi.spw)t.spw=pi.spw;}
     pi.fresh.forEach(function(p){t.parts.push({id:uid(),name:p.name,due:p.due||null,done:null,note:p.note||''});nP++;});
-    last={k:pi.k,id:t.id};
+    if(!last||(last.k!==m.k&&pi.k===m.k))last={k:pi.k,id:t.id};
   });
   ui.modal=null;
   if(last)ui.route=r.plan.length===1?'item:'+last.k+':'+last.id:'list:'+last.k+':'+ar;
@@ -1343,6 +1385,8 @@ document.addEventListener('click',function(ev){
     case 'base-open':openModal({kind:'base'});break;
     case 'base-save':{var bt=document.getElementById('base-text');state.base=(bt?bt.value:(ui.modal.text||'')).trim();ui.modal=null;commit(state.base?'Base de prática salva':'Base de prática removida');break;}
     case 'pr-base':copyText(promptBase(),'Prompt de descrição da base');break;
+    case 'due-apply':{var ia=findItem(d.k,d.id),sd=ia&&suggestDue(ia);if(sd){ia.due=sd;commit('Prazo definido: '+fmtY(sd));}break;}
+    case 'item-activate':{var iv=findItem(d.k,d.id);if(iv){iv.status='';commit('Começou! Divida em partes e calcule o prazo.');}break;}
     case 'pr-proj':{var ip=findItem(d.k,d.id);if(ip)copyText(promptProject(ip),'Instruções do Projeto');break;}
     case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'partes.txt');break;}
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
@@ -1362,9 +1406,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,parts:[]};if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim();if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}

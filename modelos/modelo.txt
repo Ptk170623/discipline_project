@@ -5,12 +5,16 @@
 // Datas aceitas:  15/12/2026 · 15/12 · 2026-12-15
 //   ou contando a partir do dia da importação: +7 (dias) · +2 semanas · +1 mês
 // A data da parte vem depois de uma barra vertical:  - Nome da parte | +7
-// LIVROS: (opcional) livros de referência, separados por ;
+// FONTES: (opcional) livros, repositórios, cursos; separados por ; e a primeira é a principal
+// PROFUNDIDADE: Conceitual, Sólido ou Profundo · SESSOES: sessões por semana
+// SITUACAO: Em espera (para as próximas ondas) · AREA: Profissional ou Pessoal
 // Uma linha começando com > logo abaixo de uma parte vira a nota dela.
 // Parte sem data: o app pode distribuir até o prazo final.
 
 CAPACIDADE: Espanhol — conversação
-LIVROS: Gramática básica do espanhol; Guia de conversação
+FONTES: Gramática básica do espanhol; Guia de conversação
+PROFUNDIDADE: Sólido
+SESSOES: 4
 PRAZO: +90
 - Pronúncia e alfabeto | +7
   > Valor prático: ser entendido ao falar · Subconceitos: vogais, ll e y, acentuação

@@ -1,18 +1,20 @@
 # Estudo com IA — um Projeto do Claude por capacidade
 
-Para livros em que o objetivo é aprender os **conceitos** (matemática, estatística, ferramentas como git),
+Para fontes (livros, repositórios, cursos) em que o objetivo é aprender os **conceitos** (matemática, estatística, ferramentas como git),
 seguindo a **linha de raciocínio do autor** (a ordem, os exemplos, o porquê de cada conceito aparecer ali)
-sem precisar ler o livro inteiro. Cada **parte** do app é um conceito.
+sem precisar ler a fonte inteira. Cada **parte** do app é um conceito.
 
 ## Montagem (uma vez por capacidade)
 
-1. No app, abra a capacidade → **Editar**: preencha os livros (e, se quiser, uma base de prática própria).
+1. No app, abra a capacidade → **Editar**: preencha as **fontes** (a primeira é a principal), a **profundidade**
+   (Conceitual, Sólido ou Profundo), as **sessões por semana** e, se quiser, uma base de prática própria.
 2. No claude.ai, crie um **Projeto** com o nome da capacidade.
 3. Em **Copiar instruções do Projeto**, cole o texto nas instruções do Projeto.
-4. Anexe ao Projeto: o(s) livro(s) e o arquivo de **descrição/schema das bases** (só estrutura, sem dados pessoais).
+4. Anexe ao Projeto: a fonte principal (PDF do livro, ou o README/arquivos do repositório), as complementares e o arquivo de **descrição/schema das bases** (só estrutura, sem dados pessoais).
 5. Numa conversa do Projeto, cole **Copiar prompt: dividir em partes**. A resposta vem no formato de importação:
    - importe no app (**Importar**, dentro da capacidade);
    - salve a mesma resposta como **partes.txt** e anexe ao Projeto.
+   Com as partes no app, a página da capacidade mostra o **prazo pelas partes**; **Usar este prazo** troca o prazo final por ele.
    Depois de editar partes no app, **Copiar partes.txt** gera o arquivo atualizado (com datas, notas e o que já foi concluído).
 
 Cada parte traz as notas: **Fonte** (capítulo, seção, páginas), **Por que aqui**, **Valor prático** e **Mini-projeto**.
@@ -45,6 +47,7 @@ interpreta. As instruções proíbem pedir ou exibir dados pessoais; os scripts 
 
 ## Observações
 
+- Capacidades de ondas futuras podem ficar **Em espera** (Editar → Situação): saem das contagens até **Começar agora**.
 - Em livros grandes, o Projeto tende a buscar trechos relevantes em vez de ler tudo de uma vez; por isso cada
   parte aponta capítulo/seção/páginas.
 - A base de prática do app entra inteira nas instruções só se for curta; se for longa, entra pelo nome e o

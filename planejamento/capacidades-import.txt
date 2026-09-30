@@ -1,0 +1,196 @@
+// Plano de capacidades — arquivo de importação do app
+// Gerado a partir de planejamento/plano-capacidades.xlsx.
+// Como usar: Capacidades → Importar de arquivo → escolha este arquivo → Pré-visualizar → Importar.
+// Se uma capacidade com o mesmo nome já existir, o app só completa o que falta nela.
+//
+// Onda 1 entra ativa. As ondas seguintes entram "Em espera": ficam fora das contagens
+// até você clicar em "Começar agora" na página da capacidade.
+// PRAZO é a estimativa da planilha. Depois de dividir em partes no Projeto do Claude
+// (prompt "dividir em partes"), use o botão "Usar este prazo" para trocar pelo prazo pelas partes.
+
+// Onda 1 · início previsto 01/10/2026 · cerca de 50 partes · pré-requisitos: —
+CAPACIDADE: Estatística para DS
+AREA: Profissional
+FONTES: Livro: Practical Statistics for Data Scientists, 2ª ed. (Bruce, Bruce & Gedeck); Livro: Estatística Básica (Morettin & Bussab)
+PROFUNDIDADE: Profundo
+SESSOES: 8
+PRAZO: 10/12/2026
+
+// Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
+CAPACIDADE: Lógica de programação e bibliotecas Python para DS
+AREA: Profissional
+FONTES: Livro: Python for Data Analysis, 3ª ed. (Wes McKinney), grátis em wesmckinney.com/book; Repositório: github.com/jakevdp/PythonDataScienceHandbook
+PROFUNDIDADE: Sólido
+SESSOES: 5
+PRAZO: 26/11/2026
+
+// Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
+CAPACIDADE: SQL / modelagem de dados
+AREA: Profissional
+FONTES: Livro: Learning SQL, 3ª ed. (Alan Beaulieu); Livro: The Data Warehouse Toolkit, 3ª ed. (Kimball & Ross)
+PROFUNDIDADE: Sólido
+SESSOES: 4
+PRAZO: 03/12/2026
+
+// Onda 1 · início previsto 01/10/2026 · cerca de 12 partes · pré-requisitos: —
+CAPACIDADE: Git conceitual
+AREA: Profissional
+FONTES: Livro: Pro Git, 2ª ed. (Chacon & Straub), grátis em git-scm.com/book — capítulos 1–3 e 10
+PROFUNDIDADE: Conceitual
+SESSOES: 3
+PRAZO: 05/11/2026
+
+// Onda 1 · início previsto 06/11/2026 · cerca de 25 partes · pré-requisitos: Começa quando Git termina
+CAPACIDADE: Engenharia de prompt / harness / spec
+AREA: Profissional
+FONTES: Repositório: github.com/anthropics/prompt-eng-interactive-tutorial; Artigo: Building effective agents (Anthropic); documentação da Anthropic sobre prompts e agentes
+PROFUNDIDADE: Sólido
+SESSOES: 4
+PRAZO: 01/01/2027
+SITUACAO: Em espera
+
+// Onda 2 · início previsto 04/01/2027 · cerca de 35 partes · pré-requisitos: Estatística para DS
+CAPACIDADE: Matemática para DS
+AREA: Profissional
+FONTES: Livro: Mathematics for Machine Learning (Deisenroth, Faisal & Ong), grátis em mml-book.github.io; Curso: Essence of Linear Algebra (3Blue1Brown)
+PROFUNDIDADE: Sólido
+SESSOES: 6
+PRAZO: 22/02/2027
+SITUACAO: Em espera
+
+// Onda 2 · início previsto 04/01/2027 · cerca de 45 partes · pré-requisitos: Estatística; Python para DS
+CAPACIDADE: EDA avançada
+AREA: Profissional
+FONTES: Livro: Feature Engineering and Selection (Kuhn & Johnson), grátis em feat.engineering; Repositório: github.com/jakevdp/PythonDataScienceHandbook; as suas bases
+PROFUNDIDADE: Profundo
+SESSOES: 8
+PRAZO: 08/03/2027
+SITUACAO: Em espera
+
+// Onda 2 · início previsto 04/01/2027 · cerca de 25 partes · pré-requisitos: Python para DS
+CAPACIDADE: Visualização de dados
+AREA: Profissional
+FONTES: Livro: Fundamentals of Data Visualization (Claus Wilke), grátis em clauswilke.com/dataviz; Documentação: matplotlib e seaborn
+PROFUNDIDADE: Sólido
+SESSOES: 4
+PRAZO: 01/03/2027
+SITUACAO: Em espera
+
+// Onda 2 · início previsto 01/03/2027 · cerca de 20 partes · pré-requisitos: Visualização de dados
+CAPACIDADE: Storytelling
+AREA: Profissional
+FONTES: Livro: Storytelling with Data (Cole Nussbaumer Knaflic); Livro: Storytelling with Data: Let's Practice! (Knaflic)
+PROFUNDIDADE: Sólido
+SESSOES: 6
+PRAZO: 29/03/2027
+SITUACAO: Em espera
+
+// Onda 3 · início previsto 05/04/2027 · cerca de 50 partes · pré-requisitos: Prompt / harness / spec; Python
+CAPACIDADE: Engenharia de IA
+AREA: Profissional
+FONTES: Livro: AI Engineering (Chip Huyen); Artigo: Building effective agents (Anthropic)
+PROFUNDIDADE: Profundo
+SESSOES: 9
+PRAZO: 07/06/2027
+SITUACAO: Em espera
+
+// Onda 3 · início previsto 05/04/2027 · cerca de 35 partes · pré-requisitos: SQL / modelagem; Python
+CAPACIDADE: Engenharia de dados e governança
+AREA: Profissional
+FONTES: Livro: Fundamentals of Data Engineering (Reis & Housley); Repositório: github.com/DataTalksClub/data-engineering-zoomcamp; Livro: Data Governance: The Definitive Guide (Eryurek et al.)
+PROFUNDIDADE: Sólido
+SESSOES: 7
+PRAZO: 17/05/2027
+SITUACAO: Em espera
+
+// Onda 3 · início previsto 05/04/2027 · cerca de 15 partes · pré-requisitos: Lógica de programação
+CAPACIDADE: Ciência da computação
+AREA: Profissional
+FONTES: Livro: Grokking Algorithms, 2ª ed. (Aditya Bhargava); Curso: CS50x (Harvard, gratuito)
+PROFUNDIDADE: Conceitual
+SESSOES: 4
+PRAZO: 10/05/2027
+SITUACAO: Em espera
+
+// Onda 4 · início previsto 05/07/2027 · cerca de 55 partes · pré-requisitos: Matemática; Estatística; EDA
+CAPACIDADE: Engenharia de ML
+AREA: Profissional
+FONTES: Livro: Designing Machine Learning Systems (Chip Huyen); Repositório: github.com/GokuMohandas/Made-With-ML; Livro: Hands-On Machine Learning (Aurélien Géron)
+PROFUNDIDADE: Profundo
+SESSOES: 10
+PRAZO: 06/09/2027
+SITUACAO: Em espera
+
+// Onda 4 · início previsto 05/07/2027 · cerca de 30 partes · pré-requisitos: Engenharia de dados; Engenharia de IA
+CAPACIDADE: System design
+AREA: Profissional
+FONTES: Livro: Designing Data-Intensive Applications (Martin Kleppmann); Repositório: github.com/donnemartin/system-design-primer
+PROFUNDIDADE: Sólido
+SESSOES: 6
+PRAZO: 16/08/2027
+SITUACAO: Em espera
+
+// Contínua · 12 marcos mensais; o hábito diário fica nas tarefas diárias (Listening, Speaking)
+CAPACIDADE: Inglês
+AREA: Profissional
+FONTES: Livro: English Grammar in Use (Raymond Murphy) — só para os tópicos de gramática; Palestras técnicas (PyData, conferências); As fontes em inglês das outras capacidades
+PROFUNDIDADE: Sólido
+SESSOES: 1
+PRAZO: 30/09/2027
+- Rotina de listening de 30 dias seguidos | 31/10/2026
+  > Como provar: Sequência de 30 dias na tarefa diária de listening.
+- Ler a documentação do pandas ("Getting started") sem tradutor | 30/11/2026
+  > Como provar: Resumir em português, sem consultar tradução, o que cada seção ensina.
+- Assistir a uma palestra técnica de 20 min com legenda em inglês | 31/12/2026
+  > Como provar: Resumo de 5 frases em inglês do que foi dito.
+- Escrever um README em inglês para um projeto seu | 31/01/2027
+  > Como provar: README publicado no GitHub, revisado pela IA.
+- Ler um capítulo de uma fonte técnica em inglês sem tradutor | 28/02/2027
+  > Como provar: Cartão de revisão do capítulo escrito em inglês.
+- Palestra técnica de 30 min sem legenda | 31/03/2027
+  > Como provar: Resumo falado de 2 minutos, gravado.
+- Explicar um projeto seu em 5 minutos | 30/04/2027
+  > Como provar: Gravação sem roteiro lido.
+- Escrever um post técnico de ~500 palavras | 31/05/2027
+  > Como provar: Post publicado (LinkedIn, blog ou GitHub).
+- Conversa de 20 min por voz com IA sobre um tema técnico | 30/06/2027
+  > Como provar: Conversa sem pausas longas nem troca para o português.
+- Simular uma reunião com cliente: apresentar uma proposta de projeto de dados | 31/07/2027
+  > Como provar: Gravação de 10 minutos.
+- Participar de uma discussão técnica em inglês | 31/08/2027
+  > Como provar: Uma issue ou pull request comentado em repositório público.
+- Apresentar um case completo em inglês | 30/09/2027
+  > Como provar: Apresentação de 10 minutos gravada.
+
+// Projeto integrador da onda 1
+PROJETO: Diagnóstico estatístico de vendas
+AREA: Profissional
+FONTES: Capacidades: Estatística, SQL, Python
+PRAZO: 31/12/2026
+// Entrega: Relatório com consultas SQL e testes de hipótese (ex.: conversão de orçamentos em vendas por bloco).
+
+// Projeto integrador da onda 2
+PROJETO: Análise de ruptura de estoque para a diretoria
+AREA: Profissional
+FONTES: Capacidades: EDA avançada, matemática, visualização, storytelling
+PRAZO: 04/04/2027
+SITUACAO: Em espera
+// Entrega: EDA completa + apresentação de 10 slides com recomendação.
+
+// Projeto integrador da onda 3
+PROJETO: Assistente de IA sobre a documentação das bases
+AREA: Profissional
+FONTES: Capacidades: Engenharia de IA, engenharia de dados e governança, prompt
+PRAZO: 04/07/2027
+SITUACAO: Em espera
+// Entrega: App que responde perguntas sobre as bases a partir das descrições (RAG), com rotina de atualização.
+
+// Projeto integrador da onda 4
+PROJETO: Previsão de demanda ou ruptura em produção
+AREA: Profissional
+FONTES: Capacidades: Engenharia de ML, system design
+PRAZO: 03/10/2027
+SITUACAO: Em espera
+// Entrega: Modelo treinado, servido e monitorado, com o desenho da arquitetura.
+
+// Use dados agregados ou anonimizados nos projetos; nada de dados pessoais em portfólio.

@@ -41,15 +41,25 @@ PRAZO: +90
 - Partes sem data podem ser distribuídas até o prazo final.
 - Se já existir um item com o mesmo nome, as partes novas entram nele e as repetidas são ignoradas.
 - Linhas com `//` são comentários.
-- `LIVROS:` (opcional) guarda os livros de referência; uma linha `> texto` logo abaixo de uma parte vira a nota dela.
+- `FONTES:` (opcional) livros, repositórios, cursos ou documentação, separados por `;` — a primeira é a **fonte principal**, a que define a ordem das partes (`LIVROS:` ainda funciona).
+- `PROFUNDIDADE:` `Conceitual`, `Sólido` ou `Profundo`, e `SESSOES:` sessões por semana: o app usa os dois para calcular o **prazo pelas partes** (semanas = partes em aberto × fator ÷ sessões por semana; fator 1,5 no Profundo e 1,2 nos outros) e oferece **Usar este prazo**.
+- `SITUACAO: Em espera` deixa a capacidade guardada para uma próxima onda: ela fica fora das listas e contagens até você clicar em **Começar agora**. `AREA: Profissional` ou `Pessoal` escolhe a área.
+- Uma linha `> texto` logo abaixo de uma parte vira a nota dela.
 - Blocos de código (```) são ignorados, então dá para colar a resposta da IA inteira.
 
 ## Estudo com IA
 
-Fluxo pensado para **um Projeto do Claude por capacidade**, com o livro e o schema das bases anexados:
+Fluxo pensado para **um Projeto do Claude por capacidade**, com a fonte principal e o schema das bases anexados:
 o app gera as instruções do Projeto, o prompt de divisão em partes (seguindo a linha do autor), o `partes.txt`,
 e os prompts de sessão e de revisão. A prática é feita com scripts que você roda na sua máquina.
 O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
+
+## Plano de capacidades
+
+- [`planejamento/plano-capacidades.xlsx`](planejamento/plano-capacidades.xlsx): ondas, profundidade, partes estimadas,
+  sessões por semana, prazo estimado (fórmulas), fontes, rotina semanal, marcos de inglês e projetos integradores.
+- [`planejamento/capacidades-import.txt`](planejamento/capacidades-import.txt): o mesmo plano no formato de importação
+  (onda 1 ativa, as demais em espera).
 
 ## Onde ficam os dados
 
