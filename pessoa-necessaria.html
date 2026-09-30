@@ -649,7 +649,7 @@ function renderItem(k,it){
    (it.status==='espera'?'<div class="waitbar"><span>Em espera: fica fora das contagens até você começar.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
    periodBlocks(s)+(s.late?'<span class="late-note">'+s.late+' '+plural(s.late,'parte atrasada','partes atrasadas')+'</span>':'')+
    planRow(k,it)+
-   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Fonte principal:</b> '+(booksOf(it).length?esc(booksOf(it)[0])+(booksOf(it).length>1?'<br><b>Complementares:</b> '+esc(booksOf(it).slice(1).join(' · ')):''):'nenhuma cadastrada'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+(canE()?'<br>Projeto no Claude: crie um para '+(k==='cap'?'esta capacidade':'este projeto')+', cole as instruções, anexe as fontes e o schema das bases, e rode lá o prompt de divisão.':'')+'</span>'+(canE()?'<span class="row"><button class="btn sm" data-act="pr-proj" data-k="'+k+'" data-id="'+it.id+'">Copiar instruções do Projeto</button><button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>'+(it.parts.length?'<button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes.txt</button>':'')+'</span>':'')+'</div>':'')+
+   ((booksOf(it).length||canE())?'<div class="aibar"><span class="books"><b>Fonte principal:</b> '+(booksOf(it).length?esc(booksOf(it)[0])+(booksOf(it).length>1?'<br><b>Complementares:</b> '+esc(booksOf(it).slice(1).join(' · ')):''):'nenhuma cadastrada'+(canE()?' (adicione em Editar)':''))+(k==='cap'?'<br><b>Base de prática:</b> '+(baseOf(it)?esc(firstLine(baseOf(it)))+(it.base?' (desta capacidade)':' (padrão)'):'não configurada'):'')+(canE()?'<br>Projeto no Claude: crie um para '+(k==='cap'?'esta capacidade':'este projeto')+', cole as instruções, anexe as fontes e o schema das bases, e rode lá o prompt de divisão.':'')+'</span>'+(canE()?'<span class="row"><button class="btn sm" data-act="pr-proj" data-k="'+k+'" data-id="'+it.id+'">Copiar instruções do Projeto</button><button class="btn sm" data-act="pr-plan" data-k="'+k+'" data-id="'+it.id+'">Copiar prompt: dividir em partes</button>'+(it.parts.length?'<button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar parts.txt</button>':'')+'</span>':'')+'</div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias partes</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (parts.length?'<div class="parts">'+sq+'</div>':'<div class="empty-state"><p>Divida '+(k==='cap'?'esta capacidade':'este projeto')+' em partes pequenas, cada uma com seu prazo.</p></div>');
 }
@@ -902,7 +902,7 @@ function studyBlock(m,it,p,r){
   var h='<div class="stack"><span class="label">Estudo com IA</span>';
   if(canE())h+='<div class="row"><button class="btn" data-act="pr-study">Copiar prompt da sessão de estudo</button>'+((p.done||r)?'<button class="btn" data-act="pr-review-part">Copiar prompt de revisão</button>':'')+'</div>';
   h+='</div><div class="stack"><span class="label">Cartão de revisão</span>';
-  if(m.cardEdit)h+='<textarea id="card-text" class="cardtxt" style="min-height:180px;width:100%;resize:vertical;color:var(--ink)" placeholder="Cole aqui o cartão que a IA gerou no fim da sessão (CONCEITO, PERGUNTA, MINHA DEFINIÇÃO, REFERÊNCIA…)">'+esc(p.card||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="card-save">Salvar cartão</button><button class="btn sm" data-act="card-cancel">Cancelar</button></div>';
+  if(m.cardEdit)h+='<textarea id="card-text" class="cardtxt" style="min-height:180px;width:100%;resize:vertical;color:var(--ink)" placeholder="Cole aqui o cartão que a IA gerou no fim da sessão (CONCEPT, QUESTION, MY DEFINITION, REFERENCE…)">'+esc(p.card||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="card-save">Salvar cartão</button><button class="btn sm" data-act="card-cancel">Cancelar</button></div>';
   else if(p.card)h+='<div class="cardtxt">'+esc(p.card)+'</div>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Editar cartão</button></div>':'');
   else h+='<p class="muted" style="font-size:13.5px">'+(canE()?'No fim da sessão de estudo, a IA gera um cartão com a sua definição e a de referência. Cole aqui: ele entra no prompt de revisão.':'Sem cartão ainda.')+'</p>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Colar cartão</button></div>':'');
   h+='</div><details class="fold method"><summary>O método, etapa por etapa</summary><ol>'+
@@ -953,124 +953,135 @@ function bulkForm(m){
    '<div class="row"><button class="btn primary" type="submit">Adicionar partes</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 
-/* ---------- prompts de estudo com IA ---------- */
+/* ---------- prompts de estudo com IA (em inglês: o estudo das capacidades é feito em inglês) ---------- */
 function baseOf(it){return String((it&&it.base)||state.base||'').trim();}
 function firstLine(t){return String(t||'').trim().split('\n')[0].slice(0,90);}
 function promptBase(){
-  return ['Vou usar a base de dados que anexei como base de prática para aprender com IA. Outro agente vai usar a sua descrição para montar demonstrações e mini-projetos sem ver os dados de novo.','',
-  'Analise a base e escreva uma descrição com:',
-  '1. Nome da base e do que ela trata (a primeira linha deve ser só o nome).',
-  '2. Formato e como acessar (arquivos, tabelas, banco, repositório).',
-  '3. Tabelas e colunas, com tipo e significado de cada uma.',
-  '4. Tamanho aproximado (linhas por tabela).',
-  '5. Chaves e relações entre tabelas.',
-  '6. Particularidades: valores ausentes, unidades, formatos de data, categorias.',
-  '7. Três perguntas interessantes que a base permite responder.','',
-  'Não inclua nenhum dado pessoal (nomes, CPF, telefones, endereços): só a estrutura.',
-  'Responda só com a descrição, em texto simples, com no máximo 40 linhas.'].join('\n');
+  return ['I will use the dataset attached here as a practice base for learning with AI. Another agent will use your description to build demos and mini-projects without seeing the data again.','',
+  'Analyze the dataset and write a description in English with:',
+  '1. The dataset name and what it is about (the first line must be just the name).',
+  '2. Format and how to access it (files, tables, database, repository, file paths).',
+  '3. Tables and columns, with the type and meaning of each one. Keep table and column names exactly as they are, even if they are in Portuguese.',
+  '4. Approximate size (rows per table).',
+  '5. Keys and relationships between tables.',
+  '6. Quirks: missing values, units, date formats, categories.',
+  '7. Three interesting questions the dataset can answer.','',
+  'Do not include any personal data (names, CPF, phone numbers, addresses): only the structure.',
+  'Reply with the description only, in plain text, at most 40 lines.'].join('\n');
 }
 function booksOf(it){return String(it&&it.books||'').split(/\n|;/).map(function(x){return x.trim();}).filter(Boolean);}
 function kindOf(it){return state.proj.indexOf(it)>=0?'proj':'cap';}
-var DEPTH={conceitual:{n:'Conceitual',goal:'entender e conversar sobre o assunto',size:'cerca de 10 a 15 partes',f:1.2},solido:{n:'Sólido',goal:'usar no trabalho sem travar',size:'cerca de 20 a 35 partes',f:1.2},profundo:{n:'Profundo',goal:'dominar, construir coisas e conseguir ensinar',size:'cerca de 40 a 70 partes, com mini-projetos',f:1.5}};
+var DEPTH={conceitual:{n:'Conceitual',en:'Conceptual',goal:'understand the topic and discuss it with confidence',size:'about 10 to 15 parts',f:1.2},solido:{n:'Sólido',en:'Solid',goal:'use it at work without getting stuck',size:'about 20 to 35 parts',f:1.2},profundo:{n:'Profundo',en:'Deep',goal:'master it, build things with it and be able to teach it',size:'about 40 to 70 parts, with mini-projects',f:1.5}};
+var STAGE_EN=['day-1','week','month','future'];
 function spwOf(it){var n=+(it&&it.spw);return n>0?n:null;}
 function suggestDue(it){var open=it.parts.filter(function(p){return !p.done;}).length,spw=spwOf(it);if(!open||!spw)return null;var f=(DEPTH[it.depth]||{f:1.2}).f;return addDays(today(),Math.ceil(open*f/spw)*7);}
 function srcLines(it){var b=booksOf(it);return {main:b[0]||'',rest:b.slice(1)};}
-var DOMAIN_HINT='Em matemática ou estatística, inclua um exemplo numérico resolvido passo a passo; em ferramentas (como git), comandos reais e o que acontece em cada um.';
+function kindEn(it){return kindOf(it)==='cap'?'capability':'project';}
+var DOMAIN_HINT='In math or statistics, include a worked numerical example step by step; for tools (like git), real commands and what happens at each one.';
+var LANG_RULES=['Teach entirely in English: explanations, examples, code comments and review cards. I am a native Portuguese speaker building professional fluency, so use clear, natural English and define each key technical term in plain English the first time it appears.',
+  'If I answer in Portuguese, reply in English and ask me to try again in English.',
+  'After each of my answers, point out at most two English mistakes that hurt clarity (one short line, with the corrected phrase), then move on. Do not let this take over the lesson.',
+  'My dataset descriptions and column names may be in Portuguese: keep column names exactly as written and explain everything in English.'];
 function promptProject(it){
   var k=kindOf(it),s=srcLines(it),base=baseOf(it),dp=DEPTH[it.depth],L=[];
-  L.push('Você é meu professor particular para '+(k==='cap'?'a capacidade':'o projeto')+' "'+it.name+'". Eu não vou estudar a fonte inteira sozinho: você vai me ensinar os conceitos dela seguindo a linha de raciocínio do autor (ou a ordem do curso/repositório).','');
-  if(dp)L.push('Profundidade que eu quero: '+dp.n+' ('+dp.goal+').','');
-  L.push('Materiais deste Projeto:');
-  L.push('- Fonte principal (anexada): '+(s.main||'[livro, repositório ou curso principal]')+'.');
-  if(s.rest.length)L.push('- Fontes complementares: '+s.rest.join('; ')+'.');
-  L.push('- partes.txt: como '+(k==='cap'?'a capacidade foi dividida':'o projeto foi dividido')+' em partes, com prazo, fonte, por que o conceito aparece ali, valor prático e mini-projeto.');
-  L.push('- Descrição e schema das minhas bases de dados (arquivo anexado)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Resumo: '+firstLine(base)+'.':'.')));
-  L.push('','Como ensinar:');
-  L.push('1. A fonte principal manda. Siga a ordem, os exemplos e a forma de explicar do autor (se for um repositório ou curso, a ordem dos módulos e os exemplos do código) e sempre mostre por que o conceito aparece naquele ponto: que problema resolve e o que prepara para frente. Cite capítulo e seção, ou módulo e arquivo.');
-  L.push('2. Use as fontes complementares para preencher lacunas. Quando a fonte principal estiver confusa, prolixa ou datada, complemente com a sua explicação, deixando claro o que é do autor e o que é seu.');
-  L.push('3. O objetivo é eu entender e saber usar o conceito, não resumir a fonte. '+DOMAIN_HINT);
-  L.push('4. Faça uma etapa por vez e espere a minha resposta antes de seguir.');
-  L.push('','Prática:');
-  L.push('5. Você não tem acesso aos meus dados, só às descrições e ao schema. Escreva scripts completos e prontos para eu rodar na minha máquina (Python com pandas lendo os arquivos pelos caminhos descritos, ou SQL/comandos quando fizer mais sentido). Use só colunas que existem na descrição e diga o que espero ver na saída.');
-  L.push('6. Eu rodo, colo a saída e você interpreta comigo. Se der erro, corrija a partir da mensagem.');
-  L.push('7. Nunca peça nem exiba dados pessoais (nomes, CPF, telefones, endereços). Nos scripts, trabalhe com agregados ou colunas anonimizadas.');
-  L.push('8. Se o conceito não couber nas minhas bases, gere dados de exemplo dentro do próprio script.');
+  L.push('You are my private tutor for the '+kindEn(it)+' "'+it.name+'". I will not study the whole source on my own: you will teach me its concepts following the author\'s line of reasoning (or the order of the course/repository).','');
+  if(dp)L.push('Depth I want: '+dp.en+' ('+dp.goal+').','');
+  L.push('Materials in this Project:');
+  L.push('- Main source (attached): '+(s.main||'[main book, repository or course]')+'.');
+  if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');
+  L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
+  L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
+  L.push('','How to teach:');
+  L.push('1. The main source leads. Follow the author\'s order, examples and way of explaining (for a repository or course, the order of the modules and the code examples) and always show why the concept appears at that point: what problem it solves and what it sets up next. Cite chapter and section, or module and file.');
+  L.push('2. Use the complementary sources to fill gaps. When the main source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
+  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+DOMAIN_HINT);
+  L.push('4. Do one step at a time and wait for my answer before moving on.');
+  L.push('','Practice:');
+  L.push('5. You have no access to my data, only to the descriptions and the schema. Write complete, ready-to-run scripts for my machine (Python with pandas reading the files from the described paths, or SQL/commands when that makes more sense). Use only columns that exist in the description and tell me what output to expect.');
+  L.push('6. I run them, paste the output and you interpret it with me. If there is an error, fix it from the message.');
+  L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
+  L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
+  L.push('','Language:');
+  LANG_RULES.forEach(function(x,i){L.push((9+i)+'. '+x);});
   return L.join('\n');
 }
 function promptPlan(it){
-  var t=today(),L=[],s=it?srcLines(it):{main:'',rest:[]},dp=it?DEPTH[it.depth]:null,spw=it?spwOf(it):null;
+  var t=today(),L=[],s=it?srcLines(it):{main:'',rest:[]},dp=it?DEPTH[it.depth]:null,spw=it?spwOf(it):null,ke=it?kindEn(it):'capability';
   if(!it){
-    L.push('Use a fonte principal anexada a este Projeto (livro, repositório ou curso) para dividir a capacidade "[nome da capacidade]" em partes.','Profundidade: [Conceitual, Sólido ou Profundo]','Sessões por semana para esta capacidade: [número]','Prazo final: [dd/mm/aaaa, ou calcule pelas partes]','Data de hoje: '+fmtY(t));
+    L.push('Use the main source attached to this Project (book, repository or course) to split the capability "[capability name]" into parts.','Depth: [Conceptual, Solid or Deep]','Sessions per week for this capability: [number]','Final deadline: [dd/mm/yyyy, or work it out from the parts]','Today: '+fmtY(t));
   }else{
-    L.push('Use a fonte principal anexada a este Projeto ('+(s.main||'a fonte de referência')+')'+(s.rest.length?' e as complementares ('+s.rest.join('; ')+')':'')+' para dividir '+(kindOf(it)==='cap'?'a capacidade':'o projeto')+' "'+it.name+'" em partes.');
-    if(dp)L.push('Profundidade: '+dp.n+' ('+dp.goal+') → '+dp.size+'.');
-    L.push('Sessões por semana para '+(kindOf(it)==='cap'?'esta capacidade':'este projeto')+': '+(spw||4)+' (de 45 a 60 minutos cada).');
-    L.push('Prazo final: '+(it.due?fmtY(it.due):'não definido: calcule pelas partes e pelas sessões por semana, com uma folga para revisões e mini-projetos'),'Data de hoje: '+fmtY(t));
-    if(it.parts.length)L.push('Partes que já cadastrei (não repita; complete o que falta): '+it.parts.map(function(p){return p.name;}).join('; '));
+    L.push('Use the main source attached to this Project ('+(s.main||'the reference source')+')'+(s.rest.length?' and the complementary ones ('+s.rest.join('; ')+')':'')+' to split the '+ke+' "'+it.name+'" into parts.');
+    if(dp)L.push('Depth: '+dp.en+' ('+dp.goal+') → '+dp.size+'.');
+    L.push('Sessions per week for this '+ke+': '+(spw||4)+' (45 to 60 minutes each).');
+    L.push('Final deadline: '+(it.due?fmtY(it.due):'not set: work it out from the parts and the sessions per week, with some slack for reviews and mini-projects'),'Today: '+fmtY(t));
+    if(it.parts.length)L.push('Parts I have already registered (do not repeat them; complete what is missing): '+it.parts.map(function(p){return p.name;}).join('; '));
   }
-  L.push('','Regras:');
-  L.push('1. Siga a estrutura e a ordem da fonte principal (os capítulos do livro, ou os módulos do curso/repositório). Cada parte é UM conceito (ou um grupo pequeno de subconceitos muito ligados), na ordem em que o autor constrói o raciocínio, para uma sessão de 45 a 60 minutos.');
-  L.push('2. Deixe de fora o que não ajuda a entender e usar os conceitos (prefácio, histórico longo, digressões), mas preserve a motivação que o autor dá para cada conceito. Ajuste a quantidade de partes à profundidade.');
-  L.push('3. Em cada parte, escreva as notas: Fonte (capítulo, seção e páginas, ou módulo e arquivo), Por que aqui (por que o conceito aparece nesse ponto), Valor prático e Mini-projeto de 20 a 60 minutos usando as bases descritas neste Projeto (se não couber, um exercício com dados gerados no script).');
-  L.push('4. Distribua as datas a partir de hoje respeitando as sessões por semana. Se o prazo final não couber, avise e sugira outro.');
-  L.push('','Responda APENAS com um bloco de código neste formato. Ele é o formato de importação do meu app e também vai virar o arquivo partes.txt deste Projeto:','');
-  L.push('CAPACIDADE: '+(it?it.name:'Nome da capacidade'));
-  L.push('FONTES: '+(it&&booksOf(it).length?booksOf(it).join('; '):'Fonte principal; Fonte complementar'));
-  if(it&&dp)L.push('PROFUNDIDADE: '+dp.n);
-  L.push('SESSOES: '+(spw||'N'));
-  L.push('PRAZO: dd/mm/aaaa','- Nome curto do conceito | dd/mm/aaaa','  > Fonte: Cap. X, seção X.Y (pp. N–M), ou módulo/arquivo','  > Por que aqui: ...','  > Valor prático: ...','  > Mini-projeto: ...');
+  L.push('All dates are day first: dd/mm/yyyy.');
+  L.push('','Rules:');
+  L.push('1. Follow the structure and order of the main source (the book chapters, or the course/repository modules). Each part is ONE concept (or a small group of tightly linked subconcepts), in the order the author builds the reasoning, for a 45 to 60 minute session.');
+  L.push('2. Leave out what does not help to understand and use the concepts (preface, long history, digressions), but keep the motivation the author gives for each concept. Match the number of parts to the depth.');
+  L.push('3. For each part, write the notes: Source (chapter, section and pages, or module and file), Why here (why the concept appears at this point), Practical value and a 20 to 60 minute Mini-project using the datasets described in this Project (if it does not fit, an exercise with data generated in the script).');
+  L.push('4. Spread the dates from today, respecting the sessions per week. If the final deadline does not fit, say so and suggest another one.');
+  L.push('5. Write everything in English: part names and notes.');
+  L.push('','Reply ONLY with a code block in this format. It is my app\'s import format and it will also become this Project\'s parts.txt file:','');
+  L.push((it&&kindOf(it)==='proj'?'PROJECT: ':'CAPABILITY: ')+(it?it.name:'Capability name'));
+  L.push('SOURCES: '+(it&&booksOf(it).length?booksOf(it).join('; '):'Main source; Complementary source'));
+  if(it&&dp)L.push('DEPTH: '+dp.en);
+  L.push('SESSIONS: '+(spw||'N'));
+  L.push('DEADLINE: dd/mm/yyyy','- Short concept name | dd/mm/yyyy','  > Source: Ch. X, section X.Y (pp. N–M), or module/file','  > Why here: ...','  > Practical value: ...','  > Mini-project: ...');
   return L.join('\n');
 }
 function exportParts(it){
-  var L=[(kindOf(it)==='cap'?'CAPACIDADE: ':'PROJETO: ')+it.name];
-  if(booksOf(it).length)L.push('FONTES: '+booksOf(it).join('; '));
-  if(DEPTH[it.depth])L.push('PROFUNDIDADE: '+DEPTH[it.depth].n);
-  if(spwOf(it))L.push('SESSOES: '+spwOf(it));
-  if(it.due)L.push('PRAZO: '+fmtY(it.due));
+  var L=[(kindOf(it)==='cap'?'CAPABILITY: ':'PROJECT: ')+it.name];
+  if(booksOf(it).length)L.push('SOURCES: '+booksOf(it).join('; '));
+  if(DEPTH[it.depth])L.push('DEPTH: '+DEPTH[it.depth].en);
+  if(spwOf(it))L.push('SESSIONS: '+spwOf(it));
+  if(it.due)L.push('DEADLINE: '+fmtY(it.due));
   it.parts.forEach(function(p){
     L.push('- '+p.name+(p.due?' | '+fmtY(p.due):''));
-    if(p.done)L.push('  > Status: concluída em '+fmtY(p.done));
+    if(p.done)L.push('  > Status: done on '+fmtY(p.done));
     String(p.note||'').split('\n').map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){L.push('  > '+x);});
   });
   return L.join('\n')+'\n';
 }
 function promptStudy(it,p){
   var done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[];
-  L.push('Sessão de estudo: parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use a fonte principal, as complementares e o partes.txt anexados a este Projeto e siga as instruções do Projeto.');
-  if(p.note)L.push('Notas do plano: '+p.note.replace(/\n+/g,' · '));
-  if(done.length)L.push('Partes que já estudei: '+done.slice(-12).join('; '));
-  L.push('','Faça UMA etapa por vez e espere a minha resposta antes de seguir.','');
-  L.push('Etapa 1 — Por que este conceito: seguindo a fonte principal, explique por que o conceito aparece neste ponto, que problema ele resolve e o que ele prepara. Depois, para que ele me serve na prática.');
-  L.push('Etapa 2 — Mapa: o conceito principal e os subconceitos, organizados como a fonte organiza (cite capítulo e seção, ou módulo e arquivo). Não explique ainda.');
-  L.push('Etapa 3 — Minha tentativa: peça para eu explicar o conceito com o que eu já sei ou imagino. Não corrija ainda.');
-  L.push('Etapa 4 — Ensino na linha do autor: explique como o autor (ou o curso) explica (a intuição, o argumento e os exemplos) e dê a definição formal. Se a fonte estiver confusa, complemente deixando claro o que é seu. Diga o que estava certo e errado na minha tentativa e termine com 2 perguntas curtas para eu checar se entendi.');
-  L.push('Etapa 5 — Demonstração prática: escreva um script completo para eu rodar na minha máquina com as bases descritas no Projeto (ou com dados gerados no script, se não couber nelas) e diga o que esperar da saída. Eu rodo, colo a saída e você interpreta comigo.');
-  L.push('Etapa 6 — Minha definição: peça para eu escrever uma definição com minhas palavras, do zero, sem copiar a sua nem a do autor.');
-  L.push('Etapa 7 — Comparação: mostre a definição da fonte e uma definição formal concisa e compare com a minha: o que está certo, o que falta e o que está impreciso.');
-  L.push('Etapa 8 — Atualização: peça para eu reescrever minha definição. Se ainda houver erro, aponte e peça de novo.');
-  L.push('Etapa 9 — Mini-projeto: '+(/mini-projeto/i.test(p.note||'')?'use o mini-projeto das notas do plano (ajuste se precisar)':'proponha um mini-projeto de 20 a 60 minutos nas minhas bases')+'. Dê objetivo, entrega, critérios de pronto e um esqueleto de script sem a resposta. Eu completo, rodo e te mando o código e a saída para revisar. Se eu disser "depois", siga para o cartão e registre o mini-projeto como pendente.');
-  L.push('Etapa final — Cartão de revisão: gere um bloco de texto neste formato para eu guardar no meu app:','');
-  L.push('CONCEITO: '+p.name);
-  L.push('FONTE: (capítulo e seção, ou módulo e arquivo)');
-  L.push('POR QUE A FONTE TRATA DISSO: (uma frase)');
-  L.push('PERGUNTA: (uma pergunta que me obrigue a explicar o conceito, não só a repetir a definição)');
-  L.push('MINHA DEFINIÇÃO: (minha versão final, com as minhas palavras)');
-  L.push('REFERÊNCIA: (a definição da fonte ou uma formal, concisa)');
-  L.push('APLICAÇÃO: (um exercício curto nas minhas bases para testar o uso do conceito)');
-  L.push('MINI-PROJETO: (enunciado, e se ficou feito ou pendente)');
-  L.push('PONTOS DE ATENÇÃO: (os erros que cometi e confusões comuns)','','Comece pela etapa 1.');
+  L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the main source, the complementary sources and the parts.txt attached to this Project, and follow the Project instructions. The whole session is in English.');
+  if(p.note)L.push('Plan notes: '+p.note.replace(/\n+/g,' · '));
+  if(done.length)L.push('Parts I have already studied: '+done.slice(-12).join('; '));
+  L.push('','Do ONE step at a time and wait for my answer before moving on.','');
+  L.push('Step 1 — Why this concept: following the main source, explain why the concept appears at this point, what problem it solves and what it sets up. Then, what it is useful for in practice.');
+  L.push('Step 2 — Map: the main concept and its subconcepts, organized the way the source organizes them (cite chapter and section, or module and file), with a one-line plain-English meaning for each key term. Do not explain yet.');
+  L.push('Step 3 — My attempt: ask me to explain the concept with what I already know or imagine. Do not correct me yet.');
+  L.push('Step 4 — Teaching along the author\'s line: explain it the way the author (or the course) does (the intuition, the argument and the examples) and give the formal definition. If the source is confusing, add your own explanation and make clear what is yours. Tell me what was right and wrong in my attempt and finish with 2 short questions to check my understanding.');
+  L.push('Step 5 — Hands-on demo: write a complete script for me to run on my machine with the datasets described in the Project (or with data generated in the script, if they do not fit) and tell me what output to expect. I run it, paste the output and you interpret it with me.');
+  L.push('Step 6 — My definition: ask me to write a definition in my own words, from scratch, without copying yours or the author\'s.');
+  L.push('Step 7 — Comparison: show the source\'s definition and a concise formal one and compare them with mine: what is right, what is missing and what is imprecise.');
+  L.push('Step 8 — Update: ask me to rewrite my definition. If there is still an error, point it out and ask again.');
+  L.push('Step 9 — Mini-project: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes (adjust it if needed)':'propose a 20 to 60 minute mini-project on my datasets')+'. Give the goal, the deliverable, the done criteria and a script skeleton without the answer. I complete it, run it and send you the code and the output to review. If I say "later", move on to the card and record the mini-project as pending.');
+  L.push('Final step — Review card: generate a text block in this format for me to keep in my app:','');
+  L.push('CONCEPT: '+p.name);
+  L.push('SOURCE: (chapter and section, or module and file)');
+  L.push('WHY THE SOURCE COVERS IT: (one sentence)');
+  L.push('QUESTION: (a question that forces me to explain the concept, not just repeat the definition)');
+  L.push('MY DEFINITION: (my final version, in my own words)');
+  L.push('REFERENCE: (the source\'s definition or a formal one, concise)');
+  L.push('APPLICATION: (a short exercise on my datasets to test using the concept)');
+  L.push('MINI-PROJECT: (the brief, and whether it is done or pending)');
+  L.push('WATCH OUT: (the mistakes I made and common confusions)');
+  L.push('KEY TERMS: (the new English terms from this session, each with a short definition)','','Start with step 1.');
   return L.join('\n');
 }
 function promptReview(it,p,r){
   var L=[];
-  L.push('Revisão espaçada ('+(r?STAGE[r.stage]:'revisão')+') da parte "'+p.name+'" '+(kindOf(it)==='cap'?'da capacidade':'do projeto')+' "'+it.name+'". Use as fontes e o partes.txt anexados a este Projeto e siga as instruções do Projeto.','');
-  if(p.card)L.push('Este é o meu cartão de revisão. Não me mostre o conteúdo dele; use só para me avaliar:','---',p.card,'---','');
-  else L.push('Ainda não tenho cartão de revisão para esta parte; use a fonte principal como referência.','');
-  L.push('1. Faça a pergunta do cartão (ou uma pergunta que me obrigue a explicar o conceito) e espere eu responder de memória.');
-  L.push('2. Compare a minha resposta com a referência, com a explicação da fonte'+(p.card?' e com a minha definição do cartão':'')+': o que acertei, o que esqueci e o que confundi.');
-  L.push('3. Peça que eu escreva um pequeno script ou consulta de aplicação nas minhas bases (sem me dar o código). Eu rodo na minha máquina e te mando o código e a saída. Se o cartão tiver mini-projeto pendente, pergunte se já fiz e revise.');
-  L.push('4. Termine com o veredito em uma linha: "REVISÃO FEITA" se eu expliquei e apliquei o essencial sem ajuda, ou "REVISAR DE NOVO" se faltou algo importante, dizendo o que reforçar.');
-  L.push('5. Se minha definição melhorou, gere o cartão atualizado no mesmo formato.');
+  L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
+  if(p.card)L.push('This is my review card. Do not show me its content; use it only to assess me:','---',p.card,'---','');
+  else L.push('I do not have a review card for this part yet; use the main source as the reference.','');
+  L.push('1. Ask the card\'s question (or a question that forces me to explain the concept) and wait for me to answer from memory, in English.');
+  L.push('2. Compare my answer with the reference, the source\'s explanation'+(p.card?' and my definition on the card':'')+': what I got right, what I forgot and what I mixed up.');
+  L.push('3. Ask me to write a small script or query that applies it to my datasets (do not give me the code). I run it on my machine and send you the code and the output. If the card has a pending mini-project, ask whether I did it and review it.');
+  L.push('4. Finish with a one-line verdict: "REVIEW DONE" if I explained and applied the essentials without help, or "REVIEW AGAIN" if something important was missing, saying what to reinforce.');
+  L.push('5. If my definition improved, generate the updated card in the same format.');
   return L.join('\n');
 }
 function copyText(txt,what){
@@ -1106,6 +1117,8 @@ var MODELO=['// Modelo de importação — Pessoa Necessária',
 '// SITUACAO: Em espera (para as próximas ondas) · AREA: Profissional ou Pessoal',
 '// Uma linha começando com > logo abaixo de uma parte vira a nota dela.',
 '// Parte sem data: o app pode distribuir até o prazo final.',
+'// Também aceita as palavras em inglês que os prompts usam: CAPABILITY, PROJECT, SOURCES,',
+'//   DEPTH (Conceptual, Solid, Deep), SESSIONS, DEADLINE, STATUS: On hold, AREA.',
 '',
 'CAPACIDADE: Espanhol — conversação',
 'FONTES: Gramática básica do espanhol; Guia de conversação',
@@ -1141,6 +1154,9 @@ function parseDate(str,base){
   }
   return {ok:false};
 }
+var KEY_EN={capability:'capacidade',project:'projeto',book:'livro',books:'livro',source:'fonte',sources:'fonte',depth:'profundidade',sessions:'sessoes',deadline:'prazo',final:'prazo'};
+function depthOf(nv){return /^conce(i|p)/.test(nv)?'conceitual':/^sol/.test(nv)?'solido':/^(prof|deep)/.test(nv)?'profundo':'';}
+function waitOf(nv){return /espera|hold|wait|paus/.test(nv)?'espera':'';}
 function parseInput(txt,defKind,fallback){
   var base=today(),t=String(txt||'').replace(/^\uFEFF/,'').trim();
   if(/^[\[{]/.test(t))return parseJsonInput(t,defKind,fallback,base);
@@ -1148,22 +1164,22 @@ function parseInput(txt,defKind,fallback){
   t.replace(/\r/g,'').split('\n').forEach(function(raw,i){
     var ln=i+1,line=raw.trim();if(!line||/^\/\//.test(line)||/^```/.test(line))return;
     if(/^>/.test(line)){var tx=line.replace(/^>\s*/,'');if(cur&&cur.parts.length&&tx){var lp=cur.parts[cur.parts.length-1];lp.note=lp.note?lp.note+'\n'+tx:tx;}return;}
-    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|projeto|livros?|fontes?|prazo(?: final)?|profundidade|sessoes(?: por semana)?|situacao|status|area)\s*:/);
+    var bare=line.replace(/^#+\s*/,''),m=norm(bare).match(/^(capacidade|capability|projeto|project|livros?|books?|fontes?|sources?|prazo(?: final)?|(?:final )?deadline|profundidade|depth|sessoes(?: por semana)?|sessions(?: per week)?|situacao|status|area)\s*:/);
     if(m){
-      var val=bare.slice(bare.indexOf(':')+1).trim(),key=m[1],nv=norm(val);
+      var val=bare.slice(bare.indexOf(':')+1).trim(),key=KEY_EN[m[1].replace(/ .*/,'')]||m[1],nv=norm(val);if(key.indexOf('prazo')===0)key='prazo';
       if(key!=='capacidade'&&key!=='projeto'&&key.indexOf('prazo')!==0&&!cur){errs.push('Linha '+ln+': '+bare.slice(0,bare.indexOf(':')).toUpperCase()+' aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
-      if(key.indexOf('livro')===0||key.indexOf('fonte')===0){cur.books=val.split(';').map(function(x){return x.trim();}).filter(Boolean).join('\n');return;}
-      if(key==='profundidade'){cur.depth=nv.indexOf('concei')===0?'conceitual':nv.indexOf('sol')===0?'solido':nv.indexOf('prof')===0?'profundo':'';return;}
+      if(/^(livro|book|fonte|source)/.test(key)){cur.books=val.split(';').map(function(x){return x.trim();}).filter(Boolean).join('\n');return;}
+      if(key==='profundidade'){cur.depth=depthOf(nv);return;}
       if(key.indexOf('sessoes')===0){var sn=parseInt(nv,10);cur.spw=sn>0?sn:null;return;}
-      if(key==='situacao'||key==='status'){cur.status=nv.indexOf('espera')>=0?'espera':'';return;}
-      if(key==='area'){cur.area=nv.indexOf('pess')===0?'pess':'prof';return;}
-      if(m[1].indexOf('prazo')===0){
+      if(key==='situacao'||key==='status'){cur.status=waitOf(nv);return;}
+      if(key==='area'){cur.area=/^pe(ss|rs)/.test(nv)?'pess':'prof';return;}
+      if(key==='prazo'){
         if(!cur){errs.push('Linha '+ln+': PRAZO aparece antes de uma linha CAPACIDADE: ou PROJETO:.');return;}
         var d=parseDate(val,base);if(!d.ok){errs.push('Linha '+ln+': a data “'+val+'” não foi reconhecida.');return;}
         cur.due=d.v;return;
       }
       if(!val){errs.push('Linha '+ln+': falta o nome depois de “'+bare.slice(0,bare.indexOf(':')+1)+'”.');cur=null;return;}
-      cur={k:m[1]==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,books:'',depth:'',spw:null,status:'',area:null,parts:[]};out.push(cur);return;
+      cur={k:key==='capacidade'?'cap':'proj',name:val.slice(0,120),due:null,books:'',depth:'',spw:null,status:'',area:null,parts:[]};out.push(cur);return;
     }
     if(/^#/.test(line))return;
     var pm=line.match(/^(?:[-*•]|\d+[.)])\s+(.*)$/),body=pm?pm[1]:line;
@@ -1183,15 +1199,15 @@ function parseJsonInput(t,defKind,fallback,base){
   var arr=Array.isArray(data)?data:(data&&Array.isArray(data.itens)?data.itens:[data]);
   arr.forEach(function(o,i){
     if(!o||typeof o!=='object'){errs.push('Item '+(i+1)+': formato inválido.');return;}
-    var tipo=norm(o.tipo||o.type),k=tipo?(tipo.indexOf('proj')===0?'proj':'cap'):(o.projeto?'proj':(o.capacidade?'cap':defKind));
-    var name=String(o.nome||o.name||o.capacidade||o.projeto||fallback||'').trim();
+    var tipo=norm(o.tipo||o.type),k=tipo?(tipo.indexOf('proj')===0?'proj':'cap'):((o.projeto||o.project)?'proj':((o.capacidade||o.capability)?'cap':defKind));
+    var name=String(o.nome||o.name||o.capacidade||o.capability||o.projeto||o.project||fallback||'').trim();
     if(!name){errs.push('Item '+(i+1)+': falta o nome.');return;}
-    var d=parseDate(o.prazo||o.due||'',base);if(!d.ok)errs.push(name+': o prazo “'+(o.prazo||o.due)+'” não foi reconhecido.');
-    var lv=o.fontes||o.livros||o.books||'',pv=norm(o.profundidade||o.depth),sv=parseInt(o.sessoes||o.spw,10),av=norm(o.area);
+    var dv=o.prazo||o.deadline||o.due||'',d=parseDate(dv,base);if(!d.ok)errs.push(name+': o prazo “'+dv+'” não foi reconhecido.');
+    var lv=o.fontes||o.sources||o.livros||o.books||'',pv=norm(o.profundidade||o.depth),sv=parseInt(o.sessoes||o.sessions||o.spw,10),av=norm(o.area);
     var it={k:k,name:name.slice(0,120),due:d.ok?d.v:null,books:(Array.isArray(lv)?lv:String(lv).split(';')).map(function(x){return String(x).trim();}).filter(Boolean).join('\n'),
-      depth:pv.indexOf('concei')===0?'conceitual':pv.indexOf('sol')===0?'solido':pv.indexOf('prof')===0?'profundo':'',spw:sv>0?sv:null,status:norm(o.situacao||o.status).indexOf('espera')>=0?'espera':'',area:av?(av.indexOf('pess')===0?'pess':'prof'):null,parts:[]};
+      depth:depthOf(pv),spw:sv>0?sv:null,status:waitOf(norm(o.situacao||o.status)),area:av?(/^pe(ss|rs)/.test(av)?'pess':'prof'):null,parts:[]};
     (o.partes||o.parts||[]).forEach(function(p){
-      var pn=typeof p==='string'?p:(p&&(p.nome||p.name)),pd=typeof p==='object'&&p?(p.prazo||p.due||''):'';
+      var pn=typeof p==='string'?p:(p&&(p.nome||p.name)),pd=typeof p==='object'&&p?(p.prazo||p.deadline||p.due||''):'';
       pn=String(pn||'').trim();if(!pn)return;
       var r=parseDate(pd,base);if(!r.ok)errs.push(name+' → '+pn+': a data “'+pd+'” não foi reconhecida.');
       var pnote=typeof p==='object'&&p?String(p.nota||p.valor||p.note||'').trim():'';
@@ -1388,7 +1404,7 @@ document.addEventListener('click',function(ev){
     case 'due-apply':{var ia=findItem(d.k,d.id),sd=ia&&suggestDue(ia);if(sd){ia.due=sd;commit('Prazo definido: '+fmtY(sd));}break;}
     case 'item-activate':{var iv=findItem(d.k,d.id);if(iv){iv.status='';commit('Começou! Divida em partes e calcule o prazo.');}break;}
     case 'pr-proj':{var ip=findItem(d.k,d.id);if(ip)copyText(promptProject(ip),'Instruções do Projeto');break;}
-    case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'partes.txt');break;}
+    case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'parts.txt');break;}
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
     case 'pr-study':{var cs=curPart();if(cs)copyText(promptStudy(cs.item,cs.part),'Prompt da sessão de estudo');break;}
     case 'pr-review-part':{var cr=curPart();if(cr)copyText(promptReview(cr.item,cr.part,reviewOf(cr.part.id)),'Prompt de revisão');break;}

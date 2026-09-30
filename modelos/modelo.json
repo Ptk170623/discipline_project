@@ -44,14 +44,14 @@
     ]
   },
   {
-    "capacidade": "Visualização de dados",
-    "fontes": [
-      "Livro: Fundamentals of Data Visualization (Claus Wilke)",
-      "Documentação: matplotlib e seaborn"
+    "capability": "Data Visualization",
+    "sources": [
+      "Book: Fundamentals of Data Visualization (Claus Wilke)",
+      "Docs: matplotlib and seaborn"
     ],
-    "profundidade": "Sólido",
-    "sessoes": 4,
-    "situacao": "Em espera",
-    "partes": []
+    "depth": "Solid",
+    "sessions": 4,
+    "status": "On hold",
+    "parts": []
   }
 ]

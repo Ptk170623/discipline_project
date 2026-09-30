@@ -10,6 +10,8 @@
 // SITUACAO: Em espera (para as próximas ondas) · AREA: Profissional ou Pessoal
 // Uma linha começando com > logo abaixo de uma parte vira a nota dela.
 // Parte sem data: o app pode distribuir até o prazo final.
+// Também aceita as palavras em inglês que os prompts usam: CAPABILITY, PROJECT, SOURCES,
+//   DEPTH (Conceptual, Solid, Deep), SESSIONS, DEADLINE, STATUS: On hold, AREA.
 
 CAPACIDADE: Espanhol — conversação
 FONTES: Gramática básica do espanhol; Guia de conversação

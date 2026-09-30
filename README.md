@@ -45,14 +45,15 @@ PRAZO: +90
 - `PROFUNDIDADE:` `Conceitual`, `Sólido` ou `Profundo`, e `SESSOES:` sessões por semana: o app usa os dois para calcular o **prazo pelas partes** (semanas = partes em aberto × fator ÷ sessões por semana; fator 1,5 no Profundo e 1,2 nos outros) e oferece **Usar este prazo**.
 - `SITUACAO: Em espera` deixa a capacidade guardada para uma próxima onda: ela fica fora das listas e contagens até você clicar em **Começar agora**. `AREA: Profissional` ou `Pessoal` escolhe a área.
 - Uma linha `> texto` logo abaixo de uma parte vira a nota dela.
+- As palavras-chave também valem em inglês, como os prompts geram: `CAPABILITY:`, `PROJECT:`, `SOURCES:`, `DEPTH:` (Conceptual, Solid, Deep), `SESSIONS:`, `DEADLINE:`, `STATUS: On hold`, `AREA:` (Professional, Personal). Em JSON: `capability`, `project`, `sources`, `deadline`, `sessions`.
 - Blocos de código (```) são ignorados, então dá para colar a resposta da IA inteira.
 
 ## Estudo com IA
 
 Fluxo pensado para **um Projeto do Claude por capacidade**, com a fonte principal e o schema das bases anexados:
-o app gera as instruções do Projeto, o prompt de divisão em partes (seguindo a linha do autor), o `partes.txt`,
+o app gera as instruções do Projeto, o prompt de divisão em partes (seguindo a linha do autor), o `parts.txt`,
 e os prompts de sessão e de revisão. A prática é feita com scripts que você roda na sua máquina.
-O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
+Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O passo a passo está em [`metodo/estudo-com-ia.md`](metodo/estudo-com-ia.md).
 
 ## Plano de capacidades
 
