@@ -1535,7 +1535,7 @@ function promptStudy(it,p){
   L.push('Step 7 — Comparison: show the source\'s definition and a concise formal one and compare them with mine: what is right, what is missing and what is imprecise.');
   L.push('Step 8 — Update: show the same checklist again (every term from the Step 2 map, names only, no meanings) and ask me to rewrite my definition of each term, using the feedback from step 7. If there is still an error, point it out and ask again.');
   L.push(lifeOf(it)?'Step 9 — Experiment: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes as my experiment (adjust it if needed)':'propose a 3 to 7 day experiment')+': one situation, what to do and what to observe, with a simple way for me to note the result. I run it in real life and report back in the next session. If I say "later", move on to the card and record the experiment as pending.':'Step 9 — Mini-project: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes (adjust it if needed)':'propose a 20 to 60 minute mini-project on my datasets')+'. '+(hasPrac(it)?'Follow my practice rules. Give the goal, the deliverable and the done criteria; I do the first practice-rule step myself (for example, I draw the diagram first), and only after you agree with it do you give a script skeleton without the answer.':'Give the goal, the deliverable, the done criteria and a script skeleton without the answer.')+' I complete it, run it and send you the code and the output to review. If I say "later", move on to the card and record the mini-project as pending.');
-  L.push('Final step — Review card: generate a text block in this format for me to keep in my app:','');
+  L.push('Step 10 — Review card: generate a text block in this format for me to keep in my app:','');
   L.push('CONCEPT: '+p.name);
   L.push('SOURCE: (chapter and section, or module and file)');
   L.push('WHY THE SOURCE COVERS IT: (one sentence)');
@@ -1546,7 +1546,11 @@ function promptStudy(it,p){
   L.push('MINI-PROJECT: (the brief, and whether it is done or pending)');
   if(usesDiagram(it))L.push('DIAGRAM: (my final Mermaid diagram for this part, with its failure points marked)');
   L.push('WATCH OUT: (the mistakes I made and common confusions)');
-  L.push('KEY TERMS: (the new English terms from this session, each with a short definition)','','Start with step 1.');
+  L.push('KEY TERMS: (the new English terms from this session, each with a short definition)','');
+  L.push('Final step — Audio recap: after the card, write one long talk about the whole part that I will paste into a text-to-speech tool and listen to tomorrow, as listening practice and as my review. Output only the text to be read, separate from the card, with no introduction and no notes.');
+  L.push('Rules for the text: plain prose, as if you were speaking to me. No headings, no bullet points, no tables, no markdown symbols and no code. Short, clear sentences in natural English, without idioms. Say numbers, formulas, symbols and commands in words, and describe code and diagrams in words: what they do, not their syntax. Use my own final definition where it was right, and the mistakes I made.');
+  L.push('Length: about 1,500 words, around ten minutes of audio. If you need more room, split it into chunks of at most 1,500 words, each one starting with the words "Part 1 of 2", "Part 2 of 2" and so on.');
+  L.push('Order: (1) why the concept matters and where it sits in the source; (2) the map of the concept and each subconcept; (3) the explanation and the formal definition; (4) the '+(lifeOf(it)?'scenes and the experiment':'hands-on example and what its output meant')+'; (5) my mistakes and the common confusions; (6) the key terms, each with a one-sentence meaning; (7) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start with step 1.');
   return L.join('\n');
 }
 function promptReview(it,p,r){

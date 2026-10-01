@@ -54,6 +54,9 @@ valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o camp
 | Mini-projeto nas suas bases | Sessão (etapa 9) |
 | 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app |
 
+- **Áudio de revisão (último passo da sessão):** depois do cartão, o tutor escreve uma fala longa sobre a parte inteira, em prosa simples, sem
+  símbolos nem código, com perguntas para responder em voz alta. Cole o texto em uma ferramenta de texto para voz e ouça no dia seguinte: serve de revisão
+  e de treino de listening (ouça sem ler, depois lendo o texto, depois sem ler de novo, como no cartão Listening English).
 - **Estudar:** abra a parte no app → **Copiar prompt da sessão de estudo** → nova conversa **dentro do Projeto**.
   Ao final, cole o cartão em **Colar cartão** e marque a parte.
 - **Revisar:** no dia, **Prompt** ao lado da revisão → conversa no mesmo Projeto. O veredito
