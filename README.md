@@ -68,6 +68,16 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
 - [`planejamento/capacidades-import.txt`](planejamento/capacidades-import.txt): o mesmo plano no formato de importação
   (onda 1 ativa, as demais em espera).
 
+## Guia do dia
+
+Na tela inicial, o **Guia do dia** lista os passos de hoje na ordem em que acontecem: ao acordar, trajeto, almoço, antes de estudar,
+estudo e antes de dormir. Cada tarefa diária entra no bloco escolhido em **Quando no dia** (ou deduzido pelo nome); as sessões de estudo vêm das
+capacidades ativas (as partes que vencem ou estão atrasadas, uma parte por capacidade, a mais profunda primeiro); as revisões do dia aparecem no
+trajeto de volta; capacidades ativas sem partes aparecem como lembrete para dividir. Marcar um passo registra o dia no app. **Ajustar** muda os
+horários e o número de sessões em dias úteis e no fim de semana. Só quem edita vê o guia.
+
+**Regras de prática** (Editar) valem para uma capacidade sem mudar a ordem das partes, ao contrário do **Foco**.
+
 ## Plano da semana e prática na vida real
 
 - **Plano da semana.** Em uma tarefa diária, o campo **Plano da semana** guarda o que fazer em cada dia (a primeira linha é o título). O cartão da tarefa

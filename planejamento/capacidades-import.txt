@@ -17,18 +17,18 @@ DEPTH: Deep
 SESSIONS: 8
 DEADLINE: 10/12/2026
 
-// Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
+// Onda 1 · início previsto 01/10/2026 · cerca de 36 partes · pré-requisitos: —
 CAPABILITY: Programming Logic and Python Libraries for Data Science
 AREA: Professional
-SOURCES: Book: Fundamentals of Data Engineering (Reis & Housley); Book: Designing Data-Intensive Applications (Kleppmann); Book: The Data Warehouse Toolkit (Kimball & Ross); Book: A Philosophy of Software Design (Ousterhout); Book: How to Solve It (Pólya); Book: Data Pipelines Pocket Reference (Densmore); Book: Python Data Science Handbook (VanderPlas), free at jakevdp.github.io/PythonDataScienceHandbook; Site: c4model.com; Docs: Mermaid (mermaid.js.org)
+SOURCES: Book: Fundamentals of Data Engineering (Reis & Housley); Book: Designing Data-Intensive Applications (Kleppmann); Book: The Data Warehouse Toolkit (Kimball & Ross); Book: A Philosophy of Software Design (Ousterhout); Book: How to Solve It (Pólya); Book: Data Pipelines Pocket Reference (Densmore); Book: Python Data Science Handbook (VanderPlas), free at jakevdp.github.io/PythonDataScienceHandbook; Book: Pro Git, 2nd ed. (Chacon & Straub), free at git-scm.com/book — chapters 1–3 and 10 (the Git track); Site: c4model.com; Docs: Mermaid (mermaid.js.org)
 DEPTH: Solid
 SESSIONS: 5
-DEADLINE: 26/11/2026
+DEADLINE: 03/12/2026
 FOCUS: I want to learn to THINK about data programs, not to memorize syntax. AI writes most of the code; my job is to design it, judge it and catch what is wrong.
 FOCUS: Concepts to learn, in roughly this order:
 FOCUS: - Decomposition: break a problem into inputs, transformations, outputs
 FOCUS: - Data flow: where data comes from, how it changes, where it lands
-FOCUS: - Data modeling: grain (what one row means), keys, joins, one-to-many traps
+FOCUS: - Data modeling, light version: grain (what one row means), keys, joins and one-to-many traps as they show up in pandas. Dimensional modeling is taught in the SQL / Data Modeling capability.
 FOCUS: - Control flow: conditions, loops, "for each group, do X"
 FOCUS: - Failure modes: bad data, nulls, duplicates, schema changes
 FOCUS: - Testing and verification: invariants, row counts, reconciliation
@@ -36,14 +36,16 @@ FOCUS: - State and idempotency: what happens if it runs twice or fails halfway
 FOCUS: - Separation of concerns: config vs. logic vs. I/O
 FOCUS: - Library awareness: what exists and the trade-offs
 FOCUS: - Code reading: spotting silent bugs in AI-written code
+FOCUS: - Version control (the Git track, about 8 parts whose names start with "Git:"): commits as snapshots, branches, reading a diff, undoing safely, and using Git to review and roll back AI-written code
 FOCUS: Where each concept is usually covered best (starting points; check each book's table of contents):
 FOCUS: - Decomposition: How to Solve It; A Philosophy of Software Design
 FOCUS: - Data flow: Fundamentals of Data Engineering; Data Pipelines Pocket Reference
-FOCUS: - Data modeling: The Data Warehouse Toolkit
+FOCUS: - Data modeling (light version): The Data Warehouse Toolkit, only the parts about grain and keys
 FOCUS: - Control flow (for each group, do X): Python Data Science Handbook
 FOCUS: - Failure modes, state and idempotency: Designing Data-Intensive Applications; Data Pipelines Pocket Reference
 FOCUS: - Separation of concerns: A Philosophy of Software Design
 FOCUS: - Library awareness: Python Data Science Handbook
+FOCUS: - Version control: Pro Git (chapters 1 to 3 and 10 only)
 FOCUS: - Diagrams: c4model.com and the Mermaid documentation
 FOCUS: - Testing and code reading: no book covers them well; teach them with exercises on my datasets
 FOCUS: Practice rules, applied in the hands-on step and the mini-project of every part:
@@ -51,7 +53,8 @@ FOCUS: 1. Draw before you build. Before any code, ask me to draw the system as a
 FOCUS: 2. Mark the failure points on every diagram (bad data, nulls, duplicates, schema change, a step that runs twice or stops halfway) and say which check would catch each one.
 FOCUS: 3. Only after the diagram is agreed, give me the code skeleton, and make me verify it with invariants: row counts, key uniqueness, totals that must reconcile.
 FOCUS: 4. Code reading: from time to time show me a short, plausible script, the kind an AI would write, with one or two silent bugs (for example a join that multiplies rows, or nulls dropped without warning). Let me find them before you reveal them.
-FOCUS: Use my datasets from the Project for every example.
+FOCUS: 5. Git parts: practice in a scratch repository on my machine, and draw the commit graph (Mermaid gitGraph) before running the commands.
+FOCUS: Use my datasets from the Project for every example, except in the Git parts, which use a scratch repository with small text or code files.
 
 // Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
 CAPABILITY: SQL / Data Modeling
@@ -60,16 +63,15 @@ SOURCES: Book: Learning SQL, 3rd ed. (Alan Beaulieu); Book: The Data Warehouse T
 DEPTH: Solid
 SESSIONS: 4
 DEADLINE: 03/12/2026
+PRACTICE: Practice rules, applied in the hands-on step and the mini-project of every part:
+PRACTICE: 1. Declare the grain before writing any query: say in one sentence what one row of each table means and what its key is. Ask me to draw the ER diagram (Mermaid) of the tables involved, with keys and relationships, and critique it.
+PRACTICE: 2. Mark the traps on the diagram: one-to-many joins that multiply rows, nulls in join keys, duplicate keys, unmatched rows.
+PRACTICE: 3. Write the query only after the diagram is agreed. Then make me verify the result: row count before and after each join, key uniqueness, and totals that must reconcile with the source table.
+PRACTICE: 4. Before I run a query, ask me to predict how many rows it returns and why.
+PRACTICE: 5. From time to time show me a short, plausible query, the kind an AI would write, with one or two silent bugs (for example a join that fans out and inflates a SUM, or a LEFT JOIN turned into an inner join by a WHERE filter). Let me find them before you reveal them.
+PRACTICE: Use my datasets from the Project for every example.
 
-// Onda 1 · início previsto 01/10/2026 · cerca de 12 partes · pré-requisitos: —
-CAPABILITY: Git (Conceptual)
-AREA: Professional
-SOURCES: Book: Pro Git, 2nd ed. (Chacon & Straub), free at git-scm.com/book — chapters 1–3 and 10
-DEPTH: Conceptual
-SESSIONS: 3
-DEADLINE: 05/11/2026
-
-// Onda 1 · início previsto 06/11/2026 · cerca de 25 partes · pré-requisitos: Começa quando Git termina
+// Onda 1 · início previsto 06/11/2026 · cerca de 25 partes · pré-requisitos: Começa em 06/11/2026
 CAPABILITY: Prompt Engineering / Harness / Spec
 AREA: Professional
 SOURCES: Repository: github.com/anthropics/prompt-eng-interactive-tutorial; Article: Building effective agents (Anthropic); Docs: Anthropic documentation on prompting and agents

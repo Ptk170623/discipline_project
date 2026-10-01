@@ -1,0 +1,36 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Foco//PT-BR
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Foco
+BEGIN:VEVENT
+UID:manha@foco
+DTSTAMP:20261001T120000Z
+DTSTART:20261002T070000
+DTEND:20261002T071500
+RRULE:FREQ=DAILY
+SUMMARY:Abrir o Foco: guia do dia
+DESCRIPTION:Abra o app e siga o guia do dia, passo a passo.\nhttps://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
+URL:https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
+BEGIN:VALARM
+TRIGGER:PT0M
+ACTION:DISPLAY
+DESCRIPTION:Abrir o Foco: guia do dia
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:noite@foco
+DTSTAMP:20261001T120000Z
+DTSTART:20261002T190000
+DTEND:20261002T191000
+RRULE:FREQ=DAILY
+SUMMARY:Foco: treino e depois estudo
+DESCRIPTION:Hora de começar a noite: treino primeiro, depois banho, jantar e estudo. Abra o guia do dia.\nhttps://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
+URL:https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
+BEGIN:VALARM
+TRIGGER:PT0M
+ACTION:DISPLAY
+DESCRIPTION:Foco: treino e depois estudo
+END:VALARM
+END:VEVENT
+END:VCALENDAR
