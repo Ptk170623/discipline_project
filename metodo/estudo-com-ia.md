@@ -31,6 +31,14 @@ Datas sempre com o dia primeiro (dd/mm/aaaa).
 
 Cada parte traz as notas: **Source** (capítulo, seção, páginas), **Why here**, **Practical value** e **Mini-project**.
 
+## Capacidade guiada por conceitos
+
+Quando o que você quer aprender é uma lista de conceitos e não o conteúdo de um livro (por exemplo, pensar em programas de dados),
+preencha **Foco de aprendizagem** em Editar: a lista de conceitos, onde cada um costuma ser bem coberto e as regras de prática.
+O foco manda na ordem das partes (por dependência, não pela ordem de um livro), as fontes viram referências e cada parte cita só as páginas
+necessárias. Conceitos que nenhuma fonte cobre bem (como testes e leitura de código) viram exercícios nas suas bases. As regras de prática
+valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o campo **DIAGRAM**.
+
 ## Cada parte
 
 | Etapa do método | Onde acontece |

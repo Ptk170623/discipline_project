@@ -20,10 +20,38 @@ DEADLINE: 10/12/2026
 // Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
 CAPABILITY: Programming Logic and Python Libraries for Data Science
 AREA: Professional
-SOURCES: Book: Python for Data Analysis, 3rd ed. (Wes McKinney), free at wesmckinney.com/book; Repository: github.com/jakevdp/PythonDataScienceHandbook
+SOURCES: Book: Fundamentals of Data Engineering (Reis & Housley); Book: Designing Data-Intensive Applications (Kleppmann); Book: The Data Warehouse Toolkit (Kimball & Ross); Book: A Philosophy of Software Design (Ousterhout); Book: How to Solve It (Pólya); Book: Data Pipelines Pocket Reference (Densmore); Book: Python Data Science Handbook (VanderPlas), free at jakevdp.github.io/PythonDataScienceHandbook; Site: c4model.com; Docs: Mermaid (mermaid.js.org)
 DEPTH: Solid
 SESSIONS: 5
 DEADLINE: 26/11/2026
+FOCUS: I want to learn to THINK about data programs, not to memorize syntax. AI writes most of the code; my job is to design it, judge it and catch what is wrong.
+FOCUS: Concepts to learn, in roughly this order:
+FOCUS: - Decomposition: break a problem into inputs, transformations, outputs
+FOCUS: - Data flow: where data comes from, how it changes, where it lands
+FOCUS: - Data modeling: grain (what one row means), keys, joins, one-to-many traps
+FOCUS: - Control flow: conditions, loops, "for each group, do X"
+FOCUS: - Failure modes: bad data, nulls, duplicates, schema changes
+FOCUS: - Testing and verification: invariants, row counts, reconciliation
+FOCUS: - State and idempotency: what happens if it runs twice or fails halfway
+FOCUS: - Separation of concerns: config vs. logic vs. I/O
+FOCUS: - Library awareness: what exists and the trade-offs
+FOCUS: - Code reading: spotting silent bugs in AI-written code
+FOCUS: Where each concept is usually covered best (starting points; check each book's table of contents):
+FOCUS: - Decomposition: How to Solve It; A Philosophy of Software Design
+FOCUS: - Data flow: Fundamentals of Data Engineering; Data Pipelines Pocket Reference
+FOCUS: - Data modeling: The Data Warehouse Toolkit
+FOCUS: - Control flow (for each group, do X): Python Data Science Handbook
+FOCUS: - Failure modes, state and idempotency: Designing Data-Intensive Applications; Data Pipelines Pocket Reference
+FOCUS: - Separation of concerns: A Philosophy of Software Design
+FOCUS: - Library awareness: Python Data Science Handbook
+FOCUS: - Diagrams: c4model.com and the Mermaid documentation
+FOCUS: - Testing and code reading: no book covers them well; teach them with exercises on my datasets
+FOCUS: Practice rules, applied in the hands-on step and the mini-project of every part:
+FOCUS: 1. Draw before you build. Before any code, ask me to draw the system as a Mermaid diagram (text), using the type that answers the question of the part: data flow diagram (sources, steps, outputs), ER diagram (tables, keys, grain, relationships), flowchart (decisions and branches), sequence diagram (which component calls which, in what order), or C4 model (the system at 3 or 4 zoom levels). Critique my diagram, then let me fix it.
+FOCUS: 2. Mark the failure points on every diagram (bad data, nulls, duplicates, schema change, a step that runs twice or stops halfway) and say which check would catch each one.
+FOCUS: 3. Only after the diagram is agreed, give me the code skeleton, and make me verify it with invariants: row counts, key uniqueness, totals that must reconcile.
+FOCUS: 4. Code reading: from time to time show me a short, plausible script, the kind an AI would write, with one or two silent bugs (for example a join that multiplies rows, or nulls dropped without warning). Let me find them before you reveal them.
+FOCUS: Use my datasets from the Project for every example.
 
 // Onda 1 · início previsto 01/10/2026 · cerca de 30 partes · pré-requisitos: —
 CAPABILITY: SQL / Data Modeling

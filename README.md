@@ -43,12 +43,18 @@ PRAZO: +90
 - Linhas com `//` são comentários.
 - `FONTES:` (opcional) livros, repositórios, cursos ou documentação, separados por `;` — a primeira é a **fonte principal**, a que define a ordem das partes (`LIVROS:` ainda funciona).
 - `PROFUNDIDADE:` `Conceitual`, `Sólido` ou `Profundo`, e `SESSOES:` sessões por semana: o app usa os dois para calcular o **prazo pelas partes** (semanas = partes em aberto × fator ÷ sessões por semana; fator 1,5 no Profundo e 1,2 nos outros) e oferece **Usar este prazo**.
+- `FOCO:` (opcional, pode repetir a linha) guarda os conceitos que você quer aprender e as regras de prática. Com foco, a capacidade é **guiada por conceitos**: o foco manda na ordem das partes e as fontes viram referências (veja abaixo).
 - `SITUACAO: Em espera` deixa a capacidade guardada para uma próxima onda: ela fica fora das listas e contagens até você clicar em **Começar agora**. `AREA: Profissional` ou `Pessoal` escolhe a área.
 - Uma linha `> texto` logo abaixo de uma parte vira a nota dela.
 - As palavras-chave também valem em inglês, como os prompts geram: `CAPABILITY:`, `PROJECT:`, `SOURCES:`, `DEPTH:` (Conceptual, Solid, Deep), `SESSIONS:`, `DEADLINE:`, `STATUS: On hold`, `AREA:` (Professional, Personal). Em JSON: `capability`, `project`, `sources`, `deadline`, `sessions`.
 - Blocos de código (```) são ignorados, então dá para colar a resposta da IA inteira.
 
 ## Estudo com IA
+
+**Capacidade guiada por conceitos.** Nem todo assunto tem um livro que defina a ordem. No campo **Foco de aprendizagem**
+(Editar) você escreve a lista de conceitos e as regras de prática; os prompts passam a ensinar cada conceito pela fonte
+que melhor o explica, dizem quando nenhuma fonte cobre o conceito e aplicam as regras de prática em cada parte
+(por exemplo, desenhar um diagrama Mermaid antes de qualquer código). Sem foco, tudo funciona como antes, com uma fonte principal.
 
 Fluxo pensado para **um Projeto do Claude por capacidade**, com a fonte principal e o schema das bases anexados:
 o app gera as instruções do Projeto, o prompt de divisão em partes (seguindo a linha do autor), o `parts.txt`,
