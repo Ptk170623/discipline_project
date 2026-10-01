@@ -1,6 +1,6 @@
 // Capacidades pessoais — arquivo de importação do app
 // Como usar: Capacidades → Pessoal → Importar arquivo → Pré-visualizar → Importar.
-// As três entram "Em espera" e sem partes. Quando chegar a hora, clique em "Começar agora" e use os prompts do app:
+// Carnegie (sábado) e Lewis (domingo) rodam juntos, 1 sessão por semana cada; Covey começa depois, quando Lewis termina. As três entram "Em espera" e sem partes. Quando chegar a hora, clique em "Começar agora" e use os prompts do app:
 // instruções do Projeto, dividir em partes, sessão de estudo. Nas capacidades pessoais a prática é na vida real (experimentos),
 // sem bases de dados nem scripts. O DEADLINE é uma estimativa: depois de dividir em partes, use "Usar este prazo".
 
@@ -9,24 +9,24 @@ CAPABILITY: How to Win Friends and Influence People
 AREA: Personal
 SOURCES: Book: How to Win Friends and Influence People (Dale Carnegie), Portuguese edition: Como Fazer Amigos e Influenciar Pessoas
 DEPTH: Solid
-SESSIONS: 2
-DEADLINE: 29/01/2027
+SESSIONS: 1
+DEADLINE: 23/04/2027
 STATUS: On hold
 
-// Início previsto 01/02/2027 · cerca de 16 partes · Um hábito vira uma regra pessoal de 7 dias, anotada no app como tarefa diária.
-CAPABILITY: The 7 Habits of Highly Effective People
-AREA: Personal
-SOURCES: Book: The 7 Habits of Highly Effective People (Stephen R. Covey), Portuguese edition: Os 7 Hábitos das Pessoas Altamente Eficazes
-DEPTH: Solid
-SESSIONS: 2
-DEADLINE: 12/04/2027
-STATUS: On hold
-
-// Início previsto 12/04/2027 · cerca de 15 partes · Cada parte termina com uma pergunta para refletir ou conversar; sem dados, sem scripts.
+// Início previsto 06/11/2026 · cerca de 15 partes · Cada parte termina com uma pergunta para refletir ou conversar; sem dados, sem scripts.
 CAPABILITY: Mere Christianity
 AREA: Personal
 SOURCES: Book: Mere Christianity (C. S. Lewis), Portuguese edition: Cristianismo Puro e Simples
 DEPTH: Conceptual
-SESSIONS: 2
-DEADLINE: 14/06/2027
+SESSIONS: 1
+DEADLINE: 12/03/2027
+STATUS: On hold
+
+// Início previsto 12/03/2027 · cerca de 16 partes · Um hábito vira uma regra pessoal de 7 dias, anotada no app como tarefa diária.
+CAPABILITY: The 7 Habits of Highly Effective People
+AREA: Personal
+SOURCES: Book: The 7 Habits of Highly Effective People (Stephen R. Covey), Portuguese edition: Os 7 Hábitos das Pessoas Altamente Eficazes
+DEPTH: Solid
+SESSIONS: 1
+DEADLINE: 30/07/2027
 STATUS: On hold
