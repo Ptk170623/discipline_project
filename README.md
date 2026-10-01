@@ -62,6 +62,13 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
 - [`planejamento/capacidades-import.txt`](planejamento/capacidades-import.txt): o mesmo plano no formato de importação
   (onda 1 ativa, as demais em espera).
 
+## Compartilhar sem expor tudo
+
+Tudo o que o app guarda fica dentro do código da página, então esconder algo na tela não esconde do link.
+Para compartilhar só o progresso, publique uma **cópia pública somente leitura**: o mesmo app com `pub` nos dados
+(sem o texto da home e sem a base de prática, e sem capacidade de edição), em um artifact separado. A página
+principal fica privada e a cópia é atualizada sob demanda.
+
 ## Onde ficam os dados
 
 A página guarda os próprios dados (capability `artifact`): cada alteração publica uma nova versão

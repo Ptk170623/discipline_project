@@ -439,6 +439,7 @@ var art=null,dl=null,dirty=false,saving=false,retried=false,saveTimer=null,saveE
 function canE(){return mode==='edit'||mode==='local';}
 function initCaps(){
   var c=window.claude;
+  if(state.pub){mode='view';render();return;}
   if(!c||typeof c.use!=='function'){mode='local';render();return;}
   c.use('downloads').then(function(d){dl=d;if(ui.modal&&ui.modal.kind==='import')renderModal();}).catch(function(){});
   Promise.all([c.use('artifact').catch(function(){return null;}),c.use('user').catch(function(){return null;})]).then(function(r){
@@ -484,7 +485,7 @@ function buildDoc(){
 }
 function chipHtml(){
   if(mode==='pending')return '<span class="chip">Carregando…</span>';
-  if(mode==='view')return '<span class="chip info">Modo visualização</span>';
+  if(mode==='view')return '<span class="chip info">'+(state.pub?'Cópia somente leitura'+(state.pub.at?' · atualizada em '+fmtY(state.pub.at):''):'Modo visualização')+'</span>';
   if(mode==='local')return '<span class="chip warn">Prévia local, não salva</span>';
   if(saving)return '<span class="chip info">Salvando…</span>';
   if(saveErr)return '<span class="chip bad">Não salvo</span>';
@@ -560,6 +561,7 @@ function dayPanel(idx){
 }
 
 function persona(){
+  if(state.pub)return '';
   var body;
   if(ui.editPersona)body='<textarea id="persona-text" class="ruled" rows="8" aria-label="Descrição da pessoa necessária" placeholder="Quem você precisa se tornar? Por que esse estudo importa para você?">'+esc(state.persona)+'</textarea><div class="row"><button class="btn primary" data-act="persona-save">Salvar texto</button><button class="btn" data-act="persona-cancel">Cancelar</button></div>';
   else if(state.persona.trim())body='<div class="ruled">'+esc(state.persona)+'</div>';
