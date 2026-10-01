@@ -40,9 +40,9 @@ Cada parte traz as notas: **Source** (capítulo, seção, páginas), **Why here*
 | 3. Tentar explicar antes de aprender | Sessão (etapa 3) |
 | Ensino na linha do autor | Sessão (etapa 4) |
 | Prática: script nas suas bases, rodado na sua máquina | Sessão (etapa 5) |
-| 4. Definição com as próprias palavras, do zero | Sessão (etapa 6) |
+| 4. Definição com as próprias palavras, do zero, termo por termo (checklist só com os nomes, tirado do mapa da etapa 2) | Sessão (etapa 6) |
 | 5. Comparar com a definição do autor e uma formal | Sessão (etapa 7) |
-| 6. Atualizar a definição → cartão de revisão | Sessão (etapa 8 e cartão) |
+| 6. Atualizar a definição (mesmo checklist) → cartão de revisão | Sessão (etapa 8 e cartão) |
 | Mini-projeto nas suas bases | Sessão (etapa 9) |
 | 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app |
 
