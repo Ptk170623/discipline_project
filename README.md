@@ -64,10 +64,17 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
 
 ## Compartilhar sem expor tudo
 
-Tudo o que o app guarda fica dentro do código da página, então esconder algo na tela não esconde do link.
-Para compartilhar só o progresso, publique uma **cópia pública somente leitura**: o mesmo app com `pub` nos dados
-(sem o texto da home e sem a base de prática, e sem capacidade de edição), em um artifact separado. A página
-principal fica privada e a cópia é atualizada sob demanda.
+Tudo o que a página guarda aparece no código para quem abre o link, então esconder só na tela não basta.
+Em **Compartilhar** o app cria uma senha e passa a trancar o que você marcar como oculto: a base de prática, o texto
+da home e, se quiser, tarefas diárias, capacidades, projetos e conquistas. O oculto sai dos dados públicos
+e vai para um bloco cifrado (`pn-vault`, AES-GCM com chave derivada da senha por PBKDF2). O link continua vivo e
+atualiza sozinho para quem só visualiza. Só quem tem a senha e permissão de edição vê e edita tudo.
+
+- Os gráficos gerais (constância, registros por semana, progresso) e o gráfico de cada tarefa diária têm um seletor
+  Visível/Oculto. Ocultar um gráfico geral só esconde o cartão; ocultar uma tarefa, capacidade ou projeto remove
+  também o histórico dele da vista pública.
+- **Ver como visitante** mostra a página exatamente como o link a entrega.
+- Quem perder a senha perde o conteúdo oculto. Use uma frase longa; senha curta pode ser descoberta por tentativas.
 
 ## Onde ficam os dados
 
