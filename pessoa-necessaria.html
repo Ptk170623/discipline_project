@@ -389,6 +389,14 @@ details.tbl summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--mu
 .tblwrap{overflow-x:auto;margin-top:8px}
 .tblwrap table{border-collapse:collapse;font-size:13px;min-width:220px}
 .tblwrap th,.tblwrap td{text-align:left;padding:4px 14px 4px 0;border-bottom:1px solid var(--line)}
+.wkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.wkday{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wkday.today{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.wkday label,.wkname{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.wkbody{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+.wk{width:100%;min-height:170px;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 10px;resize:vertical;line-height:1.45;color:var(--ink)}
+.dplan{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.todaybox b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1002,6 +1010,20 @@ function renderChooser(k){
 }
 
 /* ---------- tarefas diárias ---------- */
+var WD=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+function weekPlan(d){var w=d&&d.week;return Array.isArray(w)&&w.some(function(x){return String(x||'').trim();})?w:null;}
+function planOn(d,day){var w=weekPlan(d);return w?String(w[parse(day).getDay()]||'').trim():'';}
+function weekSection(d){
+  var t=parse(today()).getDay(),order=[1,2,3,4,5,6,0],w=weekPlan(d);
+  if(canE())return '<div class="stack"><span class="label">Plano da semana</span><p class="muted" style="font-size:13px">O que fazer em cada dia da semana. A primeira linha de cada dia é o título e aparece no cartão. Deixe em branco um dia sem plano.</p><div class="wkgrid">'+order.map(function(i){
+    return '<div class="wkday'+(i===t?' today':'')+'"><label for="wk-'+i+'">'+WD[i]+(i===t?' · hoje':'')+'</label><textarea id="wk-'+i+'" class="wk" rows="8" placeholder="'+(i===0?'Ex.: Caminhada leve':'Título do dia&#10;Exercício 1…')+'">'+esc((d.week&&d.week[i])||'')+'</textarea></div>';
+  }).join('')+'</div><div class="row"><button class="btn primary sm" data-act="week-save" data-id="'+d.id+'">Salvar plano da semana</button></div></div>';
+  if(!w)return '';
+  return '<div class="stack"><span class="label">Plano da semana</span><div class="wkgrid">'+order.map(function(i){
+    var tx=String(w[i]||'').trim();
+    return '<div class="wkday'+(i===t?' today':'')+'"><b class="wkname">'+WD[i]+(i===t?' · hoje':'')+'</b><div class="wkbody">'+(tx?esc(tx):'<span class="muted">Sem plano</span>')+'</div></div>';
+  }).join('')+'</div></div>';
+}
 function dailyDates(id){var s={};state.log.forEach(function(e){if(e.t==='daily'&&e.item===id)s[e.d]=1;});return s;}
 function streakOf(set){var t=today(),d=set[t]?t:addDays(t,-1),n=0;while(set[d]){n++;d=addDays(d,-1);}return n;}
 function bestStreak(set,ini,fim){
@@ -1016,7 +1038,7 @@ function dailySection(){
     var set=dailyDates(d.id),done=!!set[t],st=streakOf(set);
     return '<button class="dcard'+(done?' done':'')+'" data-act="nav" data-to="daily:'+d.id+'"><span class="dtop"><b>'+esc(d.name)+'</b><span class="dstate">'+(done?'Feito hoje':'Pendente')+'</span></span>'+
       '<span class="dmeta">'+hidPill(d)+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'<span>'+AREA[areaOf(d)]+'</span></span>'+
-      '<span class="dstreak"><b class="num">'+st+'</b> '+plural(st,'dia seguido','dias seguidos')+'</span></button>';
+      '<span class="dstreak"><b class="num">'+st+'</b> '+plural(st,'dia seguido','dias seguidos')+'</span>'+(weekPlan(d)?'<span class="dplan"><b>Hoje:</b> '+esc(planOn(d,t).split('\n')[0]||'sem plano')+'</span>':'')+'</button>';
   }).join('');
   return '<section class="sec" aria-label="Tarefas diárias"><div class="sec-head"><h2 class="disp">Tarefas diárias</h2>'+
     (canE()?'<span class="row"><button class="btn sm" data-act="labels-open">Rótulos</button><button class="btn sm primary" data-act="daily-new">+ Tarefa diária</button></span>':'')+'</div>'+chips+
@@ -1030,8 +1052,10 @@ function renderDaily(d){
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">Tarefa diária · '+AREA[areaOf(d)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(d.name)+'</h1>'+(d.label?'<span class="row"><span class="lchip">'+esc(d.label)+'</span></span>':'')+'</div>'+
    (canE()?'<button class="btn sm" data-act="daily-edit" data-id="'+d.id+'">Editar</button>':'')+'</div>'+
    '<div class="dhero'+(done?' done':'')+'"><b>'+(done?'Feito hoje':'Ainda não foi feito hoje')+'</b>'+(canE()?(done?'<button class="btn sm" data-act="daily-undo">Desfazer registro de hoje</button>':'<button class="btn good lg" data-act="daily-done">Registrar feito hoje</button>'):'')+'</div>'+
+   (planOn(d,t)?'<div class="note todaybox"><b>Hoje · '+WD[parse(t).getDay()]+'</b>'+esc(planOn(d,t))+'</div>':'')+
    '<div class="facts f4"><div><span class="label">Sequência atual</span><b class="num">'+cur+' '+plural(cur,'dia','dias')+'</b></div><div><span class="label">Melhor sequência</span><b class="num">'+best+' '+plural(best,'dia','dias')+'</b></div><div><span class="label">Últimos 35 dias</span><b class="num">'+last+'/35</b></div><div><span class="label">Total de dias</span><b class="num">'+total+'</b></div></div>'+
    '<div class="stack"><span class="label">Últimos 35 dias</span><div class="hgrid">'+cells+'</div></div>'+
+   weekSection(d)+
    '<div class="stack"><span class="label">O que fazer</span>'+
    (canE()?'<textarea id="daily-text" class="dtext" placeholder="Detalhe o que precisa ser feito. Ex.: 20 minutos de flashcards · Seg: SQL · Ter: estatística…">'+esc(d.text||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="daily-text-save">Salvar texto</button></div>'
      :(d.text?'<div class="note">'+esc(d.text)+'</div>':'<p class="muted">Sem detalhes.</p>'))+'</div>';
@@ -1287,6 +1311,8 @@ var STAGE_EN=['day-1','week','month','future'];
 function spwOf(it){var n=+(it&&it.spw);return n>0?n:null;}
 function suggestDue(it){var open=it.parts.filter(function(p){return !p.done;}).length,spw=spwOf(it);if(!open||!spw)return null;var f=(DEPTH[it.depth]||{f:1.2}).f;return addDays(today(),Math.ceil(open*f/spw)*7);}
 function srcLines(it){var b=booksOf(it);return {main:b[0]||'',rest:b.slice(1)};}
+function lifeOf(it){return areaOf(it)==='pess';}
+var LIFE_HINT='Use concrete scenes from everyday life and work, such as family, friends, church, clients and colleagues.';
 function focusOf(it){return String(it&&it.focus||'').trim();}
 function kindEn(it){return kindOf(it)==='cap'?'capability':'project';}
 var DOMAIN_HINT='In math or statistics, include a worked numerical example step by step; for tools (like git), real commands and what happens at each one.';
@@ -1305,7 +1331,7 @@ function promptProject(it){
   else{L.push('- Main source (attached): '+(s.main||'[main book, repository or course]')+'.');
   if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');}
   L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
-  L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
+  if(!lifeOf(it))L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
   L.push('','How to teach:');
   if(fo){
     L.push('1. My learning focus leads, not any one source. Teach each concept from the attached source that explains it best, say which one and where (chapter and section, or module and file), and show why the concept matters for the data work I do. If no attached source covers a concept well, say so and teach it with an exercise on my datasets instead of inventing a citation.');
@@ -1314,17 +1340,24 @@ function promptProject(it){
   L.push('1. The main source leads. Follow the author\'s order, examples and way of explaining (for a repository or course, the order of the modules and the code examples) and always show why the concept appears at that point: what problem it solves and what it sets up next. Cite chapter and section, or module and file.');
   L.push('2. Use the complementary sources to fill gaps. When the main source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
   }
-  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+DOMAIN_HINT);
+  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+(lifeOf(it)?LIFE_HINT:DOMAIN_HINT));
   L.push('4. Do one step at a time and wait for my answer before moving on.');
+  var life=lifeOf(it);
   L.push('','Practice:');
-  L.push('5. You have no access to my data, only to the descriptions and the schema. Write complete, ready-to-run scripts for my machine (Python with pandas reading the files from the described paths, or SQL/commands when that makes more sense). Use only columns that exist in the description and tell me what output to expect.');
-  L.push('6. I run them, paste the output and you interpret it with me. If there is an error, fix it from the message.');
-  L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
-  L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
-  var nx=9;
-  if(fo){L.push('9. Apply the practice rules in my learning focus in every hands-on step and mini-project (for example, a diagram before any code). Diagrams are Mermaid text, so I can edit and review them.');nx=10;}
+  if(life){
+    L.push('5. Practice happens in real life, not on a computer. For each idea give me one small, concrete experiment for the coming days: one situation, what to do and what to observe. I report back and you help me reflect on what worked and what I would change.');
+    L.push('6. Keep other people anonymous: use roles or first names, never private details about them.');
+    L.push('7. If the source is religious or philosophical, present the author\'s argument faithfully and fairly, label your own comments, and do not steer me toward or away from any belief; help me understand and test the reasoning.');
+  }else{
+    L.push('5. You have no access to my data, only to the descriptions and the schema. Write complete, ready-to-run scripts for my machine (Python with pandas reading the files from the described paths, or SQL/commands when that makes more sense). Use only columns that exist in the description and tell me what output to expect.');
+    L.push('6. I run them, paste the output and you interpret it with me. If there is an error, fix it from the message.');
+    L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
+    L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
+  }
+  var nx=life?8:9;
+  if(fo){L.push(nx+'. Apply the practice rules in my learning focus in every hands-on step and mini-project (for example, a diagram before any code). Diagrams are Mermaid text, so I can edit and review them.');nx++;}
   L.push('','Language:');
-  LANG_RULES.forEach(function(x,i){L.push((nx+i)+'. '+x);});
+  LANG_RULES.slice(0,life?3:4).forEach(function(x,i){L.push((nx+i)+'. '+x);});
   return L.join('\n');
 }
 function promptPlan(it){
@@ -1345,8 +1378,9 @@ function promptPlan(it){
   if(pf)L.push('1. Each part is ONE concept from my learning focus (or a small group of tightly linked ones), for a 45 to 60 minute session. Order the parts by dependency (what I need first), not by the order of any book.');
   else L.push('1. Follow the structure and order of the main source (the book chapters, or the course/repository modules). Each part is ONE concept (or a small group of tightly linked subconcepts), in the order the author builds the reasoning, for a 45 to 60 minute session.');
   L.push('2. Leave out what does not help to understand and use the concepts (preface, long history, digressions), but keep the motivation the author gives for each concept. Match the number of parts to the depth.');
-  if(pf)L.push('3. For each part, write the notes: Source (the best attached source for this concept: book and chapter or section, or module and file; if none covers it, write "no attached source" and design the part as an exercise on my datasets), Why here (why this concept comes at this point), Practical value and a 20 to 60 minute Mini-project that follows my practice rules and uses the datasets described in this Project.');
-  else L.push('3. For each part, write the notes: Source (chapter, section and pages, or module and file), Why here (why the concept appears at this point), Practical value and a 20 to 60 minute Mini-project using the datasets described in this Project (if it does not fit, an exercise with data generated in the script).');
+  var lf=it&&lifeOf(it);
+  if(pf)L.push('3. For each part, write the notes: Source (the best attached source for this concept: book and chapter or section, or module and file; if none covers it, write "no attached source" and design the part as '+(lf?'a reflection or an experiment':'an exercise on my datasets')+'), Why here (why this concept comes at this point), Practical value and '+(lf?'a Mini-project that follows my practice rules: a real-life experiment of 3 to 7 days (one situation, what to do, what to observe).':'a 20 to 60 minute Mini-project that follows my practice rules and uses the datasets described in this Project.'));
+  else L.push('3. For each part, write the notes: Source (chapter, section and pages, or module and file), Why here (why the concept appears at this point), Practical value and '+(lf?'a Mini-project: a real-life experiment of 3 to 7 days (one situation, what to do, what to observe).':'a 20 to 60 minute Mini-project using the datasets described in this Project (if it does not fit, an exercise with data generated in the script).'));
   L.push('4. Spread the dates from today, respecting the sessions per week. If the final deadline does not fit, say so and suggest another one.');
   if(pf)L.push('5. Never assign a whole book. Cite only the pages needed for the concept (a first pass); later capabilities go deeper into the same books.');
   L.push((pf?'6':'5')+'. Write everything in English: part names and notes.');
@@ -1381,11 +1415,11 @@ function promptStudy(it,p){
   L.push('Step 2 — Map: the main concept and its subconcepts, organized the way the source organizes them (cite chapter and section, or module and file), with a one-line plain-English meaning for each key term. Do not explain yet.');
   L.push('Step 3 — My attempt: ask me to explain the concept with what I already know or imagine. Keep it open: give no checklist and no hints, because this step measures what I already know. Do not correct me yet.');
   L.push('Step 4 — Teaching along the author\'s line: explain it the way the author (or the course) does (the intuition, the argument and the examples) and give the formal definition. If the source is confusing, add your own explanation and make clear what is yours. Tell me what was right and wrong in my attempt and finish with 2 short questions to check my understanding.');
-  L.push(focusOf(it)?'Step 5 — Hands-on demo, diagram first: following my practice rules, ask me to draw the diagram that fits this concept (as Mermaid text), critique it, make me mark the failure points, and only then write a complete script for me to run on my machine with the datasets described in the Project (or with data generated in the script, if they do not fit), including checks for the invariants that matter. Tell me what output to expect. I run it, paste the output and you interpret it with me.':'Step 5 — Hands-on demo: write a complete script for me to run on my machine with the datasets described in the Project (or with data generated in the script, if they do not fit) and tell me what output to expect. I run it, paste the output and you interpret it with me.');
+  L.push(lifeOf(it)?'Step 5 — Scenes: give me two short real-life scenes (at work, with family or friends, at church) where this idea applies. For each one I say what I would do and you react: what fits the idea, what does not and what I might be missing. Keep the scenes about me and use roles or first names for other people.':focusOf(it)?'Step 5 — Hands-on demo, diagram first: following my practice rules, ask me to draw the diagram that fits this concept (as Mermaid text), critique it, make me mark the failure points, and only then write a complete script for me to run on my machine with the datasets described in the Project (or with data generated in the script, if they do not fit), including checks for the invariants that matter. Tell me what output to expect. I run it, paste the output and you interpret it with me.':'Step 5 — Hands-on demo: write a complete script for me to run on my machine with the datasets described in the Project (or with data generated in the script, if they do not fit) and tell me what output to expect. I run it, paste the output and you interpret it with me.');
   L.push('Step 6 — My definition: first list every concept from the Step 2 map that my definition must cover (the main concept plus each subconcept) as a checklist of term names only, with no meanings, hints or examples. Add no term that was not in the Step 2 map. Then ask me to define each term in my own words, from scratch, without copying yours or the author\'s. The checklist tests whether I can define each term, not whether I remember that it exists.');
   L.push('Step 7 — Comparison: show the source\'s definition and a concise formal one and compare them with mine: what is right, what is missing and what is imprecise.');
   L.push('Step 8 — Update: show the same checklist again (every term from the Step 2 map, names only, no meanings) and ask me to rewrite my definition of each term, using the feedback from step 7. If there is still an error, point it out and ask again.');
-  L.push('Step 9 — Mini-project: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes (adjust it if needed)':'propose a 20 to 60 minute mini-project on my datasets')+'. '+(focusOf(it)?'Follow my practice rules from my learning focus. Give the goal, the deliverable and the done criteria; I draw the diagram first, and only after you agree with it do you give a script skeleton without the answer.':'Give the goal, the deliverable, the done criteria and a script skeleton without the answer.')+' I complete it, run it and send you the code and the output to review. If I say "later", move on to the card and record the mini-project as pending.');
+  L.push(lifeOf(it)?'Step 9 — Experiment: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes as my experiment (adjust it if needed)':'propose a 3 to 7 day experiment')+': one situation, what to do and what to observe, with a simple way for me to note the result. I run it in real life and report back in the next session. If I say "later", move on to the card and record the experiment as pending.':'Step 9 — Mini-project: '+(/mini-?proje/i.test(p.note||'')?'use the mini-project from the plan notes (adjust it if needed)':'propose a 20 to 60 minute mini-project on my datasets')+'. '+(focusOf(it)?'Follow my practice rules from my learning focus. Give the goal, the deliverable and the done criteria; I draw the diagram first, and only after you agree with it do you give a script skeleton without the answer.':'Give the goal, the deliverable, the done criteria and a script skeleton without the answer.')+' I complete it, run it and send you the code and the output to review. If I say "later", move on to the card and record the mini-project as pending.');
   L.push('Final step — Review card: generate a text block in this format for me to keep in my app:','');
   L.push('CONCEPT: '+p.name);
   L.push('SOURCE: (chapter and section, or module and file)');
@@ -1393,7 +1427,7 @@ function promptStudy(it,p){
   L.push('QUESTION: (a question that forces me to explain the concept, not just repeat the definition)');
   L.push('MY DEFINITION: (my final version, in my own words)');
   L.push('REFERENCE: (the source\'s definition or a formal one, concise)');
-  L.push('APPLICATION: (a short exercise on my datasets to test using the concept)');
+  L.push(lifeOf(it)?'APPLICATION: (a concrete situation where I will apply it this week)':'APPLICATION: (a short exercise on my datasets to test using the concept)');
   L.push('MINI-PROJECT: (the brief, and whether it is done or pending)');
   if(focusOf(it))L.push('DIAGRAM: (my final Mermaid diagram for this part, with its failure points marked)');
   L.push('WATCH OUT: (the mistakes I made and common confusions)');
@@ -1407,7 +1441,7 @@ function promptReview(it,p,r){
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
   L.push('1. Ask the card\'s question (or a question that forces me to explain the concept) and wait for me to answer from memory, in English.');
   L.push('2. Compare my answer with the reference, the source\'s explanation'+(p.card?' and my definition on the card':'')+': what I got right, what I forgot and what I mixed up.');
-  L.push(focusOf(it)?'3. Use one of my practice rules instead of only a script: for example ask me to sketch the diagram for a new scenario and mark its failure points, or show me a short plausible script with a silent bug and ask me to find it. Do not give me the answer first. If the card has a pending mini-project, ask whether I did it and review it.':'3. Ask me to write a small script or query that applies it to my datasets (do not give me the code). I run it on my machine and send you the code and the output. If the card has a pending mini-project, ask whether I did it and review it.');
+  L.push(lifeOf(it)?'3. Ask me to describe a recent real situation where I used this idea, or could have, and discuss it; or give me a new scene and ask what I would do. Do not give me the answer first. If the card has a pending experiment, ask whether I did it and review it.':focusOf(it)?'3. Use one of my practice rules instead of only a script: for example ask me to sketch the diagram for a new scenario and mark its failure points, or show me a short plausible script with a silent bug and ask me to find it. Do not give me the answer first. If the card has a pending mini-project, ask whether I did it and review it.':'3. Ask me to write a small script or query that applies it to my datasets (do not give me the code). I run it on my machine and send you the code and the output. If the card has a pending mini-project, ask whether I did it and review it.');
   L.push('4. Finish with a one-line verdict: "REVIEW DONE" if I explained and applied the essentials without help, or "REVIEW AGAIN" if something important was missing, saying what to reinforce.');
   L.push('5. If my definition improved, generate the updated card in the same format.');
   return L.join('\n');
@@ -1710,6 +1744,7 @@ document.addEventListener('click',function(ev){
     case 'daily-del-yes':{var di=ui.modal.id;state.daily=state.daily.filter(function(x){return x.id!==di;});state.ach.forEach(function(x){if(x.rule&&x.rule.daily===di)x.rule.daily=null;});ui.modal=null;ui.route='home';commit('Tarefa excluída');break;}
     case 'daily-done':{var dq=dailyById(ui.route.slice(6));if(!dq)break;var td0=today();if(!dailyDates(dq.id)[td0])state.log.push({id:uid(),d:td0,t:'daily',k:'daily',item:dq.id,part:null,iname:dq.name,pname:dq.name,area:areaOf(dq)});commit('Feito hoje. Sequência: '+streakOf(dailyDates(dq.id))+' '+plural(streakOf(dailyDates(dq.id)),'dia','dias'));break;}
     case 'daily-undo':{var du=dailyById(ui.route.slice(6)),tdu=today();if(!du)break;state.log=state.log.filter(function(e){return !(e.t==='daily'&&e.item===du.id&&e.d===tdu);});commit('Registro de hoje desfeito');break;}
+    case 'week-save':{var wd=dailyById(d.id);if(wd){var wv=[0,1,2,3,4,5,6].map(function(i){var e=document.getElementById('wk-'+i);return e?e.value.trim():'';});if(wv.some(Boolean))wd.week=wv;else delete wd.week;commit('Plano da semana salvo');}break;}
     case 'daily-text-save':{var dt2=dailyById(ui.route.slice(6)),tx=document.getElementById('daily-text');if(!dt2||!tx)break;dt2.text=tx.value.trim();commit('Texto salvo');break;}
     case 'labels-open':openModal({kind:'labels'});break;
     case 'label-add':{var nl=document.getElementById('new-label'),lv=nl?nl.value.trim().slice(0,40):'';if(!lv)break;if(state.labels.indexOf(lv)<0)state.labels.push(lv);commit('Rótulo adicionado');break;}

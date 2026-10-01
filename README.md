@@ -68,6 +68,13 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
 - [`planejamento/capacidades-import.txt`](planejamento/capacidades-import.txt): o mesmo plano no formato de importação
   (onda 1 ativa, as demais em espera).
 
+## Plano da semana e prática na vida real
+
+- **Plano da semana.** Em uma tarefa diária, o campo **Plano da semana** guarda o que fazer em cada dia (a primeira linha é o título). O cartão da tarefa
+  mostra o título de hoje e a página mostra o dia inteiro e a semana toda. Serve para treino, rotina de estudo de inglês etc.
+- **Capacidades pessoais.** Em capacidades da área Pessoal, os prompts trocam scripts e bases por **experimentos na vida real** (uma situação, o que fazer,
+  o que observar) e cenas do dia a dia, e o tutor apresenta com fidelidade o argumento do autor em livros religiosos ou filosóficos.
+
 ## Compartilhar sem expor tudo
 
 Tudo o que a página guarda aparece no código para quem abre o link, então esconder só na tela não basta.
