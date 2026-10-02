@@ -43,16 +43,19 @@ valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o camp
 
 | Etapa do método | Onde acontece |
 | --- | --- |
-| 1. Valor prático — e por que o autor trata do conceito ali | Notas do plano e etapa 1 da sessão |
-| 2. Identificar o conceito e os subconceitos | Partes do plano / etapa 2 |
-| 3. Tentar explicar antes de aprender | Sessão (etapa 3) |
-| Ensino na linha do autor | Sessão (etapa 4) |
-| Prática: script nas suas bases, rodado na sua máquina | Sessão (etapa 5) |
-| 4. Definição com as próprias palavras, do zero, termo por termo (checklist só com os nomes, tirado do mapa da etapa 2) | Sessão (etapa 6) |
-| 5. Comparar com a definição do autor e uma formal | Sessão (etapa 7) |
-| 6. Atualizar a definição (mesmo checklist) → cartão de revisão | Sessão (etapa 8 e cartão) |
-| Mini-projeto nas suas bases | Sessão (etapa 9) |
-| 7. Explicar de novo com repetição espaçada | Revisões D+1 → D+7 → D+30 do app |
+| 1. Valor prático — e por que o autor trata do conceito ali | Notas do plano e passo 1 da sessão |
+| 3. Tentar explicar antes de aprender (aberto, sem mapa nem dicas) | Passo 2, primeira parte |
+| 2. Identificar o conceito e os subconceitos | Passo 2, mapa (só depois da sua tentativa) |
+| Ensino na linha do autor, com o que estava certo e errado na sua tentativa | Passo 3 |
+| Prática: script nas suas bases, rodado na sua máquina | Passo 4 |
+| 4. Definição com as próprias palavras, do zero, termo por termo (checklist só com os nomes, tirado do mapa) | Passo 5 |
+| 5. Comparar com a definição do autor e uma formal (aqui acontece a correção principal) | Passo 6 |
+| Mini-projeto nas suas bases | Passo 7 |
+| 6. Cartão de revisão (lembrete na primeira linha; pergunta e aplicação são o teste do dia seguinte) | Passo 8 |
+| 7. Explicar de novo, do zero: refazer o passo 5 no começo da próxima sessão, antes de qualquer coisa nova | Início da próxima sessão e revisões D+1 → D+7 → D+30 do app |
+
+Rotina: primeira tentativa hoje, feedback hoje, nova tentativa amanhã. O prompt da sessão já inclui o cartão da parte estudada por último
+(sem mostrá-lo para você) para o tutor começar pela nova tentativa; se não houver cartão, ele pede para você colar o último.
 
 - **Áudio de revisão (último passo da sessão):** depois do cartão, o tutor escreve uma fala longa sobre a parte inteira, em prosa simples, sem
   símbolos nem código, com perguntas para responder em voz alta. Cole o texto em uma ferramenta de texto para voz e ouça no dia seguinte: serve de revisão
