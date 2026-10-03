@@ -67,8 +67,8 @@ ele pede para você colar o último. Rotina: primeira tentativa hoje, feedback h
 ## Prática com os seus dados
 
 O agente do Projeto **não acessa os dados**: ele lê só a descrição/schema e escreve scripts completos
-(Python com pandas, lendo os arquivos pelos caminhos descritos). Você roda na sua máquina, cola a saída e ele
-interpreta. As instruções proíbem pedir ou exibir dados pessoais; os scripts trabalham com agregados.
+(Python com pandas, lendo os arquivos pelos caminhos descritos). Você roda no trabalho, depois cola a saída (ou conta
+o que aconteceu) numa sessão seguinte, e ele interpreta. As instruções proíbem pedir ou exibir dados pessoais; os scripts trabalham com agregados.
 
 ## Observações
 
