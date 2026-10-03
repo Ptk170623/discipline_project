@@ -67,6 +67,8 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
   sessões por semana, prazo estimado (fórmulas), fontes, rotina semanal, marcos de inglês e projetos integradores.
 - [`planejamento/capacidades-import.txt`](planejamento/capacidades-import.txt): o mesmo plano no formato de importação
   (onda 1 ativa, as demais em espera).
+- [`planejamento/projetos-leitura.txt`](planejamento/projetos-leitura.txt): os projetos de leitura e anotações (João, Lewis, Carnegie, Covey e o curso de gramática).
+- [`planejamento/rotina.md`](planejamento/rotina.md): a rotina decidida (treino, dias úteis, fim de semana, inglês, método de leitura).
 
 ## Guia do dia
 
@@ -75,6 +77,13 @@ estudo e antes de dormir. Cada tarefa diária entra no bloco escolhido em **Quan
 capacidades ativas (as partes que vencem ou estão atrasadas, uma parte por capacidade, a mais profunda primeiro); as revisões do dia aparecem no
 trajeto de volta; capacidades ativas sem partes aparecem como lembrete para dividir. Marcar um passo registra o dia no app. **Ajustar** muda os
 horários e o número de sessões em dias úteis e no fim de semana. Só quem edita vê o guia.
+
+**Fim de semana.** Itens com **1 sessão por semana** só entram no guia no sábado e no domingo, antes dos demais e na ordem da lista (projetos antes de capacidades).
+É assim que os projetos de leitura e anotações (João, Lewis, curso de gramática) vêm primeiro e os estudos profissionais depois. Tarefas diárias do bloco
+**Estudo** (como o Listening) aparecem depois das sessões de estudo.
+
+**Prática no trabalho.** Nas capacidades profissionais, os prompts não pedem que você rode código na hora: o agente explica como fazer a prática, com o seu
+esquema, e a prática vira tarefa para fazer no trabalho; o cartão registra o mini-projeto como pendente, para o trabalho.
 
 **Regras de prática** (Editar) valem para uma capacidade sem mudar a ordem das partes, ao contrário do **Foco**.
 

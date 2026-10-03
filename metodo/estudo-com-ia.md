@@ -77,3 +77,7 @@ interpreta. As instruções proíbem pedir ou exibir dados pessoais; os scripts 
   parte aponta capítulo/seção/páginas.
 - A base de prática do app entra inteira nas instruções só se for curta; se for longa, entra pelo nome e o
   arquivo completo vai anexado ao Projeto.
+
+## Prática no trabalho
+
+Você estuda em casa, na tablet, onde não dá para rodar código. Por isso o prompt de estudo não pede que você rode nada na hora: o agente explica como fazer a prática, passo a passo, com o seu esquema, e entrega o mini-projeto como tarefa para o trabalho. O cartão de revisão registra o mini-projeto como pendente, para o trabalho, e na revisão seguinte o agente pergunta o que aconteceu.
