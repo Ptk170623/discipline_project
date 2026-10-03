@@ -31,6 +31,7 @@ Tarefas diárias primeiro. Depois, nesta ordem: João (Bíblia), Lewis, curso de
 - **Tarefa diária (30 min cada):** ler e marcar a Bíblia e o livro pessoal, com lápis ou na tablet. Sem meta de capítulos por dia.
 - **Projeto por livro (fim de semana):** passar as marcas para um markdown rolante, um capítulo por vez, até terminar o livro. Ordem: João, Lewis, depois Carnegie e Covey.
 - **Curso de gramática (42 capítulos):** ver o vídeo, anotar, e passar para markdown no fim de semana.
+- **Estudo do capítulo:** o botão Prompt de cada parte dos projetos de leitura gera um prompt para você colar junto com o markdown do capítulo. Você explica do zero, a IA agrupa por linhas de raciocínio e marca o que foi bem, o que esqueceu e o que errou, corrige, e no fim faz um cartão de revisão do capítulo e um plano de ação com 3 passos. Em Editar, a caixa "Projeto de leitura e anotações" liga esse prompt.
 - **Formato de cada entrada do markdown:** data · página · trecho marcado · `Me:` uma linha com as suas palavras.
 - **Prazos:** nenhum por enquanto. Teste um dia completo para medir o ritmo e só então defina datas.
 

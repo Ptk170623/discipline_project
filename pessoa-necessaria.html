@@ -1373,6 +1373,7 @@ function itemForm(m){
    '<div class="field"><label for="f-practice">Regras de prática (opcional)</label><textarea id="f-practice" name="practice" style="min-height:96px" placeholder="Como você quer praticar, sem mudar a ordem das partes. Ex.: desenhe o diagrama antes de escrever a consulta.">'+esc(it?it.practice||'':'')+'</textarea><span class="hint">As regras valem na demonstração, no mini-projeto e nas revisões. Diferente do foco, não mudam a ordem das partes.</span></div>'+
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 180px"><label for="f-depth">Profundidade</label><select id="f-depth" name="depth"><option value="">Não definida</option>'+['conceitual','solido','profundo'].map(function(x){return '<option value="'+x+'"'+(it&&it.depth===x?' selected':'')+'>'+DEPTH[x].n+' · '+DEPTH[x].size.replace('cerca de ','')+'</option>';}).join('')+'</select></div>'+
    '<div class="field" style="flex:1 1 140px"><label for="f-spw">Sessões por semana</label><input type="number" id="f-spw" name="spw" min="1" max="40" step="1" value="'+esc(it&&it.spw?it.spw:'')+'" placeholder="Ex.: 6"></div></div>'+
+   '<label class="check"><input type="checkbox" name="notes"'+(it&&it.notes?' checked':'')+'> <span>Projeto de leitura e anotações (o prompt de estudo parte do seu markdown)</span></label>'+
    '<div class="field"><label for="f-status">Situação</label><select id="f-status" name="status"><option value="">Ativa</option><option value="espera"'+(it&&it.status==='espera'?' selected':'')+'>Em espera (próximas ondas)</option></select><span class="hint">O prazo é opcional: dá para deixar em branco e calcular depois pelas partes.</span></div>'+
    (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
    '<div class="row"><button class="btn primary" type="submit">'+(it?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
@@ -1528,7 +1529,24 @@ function lastCardPart(p){
   for(var i=0;i<ent.length;i++){if(seen[ent[i].part])continue;seen[ent[i].part]=1;var f=findPart(ent[i].part);if(f&&f.part.card)return f;}
   return null;
 }
+function isNotes(it){return !!(it&&it.notes);}
+function promptNotes(it,p){
+  var L=[];
+  L.push('Help me study one chapter from my markdown notes (pasted or attached below): "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Speak English only. If my notes are in Portuguese, answer in English.','');
+  L.push('Use only my notes. If you add anything from your own knowledge, say "outside my notes".','');
+  L.push('How we work:');
+  L.push('1. First, ask me to explain the whole chapter from scratch, in my own words, with simple examples as for a beginner. Do not show me the ideas first. Wait for me.');
+  L.push('2. After I explain, group the chapter into lines of reasoning, one per subtitle in my notes (if there are no subtitles, group the ideas by theme). Under each one, list its ideas as short hints, by name only. Mark each idea as "explained well", "forgotten", or "wrong", based on my first explanation. Do not give any explanations or corrections yet.');
+  L.push('3. I will then explain the lines of reasoning one by one, in any order. For each one, check my explanation against my notes. Tell me what is right and what is wrong, and give the correct version using my notes. Then I can try again and you check it.');
+  L.push('4. I can ask you questions at any time. Do not ask me questions unless I ask for them.');
+  L.push('5. When I say I am done, make:');
+  L.push('   - one review card for the whole chapter: the question is the chapter\'s big idea, the hints are the lines of reasoning with their ideas, and the answer is my corrected explanation in my own words, with one simple example');
+  L.push('   - an action plan: 3 small things to do this week with this chapter','');
+  L.push('Keep your messages short. Start with step 1.','','--- MY NOTES ---','[paste or attach your markdown here]');
+  return L.join('\n');
+}
 function promptStudy(it,p){
+  if(isNotes(it))return promptNotes(it,p);
   var done=it.parts.filter(function(x){return x.done&&x.id!==p.id;}).map(function(x){return x.name;}),L=[],fo=focusOf(it),life=lifeOf(it),prev=lastCardPart(p),src=fo?'the best attached source for each concept (say which one)':'the main source';
   L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". '+(fo?'Use the reference sources, my learning focus and the parts.txt attached to this Project, and follow the Project instructions.':'Use the main source, the complementary sources and the parts.txt attached to this Project, and follow the Project instructions.')+' The whole session is in English.');
   if(p.note)L.push('Plan notes: '+p.note.replace(/\n+/g,' · '));
@@ -1573,6 +1591,16 @@ function promptStudy(it,p){
 }
 function promptReview(it,p,r){
   var L=[];
+  if(isNotes(it)){
+    L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the chapter "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". The whole review is in English.','');
+    if(p.card)L.push('This is my review card: the question is the chapter\'s big idea, the hints are the lines of reasoning, and the answer is my corrected explanation. Do not show me the answer; use it only to check me:','---',p.card,'---','');
+    else L.push('I do not have a review card for this chapter yet. Ask me to explain the chapter from scratch and use my markdown notes (pasted or attached below) as the reference.','');
+    L.push('1. Ask me only the big-idea question and let me explain from scratch, in my own words, with a simple example as for a beginner. Wait for me.');
+    L.push('2. Then tell me what is right, what I forgot and what is wrong. For what I forgot, give hints by name only. Use only the card'+(p.card?'':' and my notes')+'; if you add anything else, say "outside my notes".');
+    L.push('3. I try again and you check it. I can ask you questions at any time.');
+    L.push('4. Finish with one line: "REVIEW DONE" if I explained the essentials without help, or "REVIEW AGAIN" with what to reinforce. If my explanation improved, give me the updated card in the same format.');
+    return L.join('\n');
+  }
   L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
   if(p.card)L.push('This is my review card. Do not show me its content; use it only to assess me:','---',p.card,'---','');
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
@@ -1954,9 +1982,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim();
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim();if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
