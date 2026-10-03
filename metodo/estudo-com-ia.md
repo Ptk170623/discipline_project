@@ -51,9 +51,8 @@ pedir para aprofundar, pular, voltar. O tutor pergunta mais do que explica (por 
 5. **De novo até o fim:** repete 3 e 4 com os próximos conceitos e com os que ainda estão fracos, até explicar todos e a parte inteira.
 6. **Cartão de revisão e texto para ouvir:** feitos no final (mini-projeto ou experimento é opcional e fica pendente se você deixar para depois).
 
-O cartão traz as perguntas que fizeram você pensar (o teste do dia seguinte) e as suas definições corrigidas. O prompt da sessão já inclui o cartão da parte
-estudada por último (sem mostrá-lo para você): o tutor começa pela nova tentativa, fazendo as perguntas do cartão com você respondendo do zero. Se não houver cartão,
-ele pede para você colar o último. Rotina: primeira tentativa hoje, feedback hoje, nova tentativa amanhã.
+O cartão traz as perguntas que fizeram você pensar e as suas definições corrigidas. O prompt da sessão não revisa partes anteriores: isso é feito pelas **revisões espaçadas do app** (D+1, D+7, D+30), que
+geram o prompt de revisão a partir do cartão salvo. Assim cada parte é revisada uma vez por dia marcado, e a sessão de estudo começa direto na parte nova.
 
 - **Estudar:** abra a parte no app → **Copiar prompt da sessão de estudo** → nova conversa **dentro do Projeto**.
   Ao final, cole o cartão em **Colar cartão** e marque a parte.
