@@ -41,29 +41,28 @@ valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o camp
 
 ## Cada parte
 
-| Etapa do método | Onde acontece |
-| --- | --- |
-| 1. Valor prático — e por que o autor trata do conceito ali | Notas do plano e passo 1 da sessão |
-| 3. Tentar explicar antes de aprender (aberto, sem mapa nem dicas) | Passo 2, primeira parte |
-| 2. Identificar o conceito e os subconceitos | Passo 2, mapa (só depois da sua tentativa) |
-| Ensino na linha do autor, com o que estava certo e errado na sua tentativa | Passo 3 |
-| Prática: script nas suas bases, rodado na sua máquina | Passo 4 |
-| 4. Definição com as próprias palavras, do zero, termo por termo (checklist só com os nomes, tirado do mapa) | Passo 5 |
-| 5. Comparar com a definição do autor e uma formal (aqui acontece a correção principal) | Passo 6 |
-| Mini-projeto nas suas bases | Passo 7 |
-| 6. Cartão de revisão (lembrete na primeira linha; pergunta e aplicação são o teste do dia seguinte) | Passo 8 |
-| 7. Explicar de novo, do zero: refazer o passo 5 no começo da próxima sessão, antes de qualquer coisa nova | Início da próxima sessão e revisões D+1 → D+7 → D+30 do app |
+O prompt da sessão de estudo não é uma sequência de passos para seguir. É um mapa de fases, e **você conduz**: pode interromper com uma pergunta,
+pedir para aprofundar, pular, voltar. O tutor pergunta mais do que explica (por quê? e se mudasse isso? como você sabe?) e não deixa uma ideia errada passar.
 
-Rotina: primeira tentativa hoje, feedback hoje, nova tentativa amanhã. O prompt da sessão já inclui o cartão da parte estudada por último
-(sem mostrá-lo para você) para o tutor começar pela nova tentativa; se não houver cartão, ele pede para você colar o último.
+1. **Valor da parte:** por que o conceito aparece ali, que problema resolve e para que serve.
+2. **Conceitos e perguntas:** a lista dos conceitos, cada um só com o nome e uma pergunta para pensar. Você tenta responder ou explicar mesmo sem saber, e o tutor não corrige ainda.
+3. **Explicação:** só dos conceitos que você errou ou deixou passar, poucos de cada vez, usando o schema das suas bases quando fizer sentido.
+4. **Com as suas palavras:** você explica de novo, do zero. O tutor questiona a lógica, testa com casos e faz você responder perguntas.
+5. **De novo até o fim:** repete 3 e 4 com os próximos conceitos e com os que ainda estão fracos, até explicar todos e a parte inteira.
+6. **Cartão de revisão e texto para ouvir:** feitos no final (mini-projeto ou experimento é opcional e fica pendente se você deixar para depois).
 
-- **Áudio de revisão (último passo da sessão):** depois do cartão, o tutor escreve uma fala longa sobre a parte inteira, em prosa simples, sem
-  símbolos nem código, com perguntas para responder em voz alta. Cole o texto em uma ferramenta de texto para voz e ouça no dia seguinte: serve de revisão
-  e de treino de listening (ouça sem ler, depois lendo o texto, depois sem ler de novo, como no cartão Listening English).
+O cartão traz as perguntas que fizeram você pensar (o teste do dia seguinte) e as suas definições corrigidas. O prompt da sessão já inclui o cartão da parte
+estudada por último (sem mostrá-lo para você): o tutor começa pela nova tentativa, fazendo as perguntas do cartão com você respondendo do zero. Se não houver cartão,
+ele pede para você colar o último. Rotina: primeira tentativa hoje, feedback hoje, nova tentativa amanhã.
+
 - **Estudar:** abra a parte no app → **Copiar prompt da sessão de estudo** → nova conversa **dentro do Projeto**.
   Ao final, cole o cartão em **Colar cartão** e marque a parte.
 - **Revisar:** no dia, **Prompt** ao lado da revisão → conversa no mesmo Projeto. O veredito
   (REVIEW DONE → **Revisão feita** / REVIEW AGAIN → **Revisar de novo**) é o botão que você aperta no app.
+
+- **Áudio de revisão (último passo da sessão):** depois do cartão, o tutor escreve uma fala longa sobre a parte inteira, em prosa simples, sem
+  símbolos nem código, com perguntas para responder em voz alta. Cole o texto em uma ferramenta de texto para voz e ouça no dia seguinte: serve de revisão
+  e de treino de listening (ouça sem ler, depois lendo o texto, depois sem ler de novo, como no cartão Listening English).
 
 ## Prática com os seus dados
 
