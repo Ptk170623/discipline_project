@@ -1445,7 +1445,7 @@ function partModal(m){
 }
 function studyBlock(m,it,p,r){
   var h='<div class="stack"><span class="label">Estudo com IA</span>';
-  if(canE())h+='<div class="row"><button class="btn" data-act="pr-study">Copiar prompt da sessão de estudo</button>'+((p.done||r)?'<button class="btn" data-act="pr-review-part">Copiar prompt de revisão</button>':'')+'</div>';
+  if(canE())h+='<div class="row"><button class="btn" data-act="pr-study">'+(it.mirror==='speak'?'Copiar prompt: praticar a fala':it.mirror==='listen'?'Copiar prompt: praticar a escuta':'Copiar prompt da sessão de estudo')+'</button>'+((!it.mirror&&(p.done||r))?'<button class="btn" data-act="pr-review-part">Copiar prompt de revisão</button>':'')+'</div>';
   h+='</div><div class="stack"><span class="label">Cartão de revisão</span>';
   if(m.cardEdit)h+='<textarea id="card-text" class="cardtxt" style="min-height:180px;width:100%;resize:vertical;color:var(--ink)" placeholder="Cole aqui o cartão que a IA gerou no fim da sessão (CONCEPT, QUESTION, MY DEFINITION, REFERENCE…)">'+esc(p.card||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="card-save">Salvar cartão</button><button class="btn sm" data-act="card-cancel">Cancelar</button></div>';
   else if(p.card)h+='<div class="cardtxt">'+esc(p.card)+'</div>'+(canE()?'<div class="row"><button class="btn sm" data-act="card-edit">Editar cartão</button></div>':'');
@@ -1639,7 +1639,7 @@ function mirrorDone(it,p){
   MIRRORS.forEach(function(m){
     var tgt=state.cap.find(function(x){return x.mirror===m[0];});
     if(!tgt||tgt.parts.some(function(x){return x.from===p.id;}))return;
-    tgt.parts.push({id:uid(),name:(m[1]+p.name).slice(0,160),due:null,done:null,note:'Source: '+it.name+' · '+p.name+'\n'+m[2]+(m[0]==='speak'&&/grammar/i.test(it.name)?' Use the rules of this chapter in 2 or 3 sentences about your work.':''),reps:3,from:p.id});
+    tgt.parts.push({id:uid(),name:(m[1]+p.name).slice(0,160),due:null,done:null,note:'Source: '+it.name+' · '+p.name+'\n'+m[2]+(m[0]==='speak'&&/grammar/i.test(it.name)?' Use the rules of this chapter in 2 or 3 sentences about your work.':''),from:p.id});
   });
 }
 function isNotes(it){return !!(it&&it.notes);}
@@ -1658,7 +1658,29 @@ function promptNotes(it,p){
   L.push('Keep your messages short. Start with step 1.','','--- MY NOTES ---','[paste or attach your markdown here]');
   return L.join('\n');
 }
+function promptMirror(it,p){
+  var L=[],src=String(p.note||'').split('\n')[0].replace(/^Source:\s*/,'');
+  if(it.mirror==='speak'){
+    L.push('Speaking practice: I want to explain "'+p.name.replace(/^Explain:\s*/,'')+'" out loud in English'+(src?' (it comes from my study session: '+src+')':'')+'. Speak English only. This is not a lesson: do not teach me the topic again. You only listen and fix my English.','');
+    L.push('1. Ask me to explain the topic as if I were talking to a colleague or a client: what it is, why it matters and one example from my work. I will dictate or type it. Wait for me.');
+    L.push('2. Then tell me what was clear, and correct my English: grammar, word choice, and phrases that sound unnatural. Show a better version of my explanation in simple English, about 100 words.');
+    L.push('3. I will say it again with your corrections and you check it. At most 3 rounds.');
+    L.push('4. When I say I am done, give me: my best version, 3 phrases to reuse and the 2 mistakes I should avoid.','');
+    L.push('Keep your messages short. Do not ask me anything else. Start with step 1.');
+  }else{
+    L.push('Listening practice: I will listen to the audio recap of "'+p.name.replace(/^Listen:\s*/,'')+'" in English'+(src?' (from my study session: '+src+')':'')+'. The text of the audio is at the end of this message: do not show it to me until I ask for it. Speak English only.','');
+    L.push('Do ONE step at a time and wait for me.');
+    L.push('1. I listen once without subtitles and tell you what I understood. Ask me for it.');
+    L.push('2. Compare my summary with the text: tell me what I got, what I missed and what I got wrong. Do not quote the text yet.');
+    L.push('3. I listen again with subtitles and send you the words or phrases I did not catch. Explain each one in simple English with an example.');
+    L.push('4. I listen a third time without subtitles and tell you the main idea again. Tell me how it improved.');
+    L.push('5. When I say I am done, give me 5 new words or phrases from this audio, each with a short meaning and one example sentence.','');
+    L.push('Keep your messages short. Start with step 1.','','--- AUDIO TEXT ---','[paste the listening text from your study session here]');
+  }
+  return L.join('\n');
+}
 function promptStudy(it,p){
+  if(it.mirror)return promptMirror(it,p);
   if(isNotes(it))return promptNotes(it,p);
   var L=[],fo=focusOf(it),life=lifeOf(it),lang=!!it.lang,src=fo?'the best attached source for each concept (say which one)':'the main source',org=fo?'the sources organize them':'the source organizes them',mini=/mini-?proje/i.test(p.note||'');
   L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". '+(fo?'Use the reference sources, my learning focus and the parts.txt attached to this Project, and follow the Project instructions.':'Use the main source, the complementary sources and the parts.txt attached to this Project, and follow the Project instructions.')+' The whole session is in English.');
