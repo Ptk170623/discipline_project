@@ -35,10 +35,5 @@ AREA: Professional
   > Times: 4
   > Listen to: a conference talk on data quality. Understand: the main problem and two solutions.
 
-PROJECT: English Grammar (course)
-AREA: Personal
-- Chapter 1: (title)
-  > Goal: I can ...
-  > Rules: ...
-  > Test: ...
+
 ```

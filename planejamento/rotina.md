@@ -31,7 +31,7 @@ Tarefas diárias primeiro. Depois, nesta ordem: João (Bíblia), Lewis, curso de
 - **Teologia (Bíblia)** e os **livros pessoais** são capacidades pessoais, uma parte por capítulo, com trabalho todo dia (ler e marcar). Hoje só Lewis (Mere Christianity) está ativo; Carnegie e Covey começam quando ele terminar.
 - **No fim de semana:** passar as marcas para um markdown rolante, um capítulo por vez. O botão Prompt de cada parte gera o prompt de estudo a partir do markdown do capítulo.
 - **English Speaking** e **English Listening** são duas capacidades profissionais, com trabalho todo dia (Speaking no almoço, Listening à noite). Cada tema é uma parte, com a quantidade de vezes para trabalhar; você marca como concluída quando conseguir falar ou entender o tema. Falta cadastrar os temas.
-- **Curso de gramática (42 capítulos):** capacidade pessoal com trabalho todo dia: ver o vídeo e anotar na semana; no fim de semana, passar para markdown.
+- **English Grammar:** capacidade profissional de idioma, estudada com três livros de gramática e uso (anexados ao Projeto do Claude), dividida em tópicos pelo agente. Trabalho todo dia; no prompt, o tutor usa frases e exemplos do seu trabalho.
 - **Partes concluídas alimentam o inglês:** ao concluir uma parte de qualquer capacidade, o app cria "Explain: <parte>" em Communication / English Speaking e "Listen: <parte>" em English Listening, cada uma com 3 vezes para trabalhar. O áudio de resumo da sessão de estudo é o material do Listening.
 - **Formato de cada entrada do markdown:** data · página · trecho marcado · `Me:` uma linha com as suas palavras.
 - **Prazos:** nenhum por enquanto.
