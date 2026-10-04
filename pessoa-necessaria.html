@@ -1473,6 +1473,7 @@ function itemForm(m){
    '<div class="field" style="flex:1 1 140px"><label for="f-spw">Sessões por semana</label><input type="number" id="f-spw" name="spw" min="1" max="40" step="1" value="'+esc(it&&it.spw?it.spw:'')+'" placeholder="Ex.: 6"></div></div>'+
    '<label class="check"><input type="checkbox" name="daily"'+(it&&it.daily?' checked':'')+'> <span>Trabalhar todo dia (um passo por dia no guia, inclusive no fim de semana)</span></label>'+
    '<div class="field"><label for="f-slot">Quando no dia (se trabalhar todo dia)</label><select id="f-slot" name="slot"><option value="">Estudo (padrão)</option>'+SLOTS.map(function(z){return '<option value="'+z[0]+'"'+(it&&it.slot===z[0]?' selected':'')+'>'+esc(z[1])+'</option>';}).join('')+'</select></div>'+
+   '<label class="check"><input type="checkbox" name="lang"'+(it&&it.lang?' checked':'')+'> <span>Idioma (gramática e uso): o prompt usa frases suas e exemplos do trabalho, sem bases de dados</span></label>'+
    '<label class="check"><input type="checkbox" name="notes"'+(it&&it.notes?' checked':'')+'> <span>Projeto de leitura e anotações (o prompt de estudo parte do seu markdown)</span></label>'+
    '<div class="field"><label for="f-status">Situação</label><select id="f-status" name="status"><option value="">Ativa</option><option value="espera"'+(it&&it.status==='espera'?' selected':'')+'>Em espera (próximas ondas)</option></select><span class="hint">O prazo é opcional: dá para deixar em branco e calcular depois pelas partes.</span></div>'+
    (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
@@ -1533,6 +1534,7 @@ function lifeOf(it){return areaOf(it)==='pess';}
 var LIFE_HINT='Use concrete scenes from everyday life and work, such as family, friends, church, clients and colleagues.';
 function focusOf(it){return String(it&&it.focus||'').trim();}
 function kindEn(it){return kindOf(it)==='cap'?'capability':'project';}
+var LANG_HINT='Use examples from my work in English (emails, meetings, reports, messages to colleagues and clients) and point out the common mistakes of Portuguese speakers with each topic.';
 var DOMAIN_HINT='In math or statistics, include a worked numerical example step by step; for tools (like git), real commands and what happens at each one.';
 var LANG_RULES=['Teach entirely in English: explanations, examples, code comments and review cards. I am a native Portuguese speaker building professional fluency, so use clear, natural English and define each key technical term in plain English the first time it appears.',
   'If I answer in Portuguese, reply in English and ask me to try again in English.',
@@ -1550,20 +1552,24 @@ function promptProject(it){
   else{L.push('- Main source (attached): '+(s.main||'[main book, repository or course]')+'.');
   if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');}
   L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
-  if(!lifeOf(it))L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
+  if(!lifeOf(it)&&!it.lang)L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
   L.push('','How to teach:');
   if(fo){
-    L.push('1. My learning focus leads, not any one source. Teach each concept from the attached source that explains it best, say which one and where (chapter and section, or module and file), and show why the concept matters for the data work I do. If no attached source covers a concept well, say so and teach it with an exercise on my datasets instead of inventing a citation.');
+    L.push('1. My learning focus leads, not any one source. Teach each concept from the attached source that explains it best, say which one and where (chapter and section, or module and file), and show why the concept matters for '+(it.lang?'the English I use at work':'the data work I do')+'. If no attached source covers a concept well, say so and teach it with '+(it.lang?'examples from my work':'an exercise on my datasets')+' instead of inventing a citation.');
     L.push('2. Use the other sources to compare viewpoints and fill gaps. When a source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
   }else{
   L.push('1. The main source leads. Follow the author\'s order, examples and way of explaining (for a repository or course, the order of the modules and the code examples) and always show why the concept appears at that point: what problem it solves and what it sets up next. Cite chapter and section, or module and file.');
   L.push('2. Use the complementary sources to fill gaps. When the main source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
   }
-  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+(lifeOf(it)?LIFE_HINT:DOMAIN_HINT));
+  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+(lifeOf(it)?LIFE_HINT:it.lang?LANG_HINT:DOMAIN_HINT));
   L.push('4. Work in small steps and wait for my answer before moving on. I lead the pace and I want to question you, so answer my questions fully and ask me questions back.');
   var life=lifeOf(it);
   L.push('','Practice:');
-  if(life){
+  if(it.lang){
+    L.push('5. Practice is language practice, not code. For each topic, ask me to write or say new sentences about my work that use it, and correct them. I study on a tablet and I can also practice later at work, in real emails and meetings.');
+    L.push('6. Give me a short mini-task for each topic (for example 5 sentences or a short email using the rule) and review what I bring back in a later session.');
+    L.push('7. Never ask for or display personal data about me or other people (names, CPF, phone numbers, addresses). Use roles or invented names in examples.');
+  }else if(life){
     L.push('5. Practice happens in real life, not on a computer. For each idea give me one small, concrete experiment for the coming days: one situation, what to do and what to observe. I report back and you help me reflect on what worked and what I would change.');
     L.push('6. Keep other people anonymous: use roles or first names, never private details about them.');
     L.push('7. If the source is religious or philosophical, present the author\'s argument faithfully and fairly, label your own comments, and do not steer me toward or away from any belief; help me understand and test the reasoning.');
@@ -1573,10 +1579,10 @@ function promptProject(it){
     L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
     L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
   }
-  var nx=life?8:9;
+  var nx=(life||it.lang)?8:9;
   if(hasPrac(it)){L.push(nx+'. Apply my practice rules in every hands-on step and mini-project.'+(usesDiagram(it)?' Diagrams are Mermaid text, so I can edit and review them.':''));nx++;}
   L.push('','Language:');
-  LANG_RULES.slice(0,life?3:4).forEach(function(x,i){L.push((nx+i)+'. '+x);});
+  LANG_RULES.slice(0,(life||it.lang)?3:4).forEach(function(x,i){L.push((nx+i)+'. '+x);});
   return L.join('\n');
 }
 function promptPlan(it){
@@ -1599,7 +1605,8 @@ function promptPlan(it){
   else L.push('1. Follow the structure and order of the main source (the book chapters, or the course/repository modules). Each part is ONE concept (or a small group of tightly linked subconcepts), in the order the author builds the reasoning, for a 45 to 60 minute session.');
   L.push('2. Leave out what does not help to understand and use the concepts (preface, long history, digressions), but keep the motivation the author gives for each concept. Match the number of parts to the depth.');
   var lf=it&&lifeOf(it);
-  if(pf)L.push('3. For each part, write the notes: Source (the best attached source for this concept: book and chapter or section, or module and file; if none covers it, write "no attached source" and design the part as '+(lf?'a reflection or an experiment':'an exercise on my datasets')+'), Why here (why this concept comes at this point), Practical value and '+(lf?'a Mini-project that follows my practice rules: a real-life experiment of 3 to 7 days (one situation, what to do, what to observe).':'a 20 to 60 minute Mini-project that follows my practice rules and uses the datasets described in this Project.'));
+  if(it&&it.lang)L.push('3. For each part, write the notes: Source (the best attached book for this topic, with chapter, section and pages; if the other books cover it too, add their chapters), Why here (why this topic matters for professional English), Practical value (where I use it at work: emails, meetings, reports, messages) and a Mini-project: a 15 to 20 minute writing or speaking task (for example 5 sentences or a short email using the rule) that I do later.');
+  else if(pf)L.push('3. For each part, write the notes: Source (the best attached source for this concept: book and chapter or section, or module and file; if none covers it, write "no attached source" and design the part as '+(lf?'a reflection or an experiment':'an exercise on my datasets')+'), Why here (why this concept comes at this point), Practical value and '+(lf?'a Mini-project that follows my practice rules: a real-life experiment of 3 to 7 days (one situation, what to do, what to observe).':'a 20 to 60 minute Mini-project that follows my practice rules and uses the datasets described in this Project.'));
   else L.push('3. For each part, write the notes: Source (chapter, section and pages, or module and file), Why here (why the concept appears at this point), Practical value and '+(lf?'a Mini-project: a real-life experiment of 3 to 7 days (one situation, what to do, what to observe).':(pracOf(it)?'a 20 to 60 minute Mini-project that follows my practice rules and uses the datasets described in this Project (if it does not fit, an exercise with data generated in the script).':'a 20 to 60 minute Mini-project using the datasets described in this Project (if it does not fit, an exercise with data generated in the script).')));
   L.push('4. Spread the dates from today, respecting the sessions per week. If the final deadline does not fit, say so and suggest another one.');
   if(pf)L.push('5. Never assign a whole book. Cite only the pages needed for the concept (a first pass); later capabilities go deeper into the same books.');
@@ -1653,7 +1660,7 @@ function promptNotes(it,p){
 }
 function promptStudy(it,p){
   if(isNotes(it))return promptNotes(it,p);
-  var L=[],fo=focusOf(it),life=lifeOf(it),src=fo?'the best attached source for each concept (say which one)':'the main source',org=fo?'the sources organize them':'the source organizes them',mini=/mini-?proje/i.test(p.note||'');
+  var L=[],fo=focusOf(it),life=lifeOf(it),lang=!!it.lang,src=fo?'the best attached source for each concept (say which one)':'the main source',org=fo?'the sources organize them':'the source organizes them',mini=/mini-?proje/i.test(p.note||'');
   L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". '+(fo?'Use the reference sources, my learning focus and the parts.txt attached to this Project, and follow the Project instructions.':'Use the main source, the complementary sources and the parts.txt attached to this Project, and follow the Project instructions.')+' The whole session is in English.');
   if(p.note)L.push('Plan notes: '+p.note.replace(/\n+/g,' · '));
   L.push('','Do ONE step at a time and wait for my answer before moving on.','');
@@ -1661,6 +1668,7 @@ function promptStudy(it,p){
   L.push('Step 2 — Map: the main concept and its subconcepts, organized the way '+org+' (cite chapter and section, or module and file), with a one-line plain-English meaning for each key term. Do not explain yet. Instead, ask me to explain the concepts with what I already know or imagine. Do not correct me yet.');
   var s3='Step 3 — Teaching along the author\'s line: explain it the way the author (or the course) does (the intuition, the argument and the examples) and give the formal definition. If the source is confusing, add your own explanation and make clear what is yours. Tell me what was right and what was wrong in my attempt.';
   if(life)s3+=' Then use short real-life scenes (work, family, friends, church) to explain it and ask what I would do; keep other people anonymous. '+(mini?'Offer the mini-project from the plan notes as my experiment (adjust it if needed).':'Offer a 3 to 7 day experiment: one situation, what to do and what to observe.')+' If needed, split this into more than one round.';
+  else if(lang)s3+=' Then explain the usage with examples from my work in English (emails, meetings, reports, messages) and the common mistakes of Portuguese speakers with this point.'+(mini?' Include the mini-project from the plan notes as the practice task.':'')+' Ask me to write sentences that use the rule and correct them. If needed, split this into more than one round.';
   else s3+=' Then use the schema of my real database described in the Project (or generated data if it does not fit) to explain the content with real practice'+(hasPrac(it)?', applying my practice rules before any code'+(usesDiagram(it)?' (for example, ask me to draw the diagram as Mermaid text first)':''):'')+'.'+(mini?' Include the mini-project from the plan notes as the practice task.':'')+' If needed, split this into more than one round and ask me to go on to the practice explanation. I study on a tablet and cannot run scripts, so write the scripts anyway and explain them, with the expected output, for me to run later at work.';
   L.push(s3);
   L.push('Step 4 — My definition: ask me to write a definition in my own words, from scratch, and let me ask questions until I understand all the content.');
@@ -1671,15 +1679,15 @@ function promptStudy(it,p){
   L.push('SOURCE: (chapter and section, or module and file)');
   L.push('QUESTIONS: (3 to 5 questions I must answer from scratch, the ones I struggled with first)');
   L.push('MY DEFINITION: (my definition in my own words, corrected with your feedback)');
-  L.push(life?'EXAMPLE: (one simple real-life scene that shows the idea)':'EXAMPLE: (one simple example that uses my database schema)');
-  L.push(life?'ACTION: (the experiment: situation, what to do, what to observe, and whether it is done or pending)':'PRACTICE FOR WORK: (the task, the script and its expected output, and whether it is done or pending)');
+  L.push(life?'EXAMPLE: (one simple real-life scene that shows the idea)':lang?'EXAMPLE: (one correct sentence of mine about my work that uses the rule)':'EXAMPLE: (one simple example that uses my database schema)');
+  L.push(life?'ACTION: (the experiment: situation, what to do, what to observe, and whether it is done or pending)':lang?'PRACTICE: (3 new sentences about my work that use the rule, and whether they are done or pending)':'PRACTICE FOR WORK: (the task, the script and its expected output, and whether it is done or pending)');
   if(usesDiagram(it))L.push('DIAGRAM: (my final Mermaid diagram for this part, with its failure points marked)');
   L.push('WATCH OUT: (what I got wrong or forgot)');
   L.push('KEY TERMS: (the new English terms from this session, each with a short meaning)','');
   L.push('B) Listening — one long talk about the whole part, which I will paste into a text-to-speech tool and use in my Listening task tonight. Output only the text to be read, separate from the flashcard, with no introduction and no notes.');
   L.push('Rules for the text: plain prose, as if you were speaking to me. No headings, no bullet points, no tables, no markdown symbols and no code. Short, clear sentences in natural English, without idioms. Say numbers, formulas, symbols and commands in words, and describe code and diagrams in words: what they do, not their syntax. Use my corrected ideas and the mistakes I made.');
   L.push('Length: about 1,500 words, around ten minutes of audio. If you need more room, split it into chunks of at most 1,500 words, each one starting with the words "Part 1 of 2", "Part 2 of 2" and so on.');
-  L.push('Order: (1) why the concept matters and where it sits in the source; (2) the concepts and the explanation of each; (3) '+(life?'the scenes and the experiment':'the practice on my database schema, told in words, and what it would show')+'; (4) my mistakes and the common confusions; (5) the key terms, each with a one-sentence meaning; (6) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start now with Step 1.');
+  L.push('Order: (1) why the concept matters and where it sits in the source; (2) the concepts and the explanation of each; (3) '+(life?'the scenes and the experiment':lang?'examples from work that use the rule, said slowly and clearly':'the practice on my database schema, told in words, and what it would show')+'; (4) my mistakes and the common confusions; (5) the key terms, each with a one-sentence meaning; (6) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start now with Step 1.');
   return L.join('\n');
 }
 function promptReview(it,p,r){
@@ -1699,7 +1707,7 @@ function promptReview(it,p,r){
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
   L.push('1. Ask the card\'s questions one at a time (or questions that force me to explain the concept) and wait for me to answer from memory, in English. Question my logic with a "why" before you confirm anything.');
   L.push('2. Compare my answer with the reference, the source\'s explanation'+(p.card?' and my definition on the card':'')+': what I got right, what I forgot and what I mixed up.');
-  L.push(lifeOf(it)?'3. Ask me to describe a recent real situation where I used this idea, or could have, and discuss it; or give me a new scene and ask what I would do. Do not give me the answer first. If the card has a pending experiment, ask whether I did it and review it.':hasPrac(it)?'3. Use one of my practice rules instead of only a script: for example ask me to sketch the diagram for a new scenario and mark its failure points, or show me a short plausible script with a silent bug and ask me to find it. Do not give me the answer first. If the card has a pending mini-project, ask whether I did it and review it.':'3. Ask me to write, as text, a small script or query that applies it to my datasets (do not give me the code). I do not run it now; I test it at work later. If the card has a pending mini-project for work, ask what happened when I did it and review it.');
+  L.push(lifeOf(it)?'3. Ask me to describe a recent real situation where I used this idea, or could have, and discuss it; or give me a new scene and ask what I would do. Do not give me the answer first. If the card has a pending experiment, ask whether I did it and review it.':it.lang?'3. Ask me to write 3 new sentences about my work that use this idea, and correct them. Do not give me the answer first. If the card has pending practice sentences, ask me to bring them and review them.':hasPrac(it)?'3. Use one of my practice rules instead of only a script: for example ask me to sketch the diagram for a new scenario and mark its failure points, or show me a short plausible script with a silent bug and ask me to find it. Do not give me the answer first. If the card has a pending mini-project, ask whether I did it and review it.':'3. Ask me to write, as text, a small script or query that applies it to my datasets (do not give me the code). I do not run it now; I test it at work later. If the card has a pending mini-project for work, ask what happened when I did it and review it.');
   L.push('4. Finish with a one-line verdict: "REVIEW DONE" if I explained and applied the essentials without help, or "REVIEW AGAIN" if something important was missing, saying what to reinforce.');
   L.push('5. If my definition improved, generate the updated card in the same format.');
   return L.join('\n');
@@ -2078,9 +2086,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',idaily=fd.get('daily')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim(),preps=Math.max(0,Math.round(+fd.get('reps')||0))||null;if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;if(preps)p.reps=preps;else delete p.reps;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
