@@ -1,5 +1,321 @@
 // Capacidades pessoais — arquivo de importação do app
-//
-// Os três livros (Carnegie, Lewis e Covey) deixaram de ser capacidades e viraram projetos de leitura
-// e anotações, com uma parte por capítulo. Veja planejamento/projetos-leitura.txt.
-// Este arquivo fica vazio de propósito: aqui entram só capacidades pessoais novas, que não sejam livros.
+// Como usar: Capacidades → Pessoal → Importar arquivo → Pré-visualizar → Importar.
+// A Bíblia (Teologia) e os livros pessoais são capacidades pessoais, uma parte por capítulo. Trabalhe todo dia (ler e marcar) e, no fim de semana,
+// passe as marcas para um markdown rolante. Hoje só Lewis (Mere Christianity) está ativo; Carnegie e Covey começam quando ele terminar.
+// Depois de importar, em Editar marque "Trabalhar todo dia" e "Projeto de leitura e anotações". O app já está com tudo criado; este arquivo é uma cópia do plano.
+// Os títulos de Lewis (Livro IV, 10 e 11) e de Carnegie (Partes 3 e 4) vieram da memória: confira com a sua edição.
+
+CAPABILITY: Theology (Bible)
+AREA: Personal
+SOURCES: Bible: Gospel of John, in my study Bible
+DEPTH: Conceptual
+SESSIONS: 7
+PRACTICE: Reading-notes project. During the week I read with a pencil (or mark in the tablet). On the weekend I turn the marks into a rolling markdown note for this book, one entry per mark: date, page, the marked passage and 'Me:' one line in my own words. In each session, help me turn my marks into those entries, question me about them and study the chapter a little more.
+- John 1
+  > Source: Gospel of John, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 2
+  > Source: Gospel of John, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 3
+  > Source: Gospel of John, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 4
+  > Source: Gospel of John, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 5
+  > Source: Gospel of John, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 6
+  > Source: Gospel of John, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 7
+  > Source: Gospel of John, chapter 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 8
+  > Source: Gospel of John, chapter 8
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 9
+  > Source: Gospel of John, chapter 9
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 10
+  > Source: Gospel of John, chapter 10
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 11
+  > Source: Gospel of John, chapter 11
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 12
+  > Source: Gospel of John, chapter 12
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 13
+  > Source: Gospel of John, chapter 13
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 14
+  > Source: Gospel of John, chapter 14
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 15
+  > Source: Gospel of John, chapter 15
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 16
+  > Source: Gospel of John, chapter 16
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 17
+  > Source: Gospel of John, chapter 17
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 18
+  > Source: Gospel of John, chapter 18
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 19
+  > Source: Gospel of John, chapter 19
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 20
+  > Source: Gospel of John, chapter 20
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- John 21
+  > Source: Gospel of John, chapter 21
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+
+CAPABILITY: Mere Christianity
+AREA: Personal
+SOURCES: Book: Mere Christianity (C. S. Lewis), Portuguese edition: Cristianismo Puro e Simples
+DEPTH: Conceptual
+SESSIONS: 7
+PRACTICE: Reading-notes project. During the week I read with a pencil (or mark in the tablet). On the weekend I turn the marks into a rolling markdown note for this book, one entry per mark: date, page, the marked passage and 'Me:' one line in my own words. In each session, help me turn my marks into those entries, question me about them and study the chapter a little more.
+- Book I, 1: The Law of Human Nature
+  > Source: Mere Christianity, Book I, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book I, 2: Some Objections
+  > Source: Mere Christianity, Book I, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book I, 3: The Reality of the Law
+  > Source: Mere Christianity, Book I, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book I, 4: What Lies Behind the Law
+  > Source: Mere Christianity, Book I, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book I, 5: We Have Cause to Be Uneasy
+  > Source: Mere Christianity, Book I, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book II, 1: The Rival Conceptions of God
+  > Source: Mere Christianity, Book II, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book II, 2: The Invasion
+  > Source: Mere Christianity, Book II, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book II, 3: The Shocking Alternative
+  > Source: Mere Christianity, Book II, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book II, 4: The Perfect Penitent
+  > Source: Mere Christianity, Book II, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book II, 5: The Practical Conclusion
+  > Source: Mere Christianity, Book II, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 1: The Three Parts of Morality
+  > Source: Mere Christianity, Book III, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 2: The "Cardinal Virtues"
+  > Source: Mere Christianity, Book III, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 3: Social Morality
+  > Source: Mere Christianity, Book III, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 4: Morality and Psychoanalysis
+  > Source: Mere Christianity, Book III, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 5: Sexual Morality
+  > Source: Mere Christianity, Book III, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 6: Christian Marriage
+  > Source: Mere Christianity, Book III, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 7: Forgiveness
+  > Source: Mere Christianity, Book III, chapter 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 8: The Great Sin
+  > Source: Mere Christianity, Book III, chapter 8
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 9: Charity
+  > Source: Mere Christianity, Book III, chapter 9
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 10: Hope
+  > Source: Mere Christianity, Book III, chapter 10
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 11: Faith
+  > Source: Mere Christianity, Book III, chapter 11
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book III, 12: Faith
+  > Source: Mere Christianity, Book III, chapter 12
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 1: Making and Begetting
+  > Source: Mere Christianity, Book IV, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 2: The Three-Personal God
+  > Source: Mere Christianity, Book IV, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 3: Time and Beyond Time
+  > Source: Mere Christianity, Book IV, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 4: Good Infection
+  > Source: Mere Christianity, Book IV, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 5: The Obstinate Toy Soldiers
+  > Source: Mere Christianity, Book IV, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 6: Two Notes
+  > Source: Mere Christianity, Book IV, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 7: Let's Pretend
+  > Source: Mere Christianity, Book IV, chapter 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 8: Is Christianity Hard or Easy?
+  > Source: Mere Christianity, Book IV, chapter 8
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 9: Counting the Cost
+  > Source: Mere Christianity, Book IV, chapter 9
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 10: Nice People or New Men
+  > Source: Mere Christianity, Book IV, chapter 10
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Book IV, 11: The New Men
+  > Source: Mere Christianity, Book IV, chapter 11
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+
+CAPABILITY: How to Win Friends and Influence People
+AREA: Personal
+SOURCES: Book: How to Win Friends and Influence People (Dale Carnegie), Portuguese edition: Como Fazer Amigos e Influenciar Pessoas
+DEPTH: Solid
+SESSIONS: 7
+STATUS: On hold
+PRACTICE: Reading-notes project. During the week I read with a pencil (or mark in the tablet). On the weekend I turn the marks into a rolling markdown note for this book, one entry per mark: date, page, the marked passage and 'Me:' one line in my own words. In each session, help me turn my marks into those entries, question me about them and study the chapter a little more.
+- Part One, 1: If You Want to Gather Honey, Don't Kick Over the Beehive
+  > Source: How to Win Friends and Influence People, Part One, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part One, 2: The Big Secret of Dealing with People
+  > Source: How to Win Friends and Influence People, Part One, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part One, 3: He Who Can Do This Has the Whole World with Him
+  > Source: How to Win Friends and Influence People, Part One, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 1: Do This and You'll Be Welcome Anywhere
+  > Source: How to Win Friends and Influence People, Part Two, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 2: A Simple Way to Make a Good First Impression
+  > Source: How to Win Friends and Influence People, Part Two, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 3: If You Don't Do This, You Are Headed for Trouble
+  > Source: How to Win Friends and Influence People, Part Two, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 4: An Easy Way to Become a Good Conversationalist
+  > Source: How to Win Friends and Influence People, Part Two, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 5: How to Interest People
+  > Source: How to Win Friends and Influence People, Part Two, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Two, 6: How to Make People Like You Instantly
+  > Source: How to Win Friends and Influence People, Part Two, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 1: You Can't Win an Argument
+  > Source: How to Win Friends and Influence People, Part Three, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 2: A Sure Way of Making Enemies, and How to Avoid It
+  > Source: How to Win Friends and Influence People, Part Three, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 3: If You're Wrong, Admit It
+  > Source: How to Win Friends and Influence People, Part Three, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 4: A Drop of Honey
+  > Source: How to Win Friends and Influence People, Part Three, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 5: The Secret of Socrates
+  > Source: How to Win Friends and Influence People, Part Three, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 6: The Safety Valve in Handling Complaints
+  > Source: How to Win Friends and Influence People, Part Three, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 7: How to Get Cooperation
+  > Source: How to Win Friends and Influence People, Part Three, chapter 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 8: A Formula That Will Work Wonders for You
+  > Source: How to Win Friends and Influence People, Part Three, chapter 8
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 9: What Everybody Wants
+  > Source: How to Win Friends and Influence People, Part Three, chapter 9
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 10: An Appeal That Everybody Likes
+  > Source: How to Win Friends and Influence People, Part Three, chapter 10
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 11: The Movies Do It. TV Does It. Why Don't You Do It?
+  > Source: How to Win Friends and Influence People, Part Three, chapter 11
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Three, 12: When Nothing Else Works, Try This
+  > Source: How to Win Friends and Influence People, Part Three, chapter 12
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 1: If You Must Find Fault, This Is the Way to Begin
+  > Source: How to Win Friends and Influence People, Part Four, chapter 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 2: How to Criticize, and Not Be Hated for It
+  > Source: How to Win Friends and Influence People, Part Four, chapter 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 3: Talk About Your Own Mistakes First
+  > Source: How to Win Friends and Influence People, Part Four, chapter 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 4: No One Likes to Take Orders
+  > Source: How to Win Friends and Influence People, Part Four, chapter 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 5: Let the Other Person Save Face
+  > Source: How to Win Friends and Influence People, Part Four, chapter 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 6: How to Spur People On to Success
+  > Source: How to Win Friends and Influence People, Part Four, chapter 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 7: Give a Dog a Good Name
+  > Source: How to Win Friends and Influence People, Part Four, chapter 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 8: Make the Fault Seem Easy to Correct
+  > Source: How to Win Friends and Influence People, Part Four, chapter 8
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Part Four, 9: Making People Glad to Do What You Want
+  > Source: How to Win Friends and Influence People, Part Four, chapter 9
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+
+CAPABILITY: The 7 Habits of Highly Effective People
+AREA: Personal
+SOURCES: Book: The 7 Habits of Highly Effective People (Stephen R. Covey), Portuguese edition: Os 7 Hábitos das Pessoas Altamente Eficazes
+DEPTH: Solid
+SESSIONS: 7
+STATUS: On hold
+PRACTICE: Reading-notes project. During the week I read with a pencil (or mark in the tablet). On the weekend I turn the marks into a rolling markdown note for this book, one entry per mark: date, page, the marked passage and 'Me:' one line in my own words. In each session, help me turn my marks into those entries, question me about them and study the chapter a little more.
+- Inside-Out
+  > Source: The 7 Habits of Highly Effective People, Inside-Out
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- The Seven Habits: An Overview
+  > Source: The 7 Habits of Highly Effective People, Overview
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 1: Be Proactive
+  > Source: The 7 Habits of Highly Effective People, Habit 1
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 2: Begin with the End in Mind
+  > Source: The 7 Habits of Highly Effective People, Habit 2
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 3: Put First Things First
+  > Source: The 7 Habits of Highly Effective People, Habit 3
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Paradigms of Interdependence
+  > Source: The 7 Habits of Highly Effective People, Part Three intro
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 4: Think Win/Win
+  > Source: The 7 Habits of Highly Effective People, Habit 4
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 5: Seek First to Understand, Then to Be Understood
+  > Source: The 7 Habits of Highly Effective People, Habit 5
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 6: Synergize
+  > Source: The 7 Habits of Highly Effective People, Habit 6
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Habit 7: Sharpen the Saw
+  > Source: The 7 Habits of Highly Effective People, Habit 7
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.
+- Inside-Out Again
+  > Source: The 7 Habits of Highly Effective People, Inside-Out Again
+  > Weekend session: type my pencil marks from this chapter into the markdown note (date, page, marked passage and 'Me:' one line in my own words), then study the chapter a little more.

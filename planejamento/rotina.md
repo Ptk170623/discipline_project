@@ -26,14 +26,18 @@ Exercício e **uma** sessão de estudo de uma capacidade profissional. O Listeni
 
 Tarefas diárias primeiro. Depois, nesta ordem: João (Bíblia), Lewis, curso de gramática de inglês, estudos profissionais. Speaking e Listening todos os dias. Só estudo no fim de semana; os projetos profissionais ficam no trabalho.
 
-## Leitura e anotações
+## Leitura, Bíblia e inglês
 
-- **Tarefa diária (30 min cada):** ler e marcar a Bíblia e o livro pessoal, com lápis ou na tablet. Sem meta de capítulos por dia.
-- **Projeto por livro (fim de semana):** passar as marcas para um markdown rolante, um capítulo por vez, até terminar o livro. Ordem: João, Lewis, depois Carnegie e Covey.
-- **Curso de gramática (42 capítulos):** ver o vídeo, anotar, e passar para markdown no fim de semana.
-- **Estudo do capítulo:** o botão Prompt de cada parte dos projetos de leitura gera um prompt para você colar junto com o markdown do capítulo. Você explica do zero, a IA agrupa por linhas de raciocínio e marca o que foi bem, o que esqueceu e o que errou, corrige, e no fim faz um cartão de revisão do capítulo e um plano de ação com 3 passos. Em Editar, a caixa "Projeto de leitura e anotações" liga esse prompt.
+- **Teologia (Bíblia)** e os **livros pessoais** são capacidades pessoais, uma parte por capítulo, com trabalho todo dia (ler e marcar). Hoje só Lewis (Mere Christianity) está ativo; Carnegie e Covey começam quando ele terminar.
+- **No fim de semana:** passar as marcas para um markdown rolante, um capítulo por vez. O botão Prompt de cada parte gera o prompt de estudo a partir do markdown do capítulo.
+- **English Speaking** e **English Listening** são duas capacidades profissionais, com trabalho todo dia (Speaking no almoço, Listening à noite). Cada tema é uma parte, com a quantidade de vezes para trabalhar; você marca como concluída quando conseguir falar ou entender o tema. Falta cadastrar os temas.
+- **Curso de gramática (42 capítulos):** projeto de fim de semana: ver o vídeo, anotar e passar para markdown.
 - **Formato de cada entrada do markdown:** data · página · trecho marcado · `Me:` uma linha com as suas palavras.
-- **Prazos:** nenhum por enquanto. Teste um dia completo para medir o ritmo e só então defina datas.
+- **Prazos:** nenhum por enquanto.
+
+## Necessárias
+
+Rótulo **Necessária**: tarefa obrigatória todo dia, inclusive no fim de semana; se faltar, compensa em outro dia. Hoje: Exercício físico. As outras tarefas diárias são opcionais.
 
 ## Projeto no trabalho
 
