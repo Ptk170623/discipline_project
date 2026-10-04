@@ -915,6 +915,7 @@ function dayTally(day,ctx){
     if(!it.daily||it.status==='espera'||!it.parts.length)return;
     if(day<(it.since||ctx.start))return;
     var did=(ctx.byDay[day]||[]).some(function(e){return e.item===it.id&&(e.t==='work'||e.t==='done');});
+    if(!did&&!it.parts.some(function(q){return (!q.start||q.start<=day)&&(!q.done||q.done>=day);}))return;
     rows.push({kind:'cap',name:it.name,n:did?1:0,st:did?'ok':day<t?'miss':'todo'});req++;if(did)done++;
   });});
   var we=parse(day).getDay()%6===0,rq=Math.min(we?gcfg().we:gcfg().wk,we?ctx.cand.we:ctx.cand.wk);
@@ -1139,7 +1140,7 @@ function workedOn(p,t){return workOf(p.id).some(function(e){return e.d===t;})||p
 function focusPart(it,t){
   var w=it.parts.find(function(p){return workedOn(p,t);});
   if(w)return w;
-  return it.parts.filter(function(p){return !p.done;}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;})[0]||null;
+  return it.parts.filter(function(p){return !p.done&&(!p.start||p.start<=t);}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;})[0]||null;
 }
 function pickParts(n,t,we){
   var rk={profundo:0,solido:1,conceitual:2},c=[];
@@ -1639,7 +1640,7 @@ function mirrorDone(it,p){
   MIRRORS.forEach(function(m){
     var tgt=state.cap.find(function(x){return x.mirror===m[0];});
     if(!tgt||tgt.parts.some(function(x){return x.from===p.id;}))return;
-    tgt.parts.push({id:uid(),name:(m[1]+p.name).slice(0,160),due:null,done:null,note:'Source: '+it.name+' · '+p.name+'\n'+m[2]+(m[0]==='speak'&&/grammar/i.test(it.name)?' Use the rules of this chapter in 2 or 3 sentences about your work.':''),from:p.id});
+    tgt.parts.push({id:uid(),name:(m[1]+p.name).slice(0,160),due:null,done:null,note:'Source: '+it.name+' · '+p.name+'\n'+m[2]+(m[0]==='speak'&&/grammar/i.test(it.name)?' Use the rules of this chapter in 2 or 3 sentences about your work.':''),from:p.id,start:addDays(today(),1)});
   });
 }
 function isNotes(it){return !!(it&&it.notes);}
