@@ -41,21 +41,20 @@ valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o camp
 
 ## Cada parte
 
-O prompt da sessão de estudo não é uma sequência de passos para seguir. É um mapa de fases, e **você conduz**: pode interromper com uma pergunta,
-pedir para aprofundar, pular, voltar. O tutor pergunta mais do que explica (por quê? e se mudasse isso? como você sabe?) e não deixa uma ideia errada passar.
+O prompt da sessão de estudo tem 4 passos, **um de cada vez**, e o tutor espera a sua resposta antes de seguir. Você pode fazer perguntas a qualquer momento.
 
-1. **Valor da parte:** por que o conceito aparece ali, que problema resolve e para que serve.
-2. **Conceitos e perguntas:** a lista dos conceitos, cada um só com o nome e uma pergunta para pensar. Você tenta responder ou explicar mesmo sem saber, e o tutor não corrige ainda.
-3. **Explicação:** só dos conceitos que você errou ou deixou passar, poucos de cada vez, usando o schema das suas bases quando fizer sentido.
-4. **Com as suas palavras:** você explica de novo, do zero. O tutor questiona a lógica, testa com casos e faz você responder perguntas.
-5. **De novo até o fim:** repete 3 e 4 com os próximos conceitos e com os que ainda estão fracos, até explicar todos e a parte inteira.
-6. **Cartão de revisão e texto para ouvir:** feitos no final (mini-projeto ou experimento é opcional e fica pendente se você deixar para depois).
+1. **Por que esse conceito:** por que ele aparece ali, que problema resolve, o que prepara e para que serve na prática.
+2. **Mapa:** o conceito e os subconceitos, na ordem da fonte (com capítulo e seção), cada termo com uma linha de significado. O tutor não explica ainda: pede que você explique com o que já sabe ou imagina, e não corrige.
+3. **Ensino na linha do autor:** a explicação do jeito do autor (intuição, argumento, exemplos) e a definição formal; o tutor diz o que estava certo e errado na sua tentativa e usa o esquema da sua base real para a prática. Pode dividir em mais de uma rodada. Como você estuda na tablet e não roda código, o tutor escreve os scripts e explica, com a saída esperada, para você rodar depois no trabalho.
+4. **Sua definição:** você escreve do zero, com as suas palavras, e pergunta até entender tudo.
 
-O cartão traz as perguntas que fizeram você pensar e as suas definições corrigidas. O prompt da sessão não revisa partes anteriores: isso é feito pelas **revisões espaçadas do app** (D+1, D+7, D+30), que
+No final saem duas coisas: o **flashcard** (CONCEPT, SOURCE, QUESTIONS, MY DEFINITION, EXAMPLE, PRACTICE FOR WORK, WATCH OUT, KEY TERMS) e o **texto para ouvir** (cerca de 1.500 palavras, em prosa, com três perguntas para responder em voz alta), que você usa na tarefa Listening da mesma noite.
+
+O flashcard traz as perguntas que fizeram você pensar e a sua definição corrigida. O prompt da sessão não revisa partes anteriores: isso é feito pelas **revisões espaçadas do app** (D+1, D+7, D+30), que
 geram o prompt de revisão a partir do cartão salvo. Assim cada parte é revisada uma vez por dia marcado, e a sessão de estudo começa direto na parte nova.
 
 - **Estudar:** abra a parte no app → **Copiar prompt da sessão de estudo** → nova conversa **dentro do Projeto**.
-  Ao final, cole o cartão em **Colar cartão** e marque a parte.
+  Ao final, cole o flashcard em **Colar cartão** e marque a parte.
 - **Revisar:** no dia, **Prompt** ao lado da revisão → conversa no mesmo Projeto. O veredito
   (REVIEW DONE → **Revisão feita** / REVIEW AGAIN → **Revisar de novo**) é o botão que você aperta no app.
 
