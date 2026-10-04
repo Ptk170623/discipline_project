@@ -88,6 +88,7 @@ horários e o número de sessões em dias úteis e no fim de semana. Só quem ed
 - **Compensar:** um dia sem registro vira uma falta. Registrar a tarefa mais de uma vez em outro dia compensa as faltas mais antigas; o guia mostra um passo **Compensar** para cada falta aberta.
 - **Calendário:** cada dia mostra **feitas/necessárias** (tarefas necessárias, capacidades "todo dia" e sessões de estudo do guia) e vale também para os dias passados, desde o primeiro registro. O painel do dia lista o que era necessário e o que foi feito, e tem o campo **Por que não fiz tudo neste dia?** (guardado só na parte privada, se houver senha).
 - **Capacidades "todo dia":** em Editar, a opção **Trabalhar todo dia** coloca um passo por dia no guia (no bloco escolhido) e conta como necessária. Uma parte pode ter **Vezes para trabalhar**; você marca a parte como concluída quando conseguir.
+- **Speaking e Listening automáticos:** capacidades com a marca interna `mirror` (Communication / English Speaking e English Listening) ganham uma parte nova sempre que você conclui uma parte de outra capacidade ou projeto: "Explain: <parte>" (explicar em voz alta, em inglês simples) e "Listen: <parte>" (ouvir o áudio de resumo da sessão). Cada uma começa com 3 vezes para trabalhar.
 
 **Prática no trabalho.** Nas capacidades profissionais, os prompts não pedem que você rode código na hora: o agente explica como fazer a prática, com o seu
 esquema, e a prática vira tarefa para fazer no trabalho; o cartão registra o mini-projeto como pendente, para o trabalho.

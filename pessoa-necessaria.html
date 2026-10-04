@@ -1625,6 +1625,16 @@ function exportParts(it){
   });
   return L.join('\n')+'\n';
 }
+/* ao concluir uma parte, ela vira uma parte de Speaking (explicar em voz alta) e uma de Listening (ouvir o resumo em áudio) */
+var MIRRORS=[['speak','Explain: ','Explain it out loud in simple English, as to a colleague or client: what it is, why it matters and one example from your work.'],['listen','Listen: ','Use the audio recap of your study session on this part: listen in 4 passes (no subtitles, with subtitles, no subtitles, then tell the AI what it was about).']];
+function mirrorDone(it,p){
+  if(it.mirror)return;
+  MIRRORS.forEach(function(m){
+    var tgt=state.cap.find(function(x){return x.mirror===m[0];});
+    if(!tgt||tgt.parts.some(function(x){return x.from===p.id;}))return;
+    tgt.parts.push({id:uid(),name:(m[1]+p.name).slice(0,160),due:null,done:null,note:'Source: '+it.name+' · '+p.name+'\n'+m[2]+(m[0]==='speak'&&/grammar/i.test(it.name)?' Use the rules of this chapter in 2 or 3 sentences about your work.':''),reps:3,from:p.id});
+  });
+}
 function isNotes(it){return !!(it&&it.notes);}
 function promptNotes(it,p){
   var L=[];
@@ -1986,8 +1996,8 @@ document.addEventListener('click',function(ev){
     case 'part-bulk':openModal({kind:'bulk',k:d.k,item:d.item});break;
     case 'part-open':openModal({kind:'part',k:d.k,item:d.item,id:d.id});break;
     case 'part-work':{var c=curPart();if(!c)break;addLog('work',c.k,c.item,c.part);commit('Sessão registrada em '+fmt(today()));break;}
-    case 'part-done':{var c2=curPart();if(!c2)break;var t2=today();c2.part.done=t2;addLog('done',c2.k,c2.item,c2.part);
-      if(c2.k==='cap'){state.reviews=state.reviews.filter(function(r){return r.part!==c2.part.id;});state.reviews.push({id:uid(),part:c2.part.id,item:c2.item.id,stage:0,due:addDays(t2,1)});commit('Parte concluída. Revisão marcada para amanhã.');}
+    case 'part-done':{var c2=curPart();if(!c2)break;var t2=today();c2.part.done=t2;addLog('done',c2.k,c2.item,c2.part);mirrorDone(c2.item,c2.part);
+      if(c2.k==='cap'&&!c2.item.mirror){state.reviews=state.reviews.filter(function(r){return r.part!==c2.part.id;});state.reviews.push({id:uid(),part:c2.part.id,item:c2.item.id,stage:0,due:addDays(t2,1)});commit('Parte concluída. Revisão marcada para amanhã.');}
       else commit('Parte concluída');break;}
     case 'part-reopen':{var c3=curPart();if(!c3)break;var pid=c3.part.id,dd=c3.part.done;c3.part.done=null;var rm=false;state.log=state.log.filter(function(e){if(!rm&&e.t==='done'&&e.part===pid&&e.d===dd){rm=true;return false;}return true;});state.reviews=state.reviews.filter(function(r){return r.part!==pid;});commit('Parte reaberta');break;}
     case 'work-del':state.log=state.log.filter(function(e){return e.id!==d.id;});commit('Sessão apagada');break;
