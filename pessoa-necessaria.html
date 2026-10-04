@@ -1166,13 +1166,14 @@ function guide(){
   var late=[];
   state.daily.forEach(function(d){
     var sl=slotOf(d),x={type:'daily',d:d,done:!!dailyDates(d.id)[t]},cx=[];
-    if(isNeeded(d))needLedger(d).debts.forEach(function(day){cx.push({type:'comp',d:d,day:day,done:false});});
+    if(isNeeded(d))needLedger(d).debts.forEach(function(day){var pl=d.comp&&d.comp[day];if(pl&&pl>t)return;cx.push({type:'comp',d:d,day:day,plan:pl||'',done:false});});
     if(sl==='study'){late.push(x);cx.forEach(function(c){late.push(c);});}else{put(sl,x);cx.forEach(function(c){put(sl,c);});}
   });
   ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
     if(!it.daily||it.status==='espera')return;
     var sl=SLOTS.some(function(z){return z[0]===it.slot;})?it.slot:'study',dp=focusPart(it,t),x;
-    x=dp?{type:'study',k:k,it:it,p:dp,done:workedOn(dp,t)}:{type:'info',title:'Cadastre as partes de '+it.name,hint:'Liste os temas em Editar > + Parte. Cada parte pode ter um número de vezes para trabalhar.'};
+    if(!dp)return;
+    x={type:'study',k:k,it:it,p:dp,done:workedOn(dp,t)};
     if(sl==='study')late.push(x);else put(sl,x);
   });});
   var picks=pickParts(we?gcfg().we:gcfg().wk,t,we);
@@ -1180,7 +1181,7 @@ function guide(){
   var due=state.reviews.filter(function(r){return r.due&&r.due<=t&&findPart(r.part);});
   put(we?'study':'pm',{type:'reviews',n:due.length,done:!due.length});
   var st=picks.map(function(c){return {type:'study',k:c.k,it:c.it,p:c.p,done:workedOn(c.p,t)};});
-  var todo=[];['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(it.status!=='espera'&&!it.daily&&!it.parts.length)todo.push({type:'info',title:'Falta dividir em partes: '+it.name,hint:'Rode o prompt de divisão no Projeto do Claude e importe o resultado.'});});});
+  var todo=[];
   if(we)by.study=(by.study||[]).concat(st,todo,late);else{st.concat(todo,late).forEach(function(x){put('study',x);});}
   return SLOTS.filter(function(s){return !(we&&(s[0]==='am'||s[0]==='pm'))&&by[s[0]]&&by[s[0]].length;}).map(function(s){return {key:s[0],label:s[1],time:slotTime(s),steps:by[s[0]]};});
 }
@@ -1192,7 +1193,7 @@ function stepHtml(x){
     return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button><span class="gtext"><b>'+esc(d.name)+hidPill(d)+'</b>'+(hint?'<small>'+esc(hint)+'</small>':'')+'</span><button class="btn ghost sm" data-act="nav" data-to="daily:'+d.id+'">Abrir</button></li>';
   }
   if(x.type==='comp')
-    return '<li class="gstep"><button type="button" class="gchk" role="checkbox" aria-checked="false" aria-label="Compensar '+esc(x.d.name)+'" data-act="guide-comp" data-id="'+x.d.id+'"></button><span class="gtext"><b>Compensar: '+esc(x.d.name)+hidPill(x.d)+'</b><small>faltou em '+esc(fmtDow(x.day))+'</small></span></li>';
+    return '<li class="gstep"><button type="button" class="gchk" role="checkbox" aria-checked="false" aria-label="Compensar '+esc(x.d.name)+'" data-act="guide-comp" data-id="'+x.d.id+'"></button><span class="gtext"><b>Compensar: '+esc(x.d.name)+hidPill(x.d)+'</b><small>faltou em '+esc(fmtDow(x.day))+(x.plan?' · marcada para '+esc(fmtDow(x.plan)):'')+'</small></span><button class="btn ghost sm" data-act="nav" data-to="daily:'+x.d.id+'">Data</button></li>';
   if(x.type==='study'){
     var sl=srcLine(x.p),rp=x.p.reps?workOf(x.p.id).length+'/'+x.p.reps+' vezes':'';
     return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Registrar sessão em '+esc(x.p.name)+'" data-act="guide-study" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'"></button><span class="gtext"><b>'+esc(x.p.name)+'</b><small>'+esc(x.it.name)+(rp?' · '+rp:'')+(sl?' · '+esc(sl):'')+'</small></span><span class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="guide-prompt" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Prompt</button><button class="btn ghost sm" data-act="part-open" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Abrir</button></span></li>';
@@ -1249,6 +1250,7 @@ function needBlock(d){
   if(!isNeeded(d))return '';
   var L=needLedger(d),n=L.cnt[today()]||0;
   return '<div class="note"><span class="label">Necessária: todos os dias, inclusive no fim de semana</span>'+(L.debts.length?'Faltou em '+L.debts.map(function(x){return esc(fmtDow(x));}).join(', ')+'. Faça de novo em outro dia para compensar (cada registro a mais compensa uma falta).':'Sem faltas a compensar.')+(n>1?' Hoje: '+n+' registros.':'')+'</div>'+
+    (L.debts.length?'<div class="stack"><span class="label">Faltas a compensar</span><ul class="hist">'+L.debts.map(function(day){var pl=(d.comp&&d.comp[day])||'';return '<li><span>Faltou em '+esc(fmtDow(day))+'</span>'+(canE()?'<span class="row" style="flex-wrap:nowrap"><input type="date" id="cp-'+day+'" value="'+esc(pl)+'" min="'+today()+'" aria-label="Compensar em" style="border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 8px"><button class="btn sm" data-act="comp-plan" data-id="'+d.id+'" data-day="'+day+'">Marcar</button></span>':(pl?'<span class="num">'+esc(fmt(pl))+'</span>':''))+'</li>';}).join('')+'</ul><p class="muted" style="font-size:13px">Escolha o dia para compensar: o passo Compensar só aparece no guia nesse dia. Sem data, aparece todos os dias.</p></div>':'')+
     (canE()&&L.debts.length?'<div class="row"><button class="btn good" data-act="guide-comp" data-id="'+d.id+'">Registrar compensação hoje</button></div>':'');
 }
 function renderDaily(d){
@@ -1904,7 +1906,7 @@ function doImport(){
     var t=pi.target;
     if(!t){if(!pi.fresh.length&&pi.dups.length)return;t={id:uid(),name:pi.name,due:pi.due,books:pi.books,area:pi.area||ar,depth:pi.depth,spw:pi.spw,status:pi.status,parts:[]};if(pi.focus)t.focus=pi.focus;if(pi.practice)t.practice=pi.practice;state[pi.k].push(t);nI++;}
     else{if(!t.due&&pi.due)t.due=pi.due;if(!t.books&&pi.books)t.books=pi.books;if(!t.depth&&pi.depth)t.depth=pi.depth;if(!t.spw&&pi.spw)t.spw=pi.spw;if(!t.focus&&pi.focus)t.focus=pi.focus;if(!t.practice&&pi.practice)t.practice=pi.practice;}
-    pi.fresh.forEach(function(p){t.parts.push({id:uid(),name:p.name,due:p.due||null,done:null,note:p.note||''});nP++;});
+    pi.fresh.forEach(function(p){var rp=null,nt=String(p.note||'').split('\n').filter(function(l){var m2=l.match(/^\s*(?:times|vezes)\s*:\s*(\d+)/i);if(m2){rp=+m2[1];return false;}return true;}).join('\n'),np2={id:uid(),name:p.name,due:p.due||null,done:null,note:nt};if(rp>0)np2.reps=rp;t.parts.push(np2);nP++;});
     if(!last||(last.k!==m.k&&pi.k===m.k))last={k:pi.k,id:t.id};
   });
   ui.modal=null;
@@ -1945,6 +1947,7 @@ document.addEventListener('click',function(ev){
     case 'guide-config':openModal({kind:'guide'});break;
     case 'guide-daily':{var gd=dailyById(d.id),tg=today();if(!gd)break;if(dailyDates(gd.id)[tg])state.log=state.log.filter(function(e){return !(e.t==='daily'&&e.item===gd.id&&e.d===tg);});else state.log.push({id:uid(),d:tg,t:'daily',k:'daily',item:gd.id,part:null,iname:gd.name,pname:gd.name,area:areaOf(gd)});commit();break;}
     case 'guide-comp':{var gc=dailyById(d.id),tc=today();if(!gc)break;var nc=state.log.filter(function(e){return e.t==='daily'&&e.item===gc.id&&e.d===tc;}).length;for(var ci=0;ci<(nc===0?2:1);ci++)state.log.push({id:uid(),d:tc,t:'daily',k:'daily',item:gc.id,part:null,iname:gc.name,pname:gc.name,area:areaOf(gc)});commit('Compensação registrada');break;}
+    case 'comp-plan':{var cd=dailyById(d.id),ci2=document.getElementById('cp-'+d.day),cv2=ci2?String(ci2.value||''):'';if(!cd)break;if(!cd.comp)cd.comp={};if(cv2)cd.comp[d.day]=cv2;else delete cd.comp[d.day];commit(cv2?'Compensação marcada para '+fmt(cv2):'Data removida');break;}
     case 'why-save':{var wt=document.getElementById('why-text'),wx=wt?String(wt.value||'').trim().slice(0,1200):'';if(!state.why)state.why={};if(wx)state.why[ui.sel]=wx;else delete state.why[ui.sel];commit(wx?'Motivo salvo em '+fmt(ui.sel):'Motivo apagado');break;}
     case 'guide-study':{var gi=findItem(d.k,d.item),gp=gi&&gi.parts.find(function(x){return x.id===d.id;}),gt=today();if(!gp)break;if(workOf(gp.id).some(function(e){return e.d===gt;}))state.log=state.log.filter(function(e){return !(e.t==='work'&&e.part===gp.id&&e.d===gt);});else addLog('work',d.k,gi,gp);commit();break;}
     case 'guide-prompt':{var pi2=findItem(d.k,d.item),pp2=pi2&&pi2.parts.find(function(x){return x.id===d.id;});if(pp2)copyText(promptStudy(pi2,pp2),'Prompt da sessão de estudo');break;}
