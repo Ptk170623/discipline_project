@@ -985,20 +985,22 @@ function persona(){
 
 function reviews(){
   var t=today(),rs=state.reviews.slice();
-  var now=rs.filter(function(r){return r.due&&r.due<=t;}).sort(function(a,b){return a.due<b.due?-1:1;});
+  var rpn=reviewPlan(t),now=rpn.show,wait=rpn.wait;
   var next=rs.filter(function(r){return r.due&&r.due>t;}).sort(function(a,b){return a.due<b.due?-1:1;});
   var fut=rs.filter(function(r){return !r.due;});
   function row(r,actions){
     var f=findPart(r.part);if(!f)return '';
-    var dt,cls;if(!r.due){dt='sem data';cls='soon';}else{var n=diff(t,r.due);if(n<0){dt='atrasada '+(-n)+' '+plural(-n,'dia','dias');cls='late';}else if(n===0){dt='hoje';cls='now';}else{dt=(n===1?'amanhã':'em '+n+' dias')+' · '+fmt(r.due);cls='soon';}}
+    var dt,cls;if(!r.due){dt='sem data';cls='soon';}else if(actions===actWait){dt='na fila';cls='soon';}else{var n=diff(t,r.due);if(n<0){dt='atrasada '+(-n)+' '+plural(-n,'dia','dias');cls='late';}else if(n===0){dt='hoje';cls='now';}else{dt=(n===1?'amanhã':'em '+n+' dias')+' · '+fmt(r.due);cls='soon';}}
     return '<li class="rev-item'+(cls==='late'?' late':'')+'"><span class="stage">'+STAGE[r.stage]+'</span><button class="rev-main rev-open" data-act="part-open" data-k="'+f.k+'" data-item="'+f.item.id+'" data-id="'+f.part.id+'"><b>'+esc(f.part.name)+'</b><small>'+esc(f.item.name)+(f.part.card?' · com cartão':'')+'</small></button><span class="due '+cls+'">'+dt+'</span>'+(canE()&&actions?'<span class="row">'+actions(r)+'</span>':'')+'</li>';
   }
   function actNow(r){return '<button class="btn ghost sm" data-act="pr-review" data-id="'+r.id+'">Prompt</button><button class="btn sm" data-act="rev-again" data-id="'+r.id+'">Revisar de novo</button><button class="btn sm good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita</button>';}
   function actFut(r){return '<button class="btn sm" data-act="rev-back" data-id="'+r.id+'">Revisar amanhã</button>';}
+  function actWait(r){return actNow(r);}
   var shown=ui.revAll?next:next.slice(0,4);
   return '<section class="rev" aria-label="Revisão espaçada">'+
    '<div class="sec-head"><h2 class="disp">Revisão espaçada</h2><span class="aside">D+1 → D+7 → D+30 → futura</span></div>'+
-   (now.length?'<ul class="rev-list">'+now.map(function(r){return row(r,actNow);}).join('')+'</ul>':'<div class="rev-empty">Nenhuma revisão para hoje. Ao concluir uma parte de uma capacidade, ela entra aqui no dia seguinte.</div>')+
+   (now.length?'<ul class="rev-list">'+now.map(function(r){return row(r,actNow);}).join('')+'</ul>':'<div class="rev-empty">'+(rpn.done&&wait.length?'Limite de hoje feito ('+rpn.done+' de '+rpn.lim+'). ':'')+'Nenhuma revisão para hoje. Ao concluir uma parte de uma capacidade, ela entra aqui no dia seguinte.</div>')+
+   (wait.length?'<details class="fold"><summary>Na fila, esperando vaga <span class="num muted">'+wait.length+'</span></summary><p class="muted" style="margin-top:8px;font-size:13.5px">Limite de hoje: '+rpn.lim+' '+plural(rpn.lim,'revisão','revisões')+' ('+rpn.done+' '+plural(rpn.done,'feita','feitas')+'). As novas (D+1) entram primeiro, e o resto sobe nos próximos dias. Dá para adiantar uma daqui se quiser.</p><ul class="rev-list" style="margin-top:8px">'+wait.map(function(r){return row(r,actWait);}).join('')+'</ul></details>':'')+
    '<details class="fold"'+(next.length&&ui.revAll?' open':'')+'><summary>Próximas <span class="num muted">'+next.length+'</span></summary>'+
      (next.length?'<ul class="rev-list">'+shown.map(function(r){return row(r,null);}).join('')+'</ul>'+(next.length>4?'<button class="btn ghost sm" data-act="rev-all" style="margin-top:6px">'+(ui.revAll?'Mostrar menos':'Ver todas as '+next.length)+'</button>':''):'<p class="muted" style="margin-top:8px;font-size:14px">Nada agendado.</p>')+'</details>'+
    '<details class="fold"><summary>Revisão futura, sem data <span class="num muted">'+fut.length+'</span></summary>'+
@@ -1083,7 +1085,7 @@ function revArea(r){var f=findPart(r.part);return f?areaOf(f.item):'prof';}
 function statCards(area){
   var idx=dayIndex(area),t=today(),td=idx[t],n=td?td.list.length:0,st=streak(idx),w=weekRange(t),ws={w:0,c:0,r:0,y:0};
   for(var d=w[0];d<=w[1];d=addDays(d,1)){var o=idx[d];if(o){ws.w+=o.w;ws.c+=o.c;ws.r+=o.r;ws.y+=o.y;}}
-  var dueNow=state.reviews.filter(function(r){return r.due&&r.due<=t&&revArea(r)===area;}).length;
+  var dueNow=reviewPlan(t).show.filter(function(r){return revArea(r)===area;}).length;
   return '<div class="stats">'+
    '<div class="stat '+(n?'today-yes':'today-no')+'"><span class="label">Hoje</span><span class="v num">'+n+'<small>'+plural(n,'registro','registros')+'</small></span><span class="s">'+(n?'Trabalhou hoje':'Ainda sem registro hoje')+'</span></div>'+
    '<div class="stat"><span class="label">Sequência</span><span class="v num">'+st+'<small>'+plural(st,'dia','dias')+'</small></span><span class="s">dias seguidos com registro</span></div>'+
@@ -1133,7 +1135,15 @@ function slotOf(d){
   if(/dormir|sono/.test(n))return 'bed';
   return 'day';
 }
-function gcfg(){var g=state.guide||{};return {t:g.t||{},wk:g.wk>0?g.wk:2,we:g.we>0?g.we:4};}
+function gcfg(){var g=state.guide||{};return {t:g.t||{},wk:g.wk>0?g.wk:2,we:g.we>0?g.we:4,rv:g.rv>0?g.rv:2,rw:g.rw>0?g.rw:6};}
+/* revisões de hoje: limite por dia (úteis/fim de semana); as novas (D+1) vêm primeiro e o resto espera na fila */
+function reviewPlan(t){
+  t=t||today();var c=gcfg(),we=parse(t).getDay()%6===0,lim=we?c.rw:c.rv;
+  var done=state.log.filter(function(e){return e.t==='review'&&e.d===t;}).length;
+  var q=state.reviews.filter(function(r){return r.due&&r.due<=t&&findPart(r.part);}).sort(function(a,b){var na=a.stage===0?0:1,nb=b.stage===0?0:1;return na!==nb?na-nb:(a.due<b.due?-1:a.due>b.due?1:0);});
+  var room=Math.max(0,lim-done);
+  return {lim:lim,done:done,show:q.slice(0,room),wait:q.slice(room)};
+}
 function slotTime(s){var c=gcfg();return (c.t&&c.t[s[0]])||s[2];}
 function srcLine(p){var l=String(p&&p.note||'').split('\n').map(function(x){return x.trim();}).filter(function(x){return /^(source|fonte)\s*:/i.test(x);})[0];return l?l.replace(/^(source|fonte)\s*:\s*/i,'').slice(0,110):'';}
 function workedOn(p,t){return workOf(p.id).some(function(e){return e.d===t;})||p.done===t;}
@@ -1179,8 +1189,8 @@ function guide(){
   });});
   var picks=pickParts(we?gcfg().we:gcfg().wk,t,we);
   if(!we&&picks.length)put('am',{type:'info',title:'Pré-leitura da parte da noite',hint:picks[0].p.name+(srcLine(picks[0].p)?' · '+srcLine(picks[0].p):'')});
-  var due=state.reviews.filter(function(r){return r.due&&r.due<=t&&findPart(r.part);});
-  put(we?'study':'pm',{type:'reviews',n:due.length,done:!due.length});
+  var rp=reviewPlan(t);
+  put(we?'study':'pm',{type:'reviews',n:rp.show.length,wait:rp.wait.length,lim:rp.lim,did:rp.done,done:!rp.show.length});
   var st=picks.map(function(c){return {type:'study',k:c.k,it:c.it,p:c.p,done:workedOn(c.p,t)};});
   var todo=[];
   if(we)by.study=(by.study||[]).concat(st,todo,late);else{st.concat(todo,late).forEach(function(x){put('study',x);});}
@@ -1200,7 +1210,7 @@ function stepHtml(x){
     return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Registrar sessão em '+esc(x.p.name)+'" data-act="guide-study" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'"></button><span class="gtext"><b>'+esc(x.p.name)+'</b><small>'+esc(x.it.name)+(rp?' · '+rp:'')+(sl?' · '+esc(sl):'')+'</small></span><span class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="guide-prompt" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Prompt</button><button class="btn ghost sm" data-act="part-open" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Abrir</button></span></li>';
   }
   if(x.type==='reviews')
-    return '<li class="gstep rv'+(x.done?' done':'')+'"><span class="gchk static'+(x.done?' on':'')+'" aria-hidden="true"></span><span class="gtext"><b>Revisões espaçadas</b><small>'+(x.n?x.n+' '+plural(x.n,'revisão','revisões')+' para hoje':'Nenhuma para hoje')+'</small></span>'+(x.n?'<button class="btn ghost sm" data-act="guide-reviews">Ver</button>':'')+'</li>';
+    return '<li class="gstep rv'+(x.done?' done':'')+'"><span class="gchk static'+(x.done?' on':'')+'" aria-hidden="true"></span><span class="gtext"><b>Revisões espaçadas</b><small>'+(x.n?x.n+' '+plural(x.n,'revisão','revisões')+' para hoje':(x.did?'Limite de hoje feito ('+x.did+' de '+x.lim+')':'Nenhuma para hoje'))+(x.wait?' · '+x.wait+' na fila para os próximos dias':'')+'</small></span>'+(x.n?'<button class="btn ghost sm" data-act="guide-reviews">Ver</button>':'')+'</li>';
   return '<li class="gstep info"><span class="gchk static" aria-hidden="true"></span><span class="gtext"><b>'+esc(x.title)+'</b><small>'+esc(x.hint)+'</small></span></li>';
 }
 function guideSection(){
@@ -1221,6 +1231,8 @@ function guideModal(){
    '<div class="gcfg">'+SLOTS.filter(function(s){return s[2];}).map(function(s){return '<div class="field"><label for="g-t-'+s[0]+'">'+esc(s[1])+'</label><input type="time" id="g-t-'+s[0]+'" name="t-'+s[0]+'" value="'+esc((c.t&&c.t[s[0]])||s[2])+'"></div>';}).join('')+'</div>'+
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-wk">Sessões em dias úteis</label><input type="number" id="g-wk" name="wk" min="1" max="8" step="1" value="'+c.wk+'"></div>'+
    '<div class="field" style="flex:1 1 150px"><label for="g-we">Sessões no fim de semana</label><input type="number" id="g-we" name="we" min="1" max="12" step="1" value="'+c.we+'"></div></div>'+
+   '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-rv">Revisões em dias úteis</label><input type="number" id="g-rv" name="rv" min="1" max="30" step="1" value="'+c.rv+'"></div>'+
+   '<div class="field" style="flex:1 1 150px"><label for="g-rw">Revisões no fim de semana</label><input type="number" id="g-rw" name="rw" min="1" max="30" step="1" value="'+c.rw+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">O que passar do limite espera na fila e sobe nos dias seguintes. As revisões novas (D+1) têm prioridade.</span>'+
    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 function slotSelect(cur){
@@ -2090,7 +2102,7 @@ document.addEventListener('submit',function(ev){
   if(k0==='guide'){
     ev.preventDefault();var gf=new FormData(f0),gt2={};
     SLOTS.forEach(function(sl){if(sl[2]){var v=String(gf.get('t-'+sl[0])||'');if(/^\d\d:\d\d$/.test(v)&&v!==sl[2])gt2[sl[0]]=v;}});
-    state.guide={t:gt2,wk:Math.max(1,Math.round(+gf.get('wk')||2)),we:Math.max(1,Math.round(+gf.get('we')||4))};
+    state.guide={t:gt2,wk:Math.max(1,Math.round(+gf.get('wk')||2)),we:Math.max(1,Math.round(+gf.get('we')||4)),rv:Math.max(1,Math.round(+gf.get('rv')||2)),rw:Math.max(1,Math.round(+gf.get('rw')||6))};
     ui.modal=null;commit('Guia ajustado');return;
   }
   if(k0==='unlock'){
