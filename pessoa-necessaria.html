@@ -1725,6 +1725,16 @@ function promptStudy(it,p){
   L.push('Order: (1) why the concept matters and where it sits in the source; (2) the concepts and the explanation of each; (3) '+(life?'the scenes and the experiment':lang?'examples from work that use the rule, said slowly and clearly':'the practice on my database schema, told in words, and what it would show')+'; (4) my mistakes and the common confusions; (5) the key terms, each with a one-sentence meaning; (6) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start now with Step 1.');
   return L.join('\n');
 }
+/* na revisão, o cartão vai só com o essencial: conceito, fonte, minha definição, cuidados e termos (sem perguntas, exemplo, código ou prática) */
+function reviewCard(card){
+  var keep=/^(CONCEPT|MY DEFINITION|WATCH OUT|KEY TERMS|SOURCE)\b/i,hdr=/^[A-Z][A-Z ]{2,30}(\([^)]*\))?:/,out=[],on=false,seen=false;
+  String(card).split('\n').forEach(function(l){
+    if(hdr.test(l)){seen=true;on=keep.test(l);}
+    if(on)out.push(l);
+  });
+  var t=out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  return seen&&t?t:String(card).trim();
+}
 function promptReview(it,p,r){
   var L=[];
   if(isNotes(it)){
@@ -1738,13 +1748,14 @@ function promptReview(it,p,r){
     return L.join('\n');
   }
   L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
-  if(p.card)L.push('This is my review card. Do not show me its content; use it only to assess me:','---',p.card,'---','');
+  if(p.card)L.push('This is my review card. Do not show me its content; use it only to check me:','---',reviewCard(p.card),'---','');
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
-  L.push('1. Ask the card\'s questions one at a time (or questions that force me to explain the concept) and wait for me to answer from memory, in English. Question my logic with a "why" before you confirm anything.');
-  L.push('2. Compare my answer with the reference, the source\'s explanation'+(p.card?' and my definition on the card':'')+': what I got right, what I forgot and what I mixed up.');
-  L.push(lifeOf(it)?'3. Ask me to describe a recent real situation where I used this idea, or could have, and discuss it; or give me a new scene and ask what I would do. Do not give me the answer first. If the card has a pending experiment, ask whether I did it and review it.':it.lang?'3. Ask me to write 3 new sentences about my work that use this idea, and correct them. Do not give me the answer first. If the card has pending practice sentences, ask me to bring them and review them.':hasPrac(it)?'3. Use one of my practice rules instead of only a script: for example ask me to sketch the diagram for a new scenario and mark its failure points, or show me a short plausible script with a silent bug and ask me to find it. Do not give me the answer first. If the card has a pending mini-project, ask whether I did it and review it.':'3. Ask me to write, as text, a small script or query that applies it to my datasets (do not give me the code). I do not run it now; I test it at work later. If the card has a pending mini-project for work, ask what happened when I did it and review it.');
-  L.push('4. Finish with a one-line verdict: "REVIEW DONE" if I explained and applied the essentials without help, or "REVIEW AGAIN" if something important was missing, saying what to reinforce.');
-  L.push('5. If my definition improved, generate the updated card in the same format.');
+  L.push('1. Ask me to define the concept again from scratch, in my own words and in English, with a simple example. Then ask me for each sub-concept of the part, one at a time (you pick the order from the card). Wait for me each time. Do not give me the answer first.');
+  L.push('2. After each answer, tell me in a few lines what is right, what I forgot and what is wrong, and give the corrected version'+(p.card?' from my card':'')+'.');
+  if(it.lang)L.push('3. At the end, ask me for one new sentence about my work that uses the rule, and correct it.');
+  L.push((it.lang?'4':'3')+'. If the card has a pending practice, experiment or action, ask me in one line whether I did it. Do not ask me to write code or scripts.');
+  L.push((it.lang?'5':'4')+'. Finish with one line: "REVIEW DONE" if I defined the essentials without help, or "REVIEW AGAIN" with what to reinforce.');
+  L.push((it.lang?'6':'5')+'. If my definition improved, give me only the updated MY DEFINITION section, in the same format.','','Keep your messages short. Start with step 1.');
   return L.join('\n');
 }
 function copyText(txt,what){
