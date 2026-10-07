@@ -831,7 +831,7 @@ function chartDaily(d){
     vals.push(n);sum+=n;cats.push({lab:fmt(w),tip:'Semana de '+fmt(w)+' a '+fmt(addDays(w,6))+': '+n+' '+plural(n,'dia feito','dias feitos')+' de 7'});
   });
   var st=streakOf(set),svg=colChart({cats:cats,top:7,ticks:[0,7],h:130,aria:d.name+': dias feitos por semana nas últimas 12 semanas',series:[{name:d.name,cls:'cb-a',vals:vals}]});
-  var meta=(d.label?'<span class="lchip">'+esc(d.label)+'</span> ':'')+AREA[areaOf(d)]+' · '+st+' '+plural(st,'dia seguido','dias seguidos');
+  var meta=(d.label?'<span class="lchip">'+esc(d.label)+'</span> ':'')+AREA[areaOf(d)]+' · '+(isWeekly(d)?'semanal · ':'')+streakTxt(d,set);
   return chartCard('daily',d.id,d.name,meta,svg,'<button type="button" class="btn sm ghost" data-act="nav" data-to="daily:'+d.id+'">Detalhes</button>');
 }
 function renderCharts(){
@@ -900,13 +900,19 @@ function needLedger(d){
 function candCount(we){var n=0;['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(it.status==='espera'||it.daily||!it.parts.length)return;if(it.spw===1&&!we)return;n++;});});return n;}
 function tallyCtx(){
   var led={},byDay={};
-  state.daily.forEach(function(d){if(isNeeded(d))led[d.id]=needLedger(d);});
+  state.daily.forEach(function(d){if(isNeeded(d)&&!isWeekly(d))led[d.id]=needLedger(d);});
   state.log.forEach(function(e){(byDay[e.d]=byDay[e.d]||[]).push(e);});
   return {led:led,byDay:byDay,cand:{wk:candCount(false),we:candCount(true)},start:appStart()};
 }
 function dayTally(day,ctx){
   var t=today(),rows=[],req=0,done=0;
   state.daily.forEach(function(d){
+    if(isWeekly(d)&&isNeeded(d)){
+      var wr=weekRange(day);
+      if(day!==wr[1]||wr[1]<weekRange(d.created||ctx.start)[0])return;
+      var wdn=weekDone(d,day),wst=wdn?'ok':day<t?'miss':'todo';
+      rows.push({kind:'need',name:d.name+' (semana)',n:wdn?1:0,st:wst,by:null});req++;if(wdn)done++;return;
+    }
     var L=ctx.led[d.id];if(!L||day<L.from)return;
     var n=L.cnt[day]||0,st=n>0?'ok':L.cov[day]?'comp':day<t?'miss':'todo';
     rows.push({kind:'need',name:d.name,n:n,st:st,by:L.cov[day]||null});req++;if(st==='ok'||st==='comp')done++;
@@ -1177,7 +1183,8 @@ function guide(){
   var late=[];
   state.daily.forEach(function(d){
     var sl=slotOf(d),x={type:'daily',d:d,done:!!dailyDates(d.id)[t]},cx=[];
-    if(isNeeded(d))needLedger(d).debts.forEach(function(day){var pl=d.comp&&d.comp[day];if(pl&&pl>t)return;cx.push({type:'comp',d:d,day:day,plan:pl||'',done:false});});
+    if(isWeekly(d)){var wdd=weekDone(d,t);if(wdd&&wdd!==t)return;x.weekly=true;}
+    if(isNeeded(d)&&!isWeekly(d))needLedger(d).debts.forEach(function(day){var pl=d.comp&&d.comp[day];if(pl&&pl>t)return;cx.push({type:'comp',d:d,day:day,plan:pl||'',done:false});});
     if(sl==='study'){late.push(x);cx.forEach(function(c){late.push(c);});}else{put(sl,x);cx.forEach(function(c){put(sl,c);});}
   });
   ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
@@ -1200,7 +1207,7 @@ function trim90(x){x=String(x||'').replace(/\s+/g,' ').trim();return x.length>92
 function stepHtml(x){
   var t=today();
   if(x.type==='daily'){
-    var d=x.d,pl=planOn(d,t).split('\n')[0],hint=pl?'Hoje: '+pl:trim90(String(d.text||'').split('\n')[0]);
+    var d=x.d,pl=planOn(d,t).split('\n')[0],hint=pl?'Hoje: '+pl:trim90(String(d.text||'').split('\n')[0]);if(x.weekly)hint='Semanal'+(x.done?'':', uma vez até domingo')+(hint?' · '+hint:'');
     return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button><span class="gtext"><b>'+esc(d.name)+hidPill(d)+'</b>'+(hint?'<small>'+esc(hint)+'</small>':'')+'</span><button class="btn ghost sm" data-act="nav" data-to="daily:'+d.id+'">Abrir</button></li>';
   }
   if(x.type==='comp')
@@ -1240,6 +1247,13 @@ function slotSelect(cur){
 }
 function dailyDates(id){var s={};state.log.forEach(function(e){if(e.t==='daily'&&e.item===id)s[e.d]=1;});return s;}
 function streakOf(set){var t=today(),d=set[t]?t:addDays(t,-1),n=0;while(set[d]){n++;d=addDays(d,-1);}return n;}
+/* tarefas semanais: vale um registro em qualquer dia da semana (segunda a domingo) */
+function isWeekly(d){return !!d&&d.freq==='week';}
+function weekDone(d,t){var r=weekRange(t||today()),s=dailyDates(d.id),x;for(x=r[0];x<=r[1];x=addDays(x,1)){if(s[x])return x;}return '';}
+function weekSetOf(d){var s=dailyDates(d.id),o={};Object.keys(s).forEach(function(k){o[weekRange(k)[0]]=1;});return o;}
+function weekStreak(d){var o=weekSetOf(d),w=weekRange(today())[0],n=0;if(!o[w])w=addDays(w,-7);while(o[w]){n++;w=addDays(w,-7);}return n;}
+function weekBest(d){var o=weekSetOf(d),best=0,cur=0,prev=null;Object.keys(o).sort().forEach(function(k){cur=(prev&&addDays(prev,7)===k)?cur+1:1;if(cur>best)best=cur;prev=k;});return best;}
+function streakTxt(d,set){if(isWeekly(d)){var n=weekStreak(d);return n+' '+plural(n,'semana seguida','semanas seguidas');}var m=streakOf(set);return m+' '+plural(m,'dia seguido','dias seguidos');}
 function bestStreak(set,ini,fim){
   var best=0,cur=0,prev=null;
   Object.keys(set).filter(function(d){return (!ini||d>=ini)&&(!fim||d<=fim);}).sort().forEach(function(d){cur=(prev&&addDays(prev,1)===d)?cur+1:1;if(cur>best)best=cur;prev=d;});
@@ -1249,10 +1263,10 @@ function dailySection(){
   var f=ui.dfilter||'',list=state.daily,shown=f?list.filter(function(d){return (d.label||'')===f;}):list,t=today();
   var chips=state.labels.length&&list.length?'<div class="fchips">'+[''].concat(state.labels).map(function(l){return '<button class="fchip'+(f===l?' on':'')+'" data-act="dfilter" data-l="'+esc(l)+'">'+(l?esc(l):'Todas')+'</button>';}).join('')+'</div>':'';
   var cards=shown.map(function(d){
-    var set=dailyDates(d.id),done=!!set[t],st=streakOf(set);
-    return '<button class="dcard'+(done?' done':'')+'" data-act="nav" data-to="daily:'+d.id+'"><span class="dtop"><b>'+esc(d.name)+'</b><span class="dstate">'+(done?'Feito hoje':'Pendente')+'</span></span>'+
-      '<span class="dmeta">'+hidPill(d)+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'<span>'+AREA[areaOf(d)]+'</span></span>'+
-      '<span class="dstreak"><b class="num">'+st+'</b> '+plural(st,'dia seguido','dias seguidos')+'</span>'+(isNeeded(d)&&needLedger(d).debts.length?'<span class="dplan"><b>A compensar:</b> '+needLedger(d).debts.length+'</span>':'')+(weekPlan(d)?'<span class="dplan"><b>Hoje:</b> '+esc(planOn(d,t).split('\n')[0]||'sem plano')+'</span>':'')+'</button>';
+    var set=dailyDates(d.id),wk=isWeekly(d),done=wk?!!weekDone(d,t):!!set[t];
+    return '<button class="dcard'+(done?' done':'')+'" data-act="nav" data-to="daily:'+d.id+'"><span class="dtop"><b>'+esc(d.name)+'</b><span class="dstate">'+(done?(wk?'Feito na semana':'Feito hoje'):'Pendente')+'</span></span>'+
+      '<span class="dmeta">'+hidPill(d)+(wk?'<span class="lchip">Semanal</span>':'')+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'<span>'+AREA[areaOf(d)]+'</span></span>'+
+      '<span class="dstreak"><b class="num">'+streakTxt(d,set).split(' ')[0]+'</b> '+streakTxt(d,set).split(' ').slice(1).join(' ')+'</span>'+(isNeeded(d)&&!wk&&needLedger(d).debts.length?'<span class="dplan"><b>A compensar:</b> '+needLedger(d).debts.length+'</span>':'')+(weekPlan(d)?'<span class="dplan"><b>Hoje:</b> '+esc(planOn(d,t).split('\n')[0]||'sem plano')+'</span>':'')+'</button>';
   }).join('');
   return '<section class="sec" aria-label="Tarefas diárias"><div class="sec-head"><h2 class="disp">Tarefas diárias</h2>'+
     (canE()?'<span class="row"><button class="btn sm" data-act="labels-open">Rótulos</button><button class="btn sm primary" data-act="daily-new">+ Tarefa diária</button></span>':'')+'</div>'+chips+
@@ -1261,21 +1275,22 @@ function dailySection(){
 }
 function needBlock(d){
   if(!isNeeded(d))return '';
+  if(isWeekly(d))return '<div class="note"><span class="label">Necessária: uma vez por semana</span>'+(weekDone(d)?'Feita nesta semana ('+esc(fmtDow(weekDone(d)))+').':'Ainda não foi feita nesta semana. A semana vai de segunda a domingo; no domingo ela conta no calendário.')+'</div>';
   var L=needLedger(d),n=L.cnt[today()]||0;
   return '<div class="note"><span class="label">Necessária: todos os dias, inclusive no fim de semana</span>'+(L.debts.length?'Faltou em '+L.debts.map(function(x){return esc(fmtDow(x));}).join(', ')+'. Faça de novo em outro dia para compensar (cada registro a mais compensa uma falta).':'Sem faltas a compensar.')+(n>1?' Hoje: '+n+' registros.':'')+'</div>'+
     (L.debts.length?'<div class="stack"><span class="label">Faltas a compensar</span><ul class="hist">'+L.debts.map(function(day){var pl=(d.comp&&d.comp[day])||'';return '<li><span>Faltou em '+esc(fmtDow(day))+'</span>'+(canE()?'<span class="row" style="flex-wrap:nowrap"><input type="date" id="cp-'+day+'" value="'+esc(pl)+'" min="'+today()+'" aria-label="Compensar em" style="border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 8px"><button class="btn sm" data-act="comp-plan" data-id="'+d.id+'" data-day="'+day+'">Marcar</button></span>':(pl?'<span class="num">'+esc(fmt(pl))+'</span>':''))+'</li>';}).join('')+'</ul><p class="muted" style="font-size:13px">Escolha o dia para compensar: o passo Compensar só aparece no guia nesse dia. Sem data, aparece todos os dias.</p></div>':'')+
     (canE()&&L.debts.length?'<div class="row"><button class="btn good" data-act="guide-comp" data-id="'+d.id+'">Registrar compensação hoje</button></div>':'');
 }
 function renderDaily(d){
-  var set=dailyDates(d.id),t=today(),done=!!set[t],cur=streakOf(set),best=bestStreak(set),total=Object.keys(set).length,last=0,cells='';
+  var set=dailyDates(d.id),t=today(),wk=isWeekly(d),done=!!set[t],wdn=wk?weekDone(d,t):'',cur=wk?weekStreak(d):streakOf(set),best=wk?weekBest(d):bestStreak(set),total=Object.keys(set).length,last=0,cells='',un=wk?['semana','semanas']:['dia','dias'];
   for(var i=34;i>=0;i--){var day=addDays(t,-i);if(set[day])last++;cells+='<span class="hcell'+(set[day]?' on':'')+(day===t?' today':'')+'" title="'+esc(fmtDow(day))+(set[day]?': feito':'')+'"></span>';}
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">Tarefa diária · '+AREA[areaOf(d)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(d.name)+'</h1>'+(d.label?'<span class="row"><span class="lchip">'+esc(d.label)+'</span></span>':'')+'</div>'+
+   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">Tarefa '+(wk?'semanal':'diária')+' · '+AREA[areaOf(d)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(d.name)+'</h1>'+(d.label?'<span class="row"><span class="lchip">'+esc(d.label)+'</span></span>':'')+'</div>'+
    (canE()?'<button class="btn sm" data-act="daily-edit" data-id="'+d.id+'">Editar</button>':'')+'</div>'+
-   '<div class="dhero'+(done?' done':'')+'"><b>'+(done?'Feito hoje':'Ainda não foi feito hoje')+'</b>'+(canE()?(done?'<button class="btn sm" data-act="daily-undo">Desfazer registro de hoje</button>':'<button class="btn good lg" data-act="daily-done">Registrar feito hoje</button>'):'')+'</div>'+
+   '<div class="dhero'+((wk?wdn:done)?' done':'')+'"><b>'+(wk?(done?'Feito hoje':wdn?'Feita nesta semana ('+fmtDow(wdn)+')':'Ainda não foi feita nesta semana'):(done?'Feito hoje':'Ainda não foi feito hoje'))+'</b>'+(canE()?(done?'<button class="btn sm" data-act="daily-undo">Desfazer registro de hoje</button>':'<button class="btn '+(wk&&wdn?'':'good ')+'lg" data-act="daily-done">'+(wk&&wdn?'Registrar de novo hoje':'Registrar feito hoje')+'</button>'):'')+'</div>'+
    needBlock(d)+
    (planOn(d,t)?'<div class="note todaybox"><b>Hoje · '+WD[parse(t).getDay()]+'</b>'+esc(planOn(d,t))+'</div>':'')+
-   '<div class="facts f4"><div><span class="label">Sequência atual</span><b class="num">'+cur+' '+plural(cur,'dia','dias')+'</b></div><div><span class="label">Melhor sequência</span><b class="num">'+best+' '+plural(best,'dia','dias')+'</b></div><div><span class="label">Últimos 35 dias</span><b class="num">'+last+'/35</b></div><div><span class="label">Total de dias</span><b class="num">'+total+'</b></div></div>'+
+   '<div class="facts f4"><div><span class="label">Sequência atual</span><b class="num">'+cur+' '+plural(cur,un[0],un[1])+'</b></div><div><span class="label">Melhor sequência</span><b class="num">'+best+' '+plural(best,un[0],un[1])+'</b></div><div><span class="label">Últimos 35 dias</span><b class="num">'+last+'/35</b></div><div><span class="label">Total de dias</span><b class="num">'+total+'</b></div></div>'+
    '<div class="stack"><span class="label">Últimos 35 dias</span><div class="hgrid">'+cells+'</div></div>'+
    weekSection(d)+
    '<div class="stack"><span class="label">O que fazer</span>'+
@@ -1288,6 +1303,7 @@ function dailyForm(m){
   return '<form data-form="daily" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">'+(d?'Editar tarefa diária':'Nova tarefa diária')+'</h2>'+closeBtn()+'</div>'+
    '<div class="field"><label for="d-name">Nome da tarefa</label><input type="text" id="d-name" name="name" required maxlength="100" value="'+esc(d?d.name:'')+'" placeholder="Ex.: 20 minutos de flashcards" autofocus></div>'+
    '<div class="field"><label for="d-area">Área</label><select id="d-area" name="area"><option value="prof"'+(ar==='prof'?' selected':'')+'>Profissional</option><option value="pess"'+(ar==='pess'?' selected':'')+'>Pessoal</option></select></div>'+
+   '<div class="field"><label for="d-freq">Frequência</label><select id="d-freq" name="freq"><option value="day"'+(isWeekly(d)?'':' selected')+'>Diária: todo dia</option><option value="week"'+(isWeekly(d)?' selected':'')+'>Semanal: uma vez por semana (segunda a domingo)</option></select><span class="hint">Uma tarefa semanal aparece no guia todo dia até você fazê-la, e some depois que a semana está cumprida.</span></div>'+
    slotSelect(d&&d.slot)+
    '<div class="field"><label for="d-label">Rótulo</label><select id="d-label" name="label">'+opts+'</select><span class="hint">“'+NEED+'”: obrigatória todos os dias, inclusive no fim de semana. Se faltar, você compensa em outro dia, registrando a tarefa mais de uma vez. Sem esse rótulo, a tarefa é opcional e não entra na conta do calendário.</span></div>'+
    '<div class="field"><label for="d-newlabel">Ou crie um rótulo novo</label><input type="text" id="d-newlabel" name="newlabel" maxlength="40" placeholder="Ex.: Discipline charge"></div>'+
@@ -1450,6 +1466,7 @@ function partModal(m){
    '<div class="facts"><div><span class="label">Prazo</span><b class="num">'+(p.due?fmt(p.due):'—')+'</b></div><div><span class="label">Status</span><b>'+stTxt+'</b></div><div><span class="label">Sessões</span><b class="num">'+w.length+(p.reps?'/'+p.reps:'')+'</b></div></div>'+
    (todayN?'<p class="chip ok" style="align-self:flex-start">'+todayN+' '+plural(todayN,'sessão registrada','sessões registradas')+' hoje</p>':'')+
    acts+(revTxt?'<div class="revbox">'+esc(revTxt)+'</div>':'')+
+   (canE()&&m.k==='cap'&&p.done&&r?'<div class="row"><button class="btn" data-act="'+(r.due?'rev-again':'rev-back')+'" data-id="'+r.id+'">Revisar amanhã</button>'+(r.due?'<button class="btn good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita: próxima ('+(r.stage<2?STAGE[r.stage+1]:'futura')+')</button>':'')+'</div>':'')+
    (p.note?'<div class="note"><span class="label">Valor prático e notas</span>'+esc(p.note)+'</div>':'')+
    studyBlock(m,it,p,r)+
    '<div style="display:flex;flex-direction:column;gap:8px"><span class="label">Histórico</span>'+
@@ -2065,7 +2082,7 @@ document.addEventListener('click',function(ev){
     case 'daily-edit':openModal({kind:'dform',id:d.id});break;
     case 'daily-del-ask':case 'ach-del-ask':ui.modal.confirm=true;renderModal();break;
     case 'daily-del-yes':{var di=ui.modal.id;state.daily=state.daily.filter(function(x){return x.id!==di;});state.ach.forEach(function(x){if(x.rule&&x.rule.daily===di)x.rule.daily=null;});ui.modal=null;ui.route='home';commit('Tarefa excluída');break;}
-    case 'daily-done':{var dq=dailyById(ui.route.slice(6));if(!dq)break;var td0=today();if(!dailyDates(dq.id)[td0])state.log.push({id:uid(),d:td0,t:'daily',k:'daily',item:dq.id,part:null,iname:dq.name,pname:dq.name,area:areaOf(dq)});commit('Feito hoje. Sequência: '+streakOf(dailyDates(dq.id))+' '+plural(streakOf(dailyDates(dq.id)),'dia','dias'));break;}
+    case 'daily-done':{var dq=dailyById(ui.route.slice(6));if(!dq)break;var td0=today();if(!dailyDates(dq.id)[td0])state.log.push({id:uid(),d:td0,t:'daily',k:'daily',item:dq.id,part:null,iname:dq.name,pname:dq.name,area:areaOf(dq)});commit('Feito hoje. Sequência: '+streakTxt(dq,dailyDates(dq.id)));break;}
     case 'daily-undo':{var du=dailyById(ui.route.slice(6)),tdu=today();if(!du)break;state.log=state.log.filter(function(e){return !(e.t==='daily'&&e.item===du.id&&e.d===tdu);});commit('Registro de hoje desfeito');break;}
     case 'week-save':{var wd=dailyById(d.id);if(wd){var wv=[0,1,2,3,4,5,6].map(function(i){var e=document.getElementById('wk-'+i);return e?e.value.trim():'';});if(wv.some(Boolean))wd.week=wv;else delete wd.week;commit('Plano da semana salvo');}break;}
     case 'daily-text-save':{var dt2=dailyById(ui.route.slice(6)),tx=document.getElementById('daily-text');if(!dt2||!tx)break;dt2.text=tx.value.trim();commit('Texto salvo');break;}
@@ -2144,8 +2161,9 @@ document.addEventListener('submit',function(ev){
     var dn=String(fd.get('name')||'').trim();if(!dn)return;
     var dl2=String(fd.get('newlabel')||'').trim().slice(0,40)||String(fd.get('label')||''),da=fd.get('area')==='pess'?'pess':'prof',dsl=SLOTS.some(function(x){return x[0]===fd.get('slot');})?fd.get('slot'):'';
     if(dl2&&state.labels.indexOf(dl2)<0)state.labels.push(dl2);
-    if(m.id){var dx=dailyById(m.id);if(dx){dx.name=dn;dx.label=dl2;dx.area=da;if(dsl)dx.slot=dsl;else delete dx.slot;}ui.modal=null;commit('Tarefa atualizada');}
-    else{state.daily.push(dsl?{id:uid(),name:dn,label:dl2,area:da,slot:dsl,text:'',created:today()}:{id:uid(),name:dn,label:dl2,area:da,text:'',created:today()});ui.modal=null;commit('Tarefa diária criada');}
+    var dfq=fd.get('freq')==='week'?'week':'';
+    if(m.id){var dx=dailyById(m.id);if(dx){dx.name=dn;dx.label=dl2;dx.area=da;if(dsl)dx.slot=dsl;else delete dx.slot;if(dfq)dx.freq=dfq;else delete dx.freq;}ui.modal=null;commit('Tarefa atualizada');}
+    else{var dnew={id:uid(),name:dn,label:dl2,area:da,text:'',created:today()};if(dsl)dnew.slot=dsl;if(dfq)dnew.freq=dfq;state.daily.push(dnew);ui.modal=null;commit(dfq?'Tarefa semanal criada':'Tarefa diária criada');}
   }else if(kind==='bulk'){
     var it3=findItem(m.k,m.item);if(!it3)return;
     var lines=String(fd.get('lines')||'').split('\n').map(function(s){return s.replace(/^\s*(?:[-•*]|\d+[.)])\s+/,'').trim();}).filter(Boolean);if(!lines.length)return;
