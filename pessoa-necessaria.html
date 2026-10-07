@@ -1750,12 +1750,13 @@ function promptReview(it,p,r){
   L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
   if(p.card)L.push('This is my review card. Do not show me its content; use it only to check me:','---',reviewCard(p.card),'---','');
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
-  L.push('1. Ask me to define the concept again from scratch, in my own words and in English, with a simple example. Then ask me for each sub-concept of the part, one at a time (you pick the order from the card). Wait for me each time. Do not give me the answer first.');
-  L.push('2. After each answer, tell me in a few lines what is right, what I forgot and what is wrong, and give the corrected version'+(p.card?' from my card':'')+'.');
-  if(it.lang)L.push('3. At the end, ask me for one new sentence about my work that uses the rule, and correct it.');
-  L.push((it.lang?'4':'3')+'. If the card has a pending practice, experiment or action, ask me in one line whether I did it. Do not ask me to write code or scripts.');
-  L.push((it.lang?'5':'4')+'. Finish with one line: "REVIEW DONE" if I defined the essentials without help, or "REVIEW AGAIN" with what to reinforce.');
-  L.push((it.lang?'6':'5')+'. If my definition improved, give me only the updated MY DEFINITION section, in the same format.','','Keep your messages short. Start with step 1.');
+  L.push('1. Give me the map: the concept of this part and all its sub-concepts in one list, by name only (taken from '+(p.card?'my card':(focusOf(it)?'the best attached source':'the main source'))+'). No definitions, no hints and no questions. Then wait: I will define each one from scratch, in my own words and in English, at my own pace, and send everything in one message.');
+  L.push('2. When I send my definitions, check them against the card: for each item, one or two lines saying what is right, what I forgot and what is wrong, with the corrected version'+(p.card?' from my card':'')+'. Do not stop for questions in the middle.');
+  var n=3;
+  if(it.lang)L.push((n++)+'. Then ask me for one new sentence about my work that uses the rule, and correct it.');
+  L.push((n++)+'. If the card has a pending practice, experiment or action, ask me in one line whether I did it. Do not ask me to write code or scripts.');
+  L.push((n++)+'. Finish with one line: "REVIEW DONE" if I defined the essentials without help, or "REVIEW AGAIN" with what to reinforce.');
+  L.push((n++)+'. If my definition improved, give me only the updated MY DEFINITION section, in the same format.','','Keep your messages short. Start with step 1.');
   return L.join('\n');
 }
 function copyText(txt,what){

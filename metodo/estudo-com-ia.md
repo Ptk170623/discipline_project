@@ -57,8 +57,8 @@ geram o prompt de revisão a partir do cartão salvo. Assim cada parte é revisa
   Ao final, cole o flashcard em **Colar cartão** e marque a parte.
 - **Revisar:** no dia, **Prompt** ao lado da revisão → conversa no mesmo Projeto. O veredito
   (REVIEW DONE → **Revisão feita** / REVIEW AGAIN → **Revisar de novo**) é o botão que você aperta no app.
-  A revisão é curta: o agente pede para você definir de novo o conceito e cada subconceito, com as suas palavras, e corrige
-  com base no cartão. Nada de código na revisão. O app manda só o essencial do cartão (conceito, fonte, minha definição,
+  A revisão é curta: o agente lista o mapa (o conceito e todos os subconceitos, só os nomes), você define tudo de novo com as
+  suas palavras, no seu tempo, e manda numa mensagem só; ele corrige tudo de uma vez com base no cartão. Nada de código na revisão. O app manda só o essencial do cartão (conceito, fonte, minha definição,
   cuidados e termos), sem as perguntas, o exemplo e o código da prática.
 
 - **Áudio de revisão (último passo da sessão):** depois do cartão, o tutor escreve uma fala longa sobre a parte inteira, em prosa simples, sem
