@@ -1723,17 +1723,15 @@ function promptStudy(it,p){
   else if(lang)s3+=' Then explain the usage with examples from my work in English (emails, meetings, reports, messages) and the common mistakes of Portuguese speakers with this point.'+(mini?' Include the mini-project from the plan notes as the practice task.':'')+' Ask me to write sentences that use the rule and correct them. If needed, split this into more than one round.';
   else s3+=' Then use the schema of my real database described in the Project (or generated data if it does not fit) to explain the content with real practice'+(hasPrac(it)?', applying my practice rules before any code'+(usesDiagram(it)?' (for example, ask me to draw the diagram as Mermaid text first)':''):'')+'.'+(mini?' Include the mini-project from the plan notes as the practice task.':'')+' If needed, split this into more than one round and ask me to go on to the practice explanation. I study on a tablet and cannot run scripts, so write the scripts anyway and explain them, with the expected output, for me to run later at work.';
   L.push(s3);
-  L.push('Step 4 — My definition: ask me to write a definition in my own words, from scratch, and let me ask questions until I understand all the content.');
+  L.push('Step 4 — My definitions: ask me to write, from scratch and in my own words, a definition of the concept and of each sub-concept from the map in Step 2, all in one go and at my own pace. Then correct them and let me ask questions until I understand all the content.');
   L.push('');
   L.push('When I say I am done, create two things:','');
   L.push('A) Flashcard — one card for this part, in plain text, for me to save in my app and to answer from memory in the spaced reviews:','');
   L.push('CONCEPT: '+p.name);
   L.push('SOURCE: (chapter and section, or module and file)');
-  L.push('QUESTIONS: (3 to 5 questions I must answer from scratch, the ones I struggled with first)');
-  L.push('MY DEFINITION: (my definition in my own words, corrected with your feedback)');
-  L.push(life?'EXAMPLE: (one simple real-life scene that shows the idea)':lang?'EXAMPLE: (one correct sentence of mine about my work that uses the rule)':'EXAMPLE: (one simple example that uses my database schema)');
-  L.push(life?'ACTION: (the experiment: situation, what to do, what to observe, and whether it is done or pending)':lang?'PRACTICE: (3 new sentences about my work that use the rule, and whether they are done or pending)':'PRACTICE FOR WORK: (the task, the script and its expected output, and whether it is done or pending)');
-  if(usesDiagram(it))L.push('DIAGRAM: (my final Mermaid diagram for this part, with its failure points marked)');
+  L.push('MAP: (the concept and all its sub-concepts, one per line, by name only, in the order we studied them)');
+  L.push('MY DEFINITION: (a definition in my own words of the concept and of EACH sub-concept in the MAP, one per line, corrected with your feedback; mark what you corrected with [fix: ...])');
+  L.push(life?'ACTION: (one line: the experiment I chose and whether it is done or pending)':lang?'PRACTICE: (one line: the sentences or task I got and whether it is done or pending)':'PRACTICE FOR WORK: (one line: the task I got for work and whether it is done or pending; no code in the card)');
   L.push('WATCH OUT: (what I got wrong or forgot)');
   L.push('KEY TERMS: (the new English terms from this session, each with a short meaning)','');
   L.push('B) Listening — one long talk about the whole part, which I will paste into a text-to-speech tool and use in my Listening task tonight. Output only the text to be read, separate from the flashcard, with no introduction and no notes.');
@@ -1744,7 +1742,7 @@ function promptStudy(it,p){
 }
 /* na revisão, o cartão vai só com o essencial: conceito, fonte, minha definição, cuidados e termos (sem perguntas, exemplo, código ou prática) */
 function reviewCard(card){
-  var keep=/^(CONCEPT|MY DEFINITION|WATCH OUT|KEY TERMS|SOURCE)\b/i,hdr=/^[A-Z][A-Z ]{2,30}(\([^)]*\))?:/,out=[],on=false,seen=false;
+  var keep=/^(CONCEPT|MAP|MY DEFINITION|WATCH OUT|KEY TERMS|SOURCE)\b/i,hdr=/^[A-Z][A-Z ]{2,30}(\([^)]*\))?:/,out=[],on=false,seen=false;
   String(card).split('\n').forEach(function(l){
     if(hdr.test(l)){seen=true;on=keep.test(l);}
     if(on)out.push(l);

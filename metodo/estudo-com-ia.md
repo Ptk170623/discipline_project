@@ -37,7 +37,7 @@ Quando o que você quer aprender é uma lista de conceitos e não o conteúdo de
 preencha **Foco de aprendizagem** em Editar: a lista de conceitos, onde cada um costuma ser bem coberto e as regras de prática.
 O foco manda na ordem das partes (por dependência, não pela ordem de um livro), as fontes viram referências e cada parte cita só as páginas
 necessárias. Conceitos que nenhuma fonte cobre bem (como testes e leitura de código) viram exercícios nas suas bases. As regras de prática
-valem na demonstração, no mini-projeto e nas revisões; o cartão ganha o campo **DIAGRAM**.
+valem na demonstração, no mini-projeto e nas revisões; o diagrama fica na conversa da sessão, não no cartão.
 
 ## Cada parte
 
@@ -48,7 +48,7 @@ O prompt da sessão de estudo tem 4 passos, **um de cada vez**, e o tutor espera
 3. **Ensino na linha do autor:** a explicação do jeito do autor (intuição, argumento, exemplos) e a definição formal; o tutor diz o que estava certo e errado na sua tentativa e usa o esquema da sua base real para a prática. Pode dividir em mais de uma rodada. Como você estuda na tablet e não roda código, o tutor escreve os scripts e explica, com a saída esperada, para você rodar depois no trabalho.
 4. **Sua definição:** você escreve do zero, com as suas palavras, e pergunta até entender tudo.
 
-No final saem duas coisas: o **flashcard** (CONCEPT, SOURCE, QUESTIONS, MY DEFINITION, EXAMPLE, PRACTICE FOR WORK, WATCH OUT, KEY TERMS) e o **texto para ouvir** (cerca de 1.500 palavras, em prosa, com três perguntas para responder em voz alta), que você usa na tarefa Listening da mesma noite.
+No final saem duas coisas: o **flashcard** (CONCEPT, SOURCE, MAP, MY DEFINITION, PRACTICE FOR WORK em uma linha, WATCH OUT, KEY TERMS). O MAP lista o conceito e os subconceitos só pelos nomes, e o MY DEFINITION traz a sua definição de cada um e o **texto para ouvir** (cerca de 1.500 palavras, em prosa, com três perguntas para responder em voz alta), que você usa na tarefa Listening da mesma noite.
 
 O flashcard traz as perguntas que fizeram você pensar e a sua definição corrigida. O prompt da sessão não revisa partes anteriores: isso é feito pelas **revisões espaçadas do app** (D+1, D+7, D+30), que
 geram o prompt de revisão a partir do cartão salvo. Assim cada parte é revisada uma vez por dia marcado, e a sessão de estudo começa direto na parte nova.
