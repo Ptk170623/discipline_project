@@ -92,11 +92,12 @@ As partes continuam as mesmas. O que muda:
 - **Instruções do Projeto:** entram o material de resultados da prática (link e STUDY_PACK.md) e a regra "ensine com os
   meus resultados: depois de explicar do livro, mostre o resultado correspondente, com a aba e o número exato". A parte
   "Prática" com scripts para o trabalho sai, porque a prática vem dos resultados do harness.
-- **Prompt da sessão de estudo:** 1) mapa (conceito e subconceitos, só os nomes); 2) prática primeiro, mostrando o
-  resultado de cada conceito (se a página ainda não tem a aba da parte, o tutor escreve o prompt para o harness e espera
-  o resultado); 3) teoria só no necessário, com perguntas à vontade; 4) você explica tudo sem ler e o tutor responde
-  APROVADO ou DE NOVO. Só depois da aprovação saem o flashcard (CONCEPT, SOURCE, MAP, MY DEFINITION, REAL CASE, WATCH OUT,
-  KEY TERMS) e o texto para ouvir.
+- **Prompt da sessão de estudo:** 1) mapa (conceito e subconceitos, só os nomes, na ordem do material de prática e com a
+  aba de cada um; se a página ainda não tem a aba da parte, o tutor escreve o prompt para o harness e espera o
+  resultado); 2) percurso pela prática, **um ou dois conceitos por vez**, na ordem da página: o tutor mostra o resultado
+  (aba e números) e já ajuda a interpretá-lo e a entender o conceito, e para para você perguntar; 3) você explica tudo sem
+  ler e o tutor responde APROVADO ou DE NOVO. Só depois da aprovação saem o flashcard (CONCEPT, SOURCE, MAP, MY DEFINITION,
+  REAL CASE, WATCH OUT, KEY TERMS) e o texto para ouvir.
 - **Revisão:** não muda. Ela lista o mapa, você define de novo e o tutor corrige. O REAL CASE fica só no cartão.
 
 Teste inicial: capacidade **Statistics for Data Science**, com a página "Statistics in Practice".
