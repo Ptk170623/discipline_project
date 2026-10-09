@@ -1505,6 +1505,8 @@ function itemForm(m){
    '<div class="field"><label for="f-slot">Quando no dia (se trabalhar todo dia)</label><select id="f-slot" name="slot"><option value="">Estudo (padrão)</option>'+SLOTS.map(function(z){return '<option value="'+z[0]+'"'+(it&&it.slot===z[0]?' selected':'')+'>'+esc(z[1])+'</option>';}).join('')+'</select></div>'+
    '<label class="check"><input type="checkbox" name="lang"'+(it&&it.lang?' checked':'')+'> <span>Idioma (gramática e uso): o prompt usa frases suas e exemplos do trabalho, sem bases de dados</span></label>'+
    '<label class="check"><input type="checkbox" name="notes"'+(it&&it.notes?' checked':'')+'> <span>Projeto de leitura e anotações (o prompt de estudo parte do seu markdown)</span></label>'+
+   '<label class="check"><input type="checkbox" name="pf"'+(it&&it.pf?' checked':'')+'> <span>Prática primeiro: o tutor ensina com os resultados do seu projeto real e você explica sem ler antes de aprovar (só para o profissional, sem idioma nem leitura)</span></label>'+
+   '<div class="field"><label for="f-prlink">Resultados da prática: link (opcional)</label><input type="text" id="f-prlink" name="prlink" maxlength="300" value="'+esc(it?it.prlink||'':'')+'" placeholder="https://claude.ai/artifact/…"><span class="hint">A página com os resultados calculados no seu projeto. Entra nas instruções do Projeto, junto com o STUDY_PACK.md anexado.</span></div>'+
    '<div class="field"><label for="f-status">Situação</label><select id="f-status" name="status"><option value="">Ativa</option><option value="espera"'+(it&&it.status==='espera'?' selected':'')+'>Em espera (próximas ondas)</option></select><span class="hint">O prazo é opcional: dá para deixar em branco e calcular depois pelas partes.</span></div>'+
    (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
    '<div class="row"><button class="btn primary" type="submit">'+(it?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
@@ -1583,6 +1585,7 @@ function promptProject(it){
   if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');}
   L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
   if(!lifeOf(it)&&!it.lang)L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
+  if(isPF(it))L.push('- Practice results from my own project ('+(it.prlink?'the practice-results page, '+it.prlink+', and its text version ':'')+'STUDY_PACK.md, attached). They hold real results, computed on my anonymized project data, for each concept I study. The page has one tab per concept group, and more tabs will be added as I go. '+(it.prlink?'If you cannot open the link, use STUDY_PACK.md: it has the same numbers in text form. ':'')+'These are snapshots, not live data.');
   L.push('','How to teach:');
   if(fo){
     L.push('1. My learning focus leads, not any one source. Teach each concept from the attached source that explains it best, say which one and where (chapter and section, or module and file), and show why the concept matters for '+(it.lang?'the English I use at work':'the data work I do')+'. If no attached source covers a concept well, say so and teach it with '+(it.lang?'examples from my work':'an exercise on my datasets')+' instead of inventing a citation.');
@@ -1591,11 +1594,13 @@ function promptProject(it){
   L.push('1. The main source leads. Follow the author\'s order, examples and way of explaining (for a repository or course, the order of the modules and the code examples) and always show why the concept appears at that point: what problem it solves and what it sets up next. Cite chapter and section, or module and file.');
   L.push('2. Use the complementary sources to fill gaps. When the main source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
   }
-  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+(lifeOf(it)?LIFE_HINT:it.lang?LANG_HINT:DOMAIN_HINT));
-  L.push('4. Work in small steps and wait for my answer before moving on. I lead the pace and I want to question you, so answer my questions fully and ask me questions back.');
+  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source.'+(isPF(it)?'':' '+(lifeOf(it)?LIFE_HINT:it.lang?LANG_HINT:DOMAIN_HINT)));
+  L.push(isPF(it)?'4. Do one step at a time and wait for my answer before moving on.':'4. Work in small steps and wait for my answer before moving on. I lead the pace and I want to question you, so answer my questions fully and ask me questions back.');
   var life=lifeOf(it);
-  L.push('','Practice:');
-  if(it.lang){
+  if(!isPF(it))L.push('','Practice:');
+  if(isPF(it)){
+    L.push('5. Teach with my practice results. After you explain a concept from the book, show me the matching result in the practice material: name the tab or section and the exact number.');
+  }else if(it.lang){
     L.push('5. Practice is language practice, not code. For each topic, ask me to write or say new sentences about my work that use it, and correct them. I study on a tablet and I can also practice later at work, in real emails and meetings.');
     L.push('6. Give me a short mini-task for each topic (for example 5 sentences or a short email using the rule) and review what I bring back in a later session.');
     L.push('7. Never ask for or display personal data about me or other people (names, CPF, phone numbers, addresses). Use roles or invented names in examples.');
@@ -1609,7 +1614,7 @@ function promptProject(it){
     L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
     L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
   }
-  var nx=(life||it.lang)?8:9;
+  var nx=isPF(it)?6:(life||it.lang)?8:9;
   if(hasPrac(it)){L.push(nx+'. Apply my practice rules in every hands-on step and mini-project.'+(usesDiagram(it)?' Diagrams are Mermaid text, so I can edit and review them.':''));nx++;}
   L.push('','Language:');
   LANG_RULES.slice(0,(life||it.lang)?3:4).forEach(function(x,i){L.push((nx+i)+'. '+x);});
@@ -1673,6 +1678,8 @@ function mirrorDone(it,p){
   });
 }
 function isNotes(it){return !!(it&&it.notes);}
+/* prática primeiro: só profissional, sem idioma, leitura ou espelho */
+function isPF(it){return !!(it&&it.pf&&!it.lang&&!it.notes&&!it.mirror&&!lifeOf(it));}
 function promptNotes(it,p){
   var L=[];
   L.push('Help me study one chapter from my markdown notes (pasted or attached below): "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Speak English only. If my notes are in Portuguese, answer in English.','');
@@ -1709,8 +1716,33 @@ function promptMirror(it,p){
   }
   return L.join('\n');
 }
+function promptStudyPF(it,p){
+  var L=[],fo=focusOf(it);
+  L.push('Study session, practice first: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources, the parts.txt and the practice results attached to this Project, and follow the Project instructions. The whole session is in English.');
+  if(p.note)L.push('Plan notes: '+p.note.replace(/\n+/g,' · '));
+  L.push('','Do ONE step at a time and wait for my answer before moving on.','');
+  L.push('Step 1 — Map: list the concept of this part and all its sub-concepts, numbered, by name only, in the order '+(fo?'the best source':'the main source')+' presents them (cite chapter and section). Do not explain yet.');
+  L.push('Step 2 — Practice first: for each concept of the map, show me the matching result in the practice material: name the tab or section and the exact numbers, and explain in plain English what it shows about my project. If the practice material has no section for this part yet, stop here: write a short, direct prompt for my work harness and wait for me to bring the result. The prompt must: add a new tab or page to the practice material for the concepts of this map; touch no existing page, data or logic; use no personal data (only column names, counts and aggregates); give insights with charts where useful; and end with a RESULT REPORT, one block per concept: CONCEPT / WHERE / WHAT I RAN / WHAT IT SHOWED (numbers) / WHAT IT MEANS FOR THE PROJECT / PROBLEMS OR SURPRISES.');
+  L.push('Step 3 — Theory, only what I need: connect each result to the author\'s explanation (chapter and section) in a few lines and give the formal definition. Answer my questions until I understand. Do not quiz me yet.');
+  L.push('Step 4 — My explanation: when I say "ready", I explain the concept and every sub-concept in my own words, without reading anything, in one message. Check each one (what is right, what I forgot, what is wrong, with the correction) and say "APPROVED" or "AGAIN" with what to reinforce. If AGAIN, I try again.','');
+  L.push('Only after APPROVED, create two things:','');
+  L.push('A) Flashcard — one card for this part, in plain text, for me to save in my app and to answer from memory in the spaced reviews:','');
+  L.push('CONCEPT: '+p.name);
+  L.push('SOURCE: (chapter and section, or module and file)');
+  L.push('MAP: (the concept and all its sub-concepts, one per line, by name only, in the order we studied them)');
+  L.push('MY DEFINITION: (a definition in my own words of the concept and of EACH sub-concept in the MAP, one per line, corrected with your feedback; mark what you corrected with [fix: ...])');
+  L.push('REAL CASE: (1 to 3 lines: what it showed in my project, with the numbers; no personal data)');
+  L.push('WATCH OUT: (what I got wrong or forgot)');
+  L.push('KEY TERMS: (the new English terms from this session, each with a short meaning)','');
+  L.push('B) Listening — one long talk about the whole part, which I will paste into a text-to-speech tool and use in my Listening task tonight. Output only the text to be read, separate from the flashcard, with no introduction and no notes.');
+  L.push('Rules for the text: plain prose, as if you were speaking to me. No headings, no bullet points, no tables, no markdown symbols and no code. Short, clear sentences in natural English, without idioms. Say numbers, formulas, symbols and commands in words, and describe code and diagrams in words: what they do, not their syntax. Use my corrected ideas and the mistakes I made.');
+  L.push('Length: about 1,500 words, around ten minutes of audio. If you need more room, split it into chunks of at most 1,500 words, each one starting with the words "Part 1 of 2", "Part 2 of 2" and so on.');
+  L.push('Order: (1) why the concept matters and where it sits in the source; (2) the concepts and the explanation of each; (3) what my practice results showed, told in words, with the numbers said clearly; (4) my mistakes and the common confusions; (5) the key terms, each with a one-sentence meaning; (6) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start now with Step 1.');
+  return L.join('\n');
+}
 function promptStudy(it,p){
   if(it.mirror)return promptMirror(it,p);
+  if(isPF(it))return promptStudyPF(it,p);
   if(isNotes(it))return promptNotes(it,p);
   var L=[],fo=focusOf(it),life=lifeOf(it),lang=!!it.lang,src=fo?'the best attached source for each concept (say which one)':'the main source',org=fo?'the sources organize them':'the source organizes them',mini=/mini-?proje/i.test(p.note||'');
   L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". '+(fo?'Use the reference sources, my learning focus and the parts.txt attached to this Project, and follow the Project instructions.':'Use the main source, the complementary sources and the parts.txt attached to this Project, and follow the Project instructions.')+' The whole session is in English.');
@@ -2148,9 +2180,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',ipf=fd.get('pf')==='on',iprl=String(fd.get('prlink')||'').trim().slice(0,300),idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ipf)it.pf=true;else delete it.pf;if(iprl)it.prlink=iprl;else delete it.prlink;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ipf)nw.pf=true;if(iprl)nw.prlink=iprl;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim(),preps=Math.max(0,Math.round(+fd.get('reps')||0))||null;if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;if(preps)p.reps=preps;else delete p.reps;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
