@@ -431,6 +431,54 @@ details.tbl summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--mu
 .gcfg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .foot{font-size:12.5px;color:var(--muted);text-align:center}
+/* estudos, tarefas e sequências (tela inicial) */
+.sgroup{display:flex;flex-direction:column;gap:8px}
+.sgroup h3.label{display:flex;gap:8px;align-items:center}
+.slist,.tlist,.adjlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.srow,.trow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.trow.done{background:var(--ok-soft);border-color:transparent}
+.trow.done .tname b{text-decoration:line-through;text-decoration-thickness:1px}
+.trow.rv{background:var(--rev-soft);border-color:transparent;flex-wrap:wrap}
+.trow.rv .tmain{flex:1 1 150px}
+.trow.rv>.row{flex:1 1 100%;justify-content:flex-end}
+.trow.rv .tname b{text-decoration:none}
+.smain,.tmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
+.tname{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.tname b{font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
+.smain small,.tmain small{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.sbar{display:block;height:5px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.sbar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.sbar i.ok{background:var(--ok)}
+.trow .gchk,.srow .gchk{flex:none}
+.trow.done .gchk,.srow .gchk.on{background:var(--ok);border-color:var(--ok)}
+.trow.done .gchk::after,.srow .gchk.on::after{content:"";width:6px;height:11px;border:solid var(--surface);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.tnote{font-size:13px}
+.seqgroup{display:flex;flex-direction:column;gap:10px}
+.seqrow{display:flex;flex-direction:column;gap:4px}
+.seqhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.seqhead b{font-size:13.5px;font-weight:600;overflow-wrap:anywhere}
+.seqhead small{font-size:12px;color:var(--muted)}
+.strip{display:grid;gap:2px;padding-right:2px}
+.sc{display:block;height:16px;border-radius:3px;background:var(--surface-2);border:1px solid var(--line);box-sizing:border-box}
+.strip .sc{min-width:0}
+.legend .sc{display:inline-block;width:12px;height:12px;vertical-align:-2px;margin-right:4px}
+.sc.ok{background:var(--ok);border-color:var(--ok)}
+.sc.ok2{background:color-mix(in srgb,var(--ok) 70%,#000);border-color:transparent}
+.sc.miss{background:var(--bad-soft);border-color:var(--bad)}
+.sc.comp{background:var(--warn-soft);border-color:var(--warn)}
+.sc.skip{background:repeating-linear-gradient(135deg,var(--surface-2) 0 3px,var(--line) 3px 5px);border-color:var(--line)}
+.sc.na{opacity:.35}
+.sc.part{background:var(--warn-soft);border-color:var(--warn)}
+.sc.w1{background:color-mix(in srgb,var(--c-a) 30%,var(--surface-2));border-color:transparent}
+.sc.w2{background:color-mix(in srgb,var(--c-a) 60%,var(--surface-2));border-color:transparent}
+.sc.w3{background:var(--c-a);border-color:transparent}
+.sc.now{outline:2px solid var(--accent);outline-offset:1px}
+details.adj{border-top:1px solid var(--line);padding-top:10px}
+.adjlist li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 10px;border-radius:12px;background:var(--surface-2);flex-wrap:wrap}
+.adjlist li small{display:block;color:var(--muted);font-size:12.5px}
+.twgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.twgrid label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase}
+.twgrid input{width:100%;padding:8px 4px;text-align:center;border:1px solid var(--line);background:var(--surface-2);border-radius:10px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div id="app"></div>
@@ -871,6 +919,7 @@ function render(){
   var r=ui.route,html='';
   if(r.indexOf('item:')===0){var p=r.split(':'),pk=p[1]==='proj'?'proj':'cap';var it=findItem(pk,p[2]);html=it?renderItem(pk,it):renderChooser(pk);if(!it)ui.route='list:'+pk;}
   else if(r==='charts'){html=renderCharts();}
+  else if(r==='persona'){html=renderPersonaPage();}
   else if(r.indexOf('daily:')===0){var dd=dailyById(r.slice(6));if(dd)html=renderDaily(dd);else{ui.route='home';html=renderHome();}}
   else if(r.indexOf('list:')===0){var q=r.split(':'),lk=q[1]==='proj'?'proj':'cap';html=q[2]?renderList(lk,q[2]==='pess'?'pess':'prof'):renderChooser(lk);}
   else {ui.route='home';html=renderHome();}
@@ -886,8 +935,112 @@ function exampleBanner(){
   return '<div class="banner"><span>Tudo o que aparece agora é <b>exemplo</b>, para mostrar como o app funciona.</span><button class="btn sm" data-act="clear-ask">Apagar exemplos e começar</button></div>';
 }
 
-function renderHome(){return guideSection()+statStrip()+dailySection()+chartsEntry()+achSection()+calendar()+persona()+reviews()+doors();}
-
+function renderHome(){return studiesSection()+tasksSection()+seqSection()+calendar()+reviews()+chartsEntry()+achSection();}
+/* ---------- estudos (antes: página Capacidades) ---------- */
+function grpOf(it,k){return String(it.grp||'').trim()||(k==='proj'?'Projetos':areaOf(it)==='pess'?'Outros estudos':'Profissionais');}
+function studyRow(k,it,t){
+  var s=itemStats(it),pct=s.total?Math.round(s.done/s.total*100):0,fp=focusPart(it,t),tg=targetOf(it,t),q=qtyOf(it,t,null),dt=dueText(it.due);
+  var worked=fp?workedOn(fp,t):false;
+  return '<li class="srow"><button type="button" class="smain" data-act="nav" data-to="item:'+k+':'+it.id+'"><span class="tname"><b>'+esc(it.name)+'</b>'+hidPill(it)+(it.due?'<span class="dl '+dt.cls+'">prazo '+fmt(it.due)+'</span>':'')+(tg>0?'<span class="lchip">hoje '+q+'/'+tg+'</span>':'')+'</span>'+
+    '<span class="sbar" role="img" aria-label="'+pct+'% das partes concluídas"><i class="'+(pct===100?'ok':'')+'" style="width:'+pct+'%"></i></span>'+
+    '<small>'+s.done+' de '+s.total+' '+plural(s.total,'parte','partes')+(fp?' · agora: '+esc(fp.name):s.total?' · sem parte aberta':' · sem partes ainda')+(s.late?' · <b>'+s.late+' '+plural(s.late,'atrasada','atrasadas')+'</b>':'')+'</small></button>'+
+    (canE()&&fp?'<button type="button" class="gchk'+(worked?' on':'')+'" role="checkbox" aria-checked="'+worked+'" aria-label="Trabalhei hoje em '+esc(fp.name)+'" data-act="guide-study" data-k="'+k+'" data-item="'+it.id+'" data-id="'+fp.id+'"></button>':'')+'</li>';
+}
+function studiesSection(){
+  var t=today(),groups={},names=[];
+  ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
+    if(it.status==='espera')return;
+    var g=grpOf(it,k);if(!groups[g]){groups[g]=[];names.push(g);}
+    groups[g].push({k:k,it:it});
+  });});
+  var order=['Profissionais','Bíblia','Livros','Outros estudos','Projetos'];
+  names.sort(function(a,b){var ia=order.indexOf(a),ib=order.indexOf(b);if(ia<0)ia=order.length;if(ib<0)ib=order.length;return ia!==ib?ia-ib:names.indexOf(a)-names.indexOf(b);});
+  var html=names.map(function(g){return '<div class="sgroup"><h3 class="label">'+esc(g)+' <span class="num muted">'+groups[g].length+'</span></h3><ul class="slist">'+groups[g].map(function(x){return studyRow(x.k,x.it,t);}).join('')+'</ul></div>';}).join('');
+  return '<section class="sec" aria-label="Estudos"><div class="sec-head"><h2 class="disp">Estudos</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="item-new" data-k="cap" data-area="prof">+ Estudo</button><button class="btn sm" data-act="item-new" data-k="proj" data-area="prof">+ Projeto</button><button class="btn sm" data-act="imp-open" data-k="cap" data-area="prof">Importar</button><button class="btn sm" data-act="nav" data-to="list:cap">Gerenciar</button></span>':'')+'</div>'+
+    (html||'<div class="rev-empty">Nenhum estudo ainda. Comece cadastrando o que você precisa estudar: as profissionais, a Bíblia, livros, outros estudos.</div>')+'</section>';
+}
+/* ---------- tarefas de hoje (com as revisões do dia) ---------- */
+function taskRow(d,t){
+  var f=freqOf(d),set=dailyDates(d.id),doneToday=!!set[t],pdn=f==='day'?'':periodDone(d,t),done=f==='day'?doneToday:!!pdn;
+  var chips=hidPill(d)+(f==='week'?'<span class="lchip">Semanal</span>':f==='month'?'<span class="lchip">Mensal</span>':'')+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'');
+  var pl=planOn(d,t).split('\n')[0],hint=[],debts=[];
+  if(isNeeded(d)&&f==='day')debts=needLedger(d).debts.filter(function(day){var p=d.comp&&d.comp[day];return !(p&&p>t);});
+  if(pl)hint.push('Hoje: '+esc(pl));
+  if(f!=='day'&&pdn&&!doneToday)hint.push('feita '+(f==='week'?'na semana':'no mês')+' ('+esc(fmtDow(pdn))+')');
+  if(isNeeded(d)&&f==='day'){var nd=needLedger(d).debts.length;if(nd)hint.push('<b>'+nd+' a compensar</b>');}
+  var go=d.link==='persona'?'persona':'daily:'+d.id;
+  return '<li class="trow'+(done?' done':'')+'">'+(canE()?'<button type="button" class="gchk" role="checkbox" aria-checked="'+done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button>':'<span class="gchk static" aria-hidden="true"></span>')+
+    '<button type="button" class="tmain" data-act="nav" data-to="'+go+'"><span class="tname"><b>'+esc(d.name)+'</b>'+chips+'</span>'+(hint.length?'<small>'+hint.join(' · ')+'</small>':'')+'</button>'+
+    (canE()&&debts.length?'<button class="btn sm" data-act="guide-comp" data-id="'+d.id+'">Compensar</button>':'')+'</li>';
+}
+function reviewTaskRows(rp){
+  var t=today();
+  return rp.show.map(function(r){
+    var f=findPart(r.part);if(!f)return '';
+    var n=diff(t,r.due);
+    return '<li class="trow rv"><span class="stage">'+esc(stageName(r.stage,r.item))+'</span><button type="button" class="tmain" data-act="part-open" data-k="'+f.k+'" data-item="'+f.item.id+'" data-id="'+f.part.id+'"><span class="tname"><b>'+esc(f.part.name)+'</b></span><small>Revisão · '+esc(f.item.name)+(n<0?' · atrasada '+(-n)+' '+plural(-n,'dia','dias'):'')+'</small></button>'+
+      (canE()?'<span class="row"><button class="btn ghost sm" data-act="pr-review" data-id="'+r.id+'">Prompt</button><button class="btn sm" data-act="rev-again" data-id="'+r.id+'">Voltar amanhã</button><button class="btn sm good" data-act="rev-ok" data-id="'+r.id+'">Feita</button></span>':'')+'</li>';
+  }).join('');
+}
+function tasksSection(){
+  var t=today(),f=ui.dfilter||'',list=state.daily,shown=f?list.filter(function(d){return (d.label||'')===f;}):list,rp=reviewPlan(t);
+  var chips=state.labels.length&&list.length?'<div class="fchips">'+[''].concat(state.labels).map(function(l){return '<button class="fchip'+(f===l?' on':'')+'" data-act="dfilter" data-l="'+esc(l)+'">'+(l?esc(l):'Todas')+'</button>';}).join('')+'</div>':'';
+  var rv=reviewTaskRows(rp),note='';
+  if(rp.wait.length||(rp.done&&!rp.show.length))note='<p class="muted tnote">Revisões: '+(rp.done?rp.done+' feita'+(rp.done===1?'':'s')+' hoje · ':'')+'limite do dia '+rp.lim+(rp.wait.length?' · '+rp.wait.length+' na fila para os próximos dias':'')+'</p>';
+  return '<section class="sec" aria-label="Tarefas"><div class="sec-head"><h2 class="disp">Tarefas</h2>'+(canE()?'<span class="row"><button class="btn sm" data-act="labels-open">Rótulos</button><button class="btn sm primary" data-act="daily-new">+ Tarefa</button></span>':'')+'</div>'+chips+
+    (shown.length||rv?'<ul class="tlist">'+shown.map(function(d){return taskRow(d,t);}).join('')+rv+'</ul>':'<div class="rev-empty">'+(list.length?'Nenhuma tarefa com este rótulo.':'Nenhuma tarefa ainda. Crie as tarefas que você quer cumprir, como exercício físico, alimentação e oração.')+'</div>')+note+'</section>';
+}
+/* ---------- sequências: uma faixa por tarefa (dias, semanas, meses) e por estudo ---------- */
+var SEQ_DAYS=60,SEQ_WEEKS=26,SEQ_MONTHS=12;
+function seqCell(cls,tip,now){return '<i class="sc'+(cls?' '+cls:'')+(now?' now':'')+'" title="'+esc(tip)+'"></i>';}
+function seqRow(name,meta,cells,n,aria){return '<div class="seqrow"><div class="seqhead"><b>'+name+'</b><small>'+meta+'</small></div><div class="strip" style="grid-template-columns:repeat('+n+',minmax(0,1fr))" role="img" aria-label="'+esc(aria)+'">'+cells+'</div></div>';}
+function seqTask(d,ctx){
+  var t=today(),f=freqOf(d),set=dailyDates(d.id),cnt=dailyCounts(d.id),L=ctx.led[d.id],need=isNeeded(d),from=d.created||ctx.start,cells='',i,x,c,cls,n,total=0;
+  if(f==='day'){
+    n=SEQ_DAYS;
+    for(i=n-1;i>=0;i--){
+      x=addDays(t,-i);c=cnt[x]||0;
+      cls=c>1?'ok2':c>0?'ok':skipped(d,x)?'skip':x<from?'na':(need&&L&&x<t&&L.cov[x])?'comp':(need&&x<t)?'miss':'';
+      if(c)total++;
+      cells+=seqCell(cls,fmtDow(x)+(c?': feita'+(c>1?' '+c+' vezes':''):cls==='skip'?': não estava no plano':cls==='miss'?': faltou':cls==='comp'?': compensada':''),x===t);
+    }
+    return seqRow(esc(d.name),total+' de '+n+' dias · '+streakTxt(d,set),cells,n,d.name+': '+total+' de '+n+' dias');
+  }
+  n=f==='week'?SEQ_WEEKS:SEQ_MONTHS;var cur=periodOf(d,t)[0];
+  for(i=n-1;i>=0;i--){
+    var st=f==='week'?addDays(cur,-7*i):addMonths(cur,-i),pr=periodOf(d,st),dn=periodDone(d,st);
+    cls=dn?'ok':skippedIn(d,pr)?'skip':pr[1]<periodOf(d,from)[0]?'na':(need&&pr[1]<t)?'miss':'';
+    if(dn)total++;
+    cells+=seqCell(cls,(f==='week'?'Semana de '+fmt(pr[0]):MESES[parse(pr[0]).getMonth()]+' de '+parse(pr[0]).getFullYear())+(dn?': feita':cls==='skip'?': não estava no plano':cls==='miss'?': faltou':''),i===0);
+  }
+  return seqRow(esc(d.name),total+' de '+n+' '+(f==='week'?'semanas':'meses')+' · '+streakTxt(d,set),cells,n,d.name+': '+total+' de '+n);
+}
+function seqStudy(it,ctx){
+  var t=today(),cells='',i,x,q,tg,cls,total=0,hasT=false,n=SEQ_DAYS;
+  for(i=n-1;i>=0;i--){
+    x=addDays(t,-i);q=qtyOf(it,x,ctx.byDay);tg=targetOf(it,x);if(tg>0)hasT=true;
+    if(tg>0)cls=q>=tg?'ok':q>0?'part':skipped(it,x)?'skip':x<t?'miss':'';
+    else cls=q>0?(q>=3?'w3':q===2?'w2':'w1'):skipped(it,x)?'skip':'';
+    total+=q;
+    cells+=seqCell(cls,fmtDow(x)+': '+q+(tg>0?' de '+tg:'')+' '+plural(q,'sessão','sessões'),x===t);
+  }
+  if(!total&&!hasT)return '';
+  var tg0=targetOf(it,t);
+  return seqRow(esc(it.name),total+' '+plural(total,'sessão','sessões')+' em '+n+' dias'+(tg0>0?' · hoje '+qtyOf(it,t,ctx.byDay)+'/'+tg0:''),cells,n,it.name+': '+total+' sessões em '+n+' dias');
+}
+function seqSection(){
+  var ctx=tallyCtx(),by={day:[],week:[],month:[]},html='';
+  state.daily.forEach(function(d){by[freqOf(d)].push(d);});
+  function grp(title,sub,arr,fn){var h=arr.map(fn).join('');return h?'<div class="seqgroup"><h3 class="label">'+title+' <span class="muted" style="font-weight:500;text-transform:none;letter-spacing:0">'+sub+'</span></h3>'+h+'</div>':'';}
+  html+=grp('Tarefas diárias','últimos '+SEQ_DAYS+' dias',by.day,function(d){return seqTask(d,ctx);});
+  html+=grp('Tarefas semanais','últimas '+SEQ_WEEKS+' semanas',by.week,function(d){return seqTask(d,ctx);});
+  html+=grp('Tarefas mensais','últimos '+SEQ_MONTHS+' meses',by.month,function(d){return seqTask(d,ctx);});
+  var studies=[];['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(it.status!=='espera'&&it.parts.length)studies.push(it);});});
+  html+=grp('Estudos','sessões por dia, últimos '+SEQ_DAYS+' dias',studies,function(it){return seqStudy(it,ctx);});
+  if(!html)return '';
+  return '<section class="sec seq" aria-label="Sequências"><div class="sec-head"><h2 class="disp">Sequências</h2><span class="aside">o último quadrado é hoje</span></div>'+html+
+    '<div class="legend"><span><i class="sc ok"></i> feito</span><span><i class="sc miss"></i> faltou (necessária)</span><span><i class="sc comp"></i> compensado</span><span><i class="sc skip"></i> não estava no plano</span><span><i class="sc part"></i> meta parcial</span><span><i class="sc w2"></i> estudo (mais escuro = mais sessões)</span></div></section>';
+}
 /* ---------- necessárias, compensação e contagem do dia ---------- */
 function isNeeded(d){return norm(d.label||'')===norm(NEED);}
 function dailyCounts(id){var c={};state.log.forEach(function(e){if(e.t==='daily'&&e.item===id)c[e.d]=(c[e.d]||0)+1;});return c;}
@@ -901,7 +1054,7 @@ function needLedger(d){
   for(;x<=t;x=addDays(x,1)){
     var n=c[x]||0;cnt[x]=n;
     if(n>1){var sr=n-1;while(sr>0&&q.length){cov[q.shift()]=x;sr--;}}
-    if(n===0&&x<t)q.push(x);
+    if(n===0&&x<t&&!skipped(d,x))q.push(x);
   }
   return {from:from,cnt:cnt,cov:cov,debts:q};
 }
@@ -910,33 +1063,47 @@ function tallyCtx(){
   var led={},byDay={};
   state.daily.forEach(function(d){if(isNeeded(d)&&!isWeekly(d))led[d.id]=needLedger(d);});
   state.log.forEach(function(e){(byDay[e.d]=byDay[e.d]||[]).push(e);});
-  return {led:led,byDay:byDay,cand:{wk:candCount(false),we:candCount(true)},start:appStart()};
+  return {led:led,byDay:byDay,cand:{wk:candCount(false),we:candCount(true)},start:appStart(),anyTw:anyTarget()};
 }
 function dayTally(day,ctx){
   var t=today(),rows=[],req=0,done=0;
   state.daily.forEach(function(d){
-    if(isWeekly(d)&&isNeeded(d)){
-      var wr=weekRange(day);
-      if(day!==wr[1]||wr[1]<weekRange(d.created||ctx.start)[0])return;
-      var wdn=weekDone(d,day),wst=wdn?'ok':day<t?'miss':'todo';
-      rows.push({kind:'need',name:d.name+' (semana)',n:wdn?1:0,st:wst,by:null});req++;if(wdn)done++;return;
+    if(!isNeeded(d))return;
+    if(isPeriodic(d)){
+      var pr=periodOf(d,day);
+      if(day!==pr[1]||pr[1]<periodOf(d,d.created||ctx.start)[0])return;
+      var pdn=periodDone(d,day);
+      if(!pdn&&skippedIn(d,pr))return;
+      rows.push({kind:'need',name:d.name+(isWeekly(d)?' (semana)':' (mês)'),n:pdn?1:0,st:pdn?'ok':day<t?'miss':'todo',by:null});req++;if(pdn)done++;return;
     }
     var L=ctx.led[d.id];if(!L||day<L.from)return;
     var n=L.cnt[day]||0,st=n>0?'ok':L.cov[day]?'comp':day<t?'miss':'todo';
+    if(n===0&&skipped(d,day))return;
     rows.push({kind:'need',name:d.name,n:n,st:st,by:L.cov[day]||null});req++;if(st==='ok'||st==='comp')done++;
   });
   ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
-    if(!it.daily||it.status==='espera'||!it.parts.length)return;
+    if(it.status==='espera'||!it.parts.length)return;
+    var tg=targetOf(it,day);
+    if(tg>0){
+      if(day<ctx.start)return;
+      var q=qtyOf(it,day,ctx.byDay);
+      if(q===0&&skipped(it,day))return;
+      rows.push({kind:'study',name:it.name,n:q,req:tg,st:q>=tg?'ok':day<t?'miss':'todo'});req+=tg;done+=Math.min(q,tg);return;
+    }
+    if(!it.daily)return;
     if(day<(it.since||ctx.start))return;
-    var did=(ctx.byDay[day]||[]).some(function(e){return e.item===it.id&&(e.t==='work'||e.t==='done');});
-    if(!did&&!it.parts.some(function(q){return (!q.start||q.start<=day)&&(!q.done||q.done>=day);}))return;
+    var did=qtyOf(it,day,ctx.byDay)>0;
+    if(!did&&skipped(it,day))return;
+    if(!did&&!it.parts.some(function(q2){return (!q2.start||q2.start<=day)&&(!q2.done||q2.done>=day);}))return;
     rows.push({kind:'cap',name:it.name,n:did?1:0,st:did?'ok':day<t?'miss':'todo'});req++;if(did)done++;
   });});
-  var we=parse(day).getDay()%6===0,rq=Math.min(we?gcfg().we:gcfg().wk,we?ctx.cand.we:ctx.cand.wk);
-  if(rq>0){
-    var seen={};(ctx.byDay[day]||[]).forEach(function(e){if(e.part&&(e.t==='work'||e.t==='done')){var f=findItem(e.k,e.item);if(f&&!f.daily)seen[e.part]=1;}});
-    var dn=Math.min(Object.keys(seen).length,rq);
-    rows.push({kind:'study',name:'Sessões de estudo',n:dn,req:rq,st:dn>=rq?'ok':day<t?'miss':'todo'});req+=rq;done+=dn;
+  if(!ctx.anyTw){
+    var we=parse(day).getDay()%6===0,rq=Math.min(we?gcfg().we:gcfg().wk,we?ctx.cand.we:ctx.cand.wk);
+    if(rq>0){
+      var seen={};(ctx.byDay[day]||[]).forEach(function(e){if(e.part&&(e.t==='work'||e.t==='done')){var f=findItem(e.k,e.item);if(f&&!f.daily)seen[e.part]=1;}});
+      var dn=Math.min(Object.keys(seen).length,rq);
+      rows.push({kind:'study',name:'Sessões de estudo',n:dn,req:rq,st:dn>=rq?'ok':day<t?'miss':'todo'});req+=rq;done+=dn;
+    }
   }
   return {rows:rows,req:req,done:done};
 }
@@ -972,21 +1139,40 @@ function whyPanel(d){
   if(!canE())return tx?'<div class="note"><span class="label">Por que não fiz tudo</span>'+esc(tx)+'</div>':'';
   return '<div class="field"><label for="why-text">Por que não fiz tudo neste dia?</label><textarea id="why-text" style="min-height:80px" placeholder="Escreva o motivo. Fica registrado neste dia.">'+esc(tx)+'</textarea><div class="row"><button class="btn sm primary" data-act="why-save">Salvar motivo</button></div></div>';
 }
+function adjustPanel(day,ctx){
+  if(!canE()||day>today()||day<ctx.start)return '';
+  var drows=state.daily.filter(function(x){return (x.created||ctx.start)<=day;}).map(function(x){
+    var f=freqOf(x),pr=periodOf(x,day),has=!!dailyDates(x.id)[day],per=f==='day'?has:!!periodDone(x,day),sk=f==='day'?skipped(x,day):skippedIn(x,pr);
+    var st=has?'feita neste dia':per?'feita no '+(f==='week'?'período (semana)':'período (mês)'):sk?'não estava no plano':'sem registro';
+    return '<li><span>'+esc(x.name)+'<small>'+st+'</small></span><span class="row">'+(has?'<button class="btn sm" data-act="adj-undo" data-id="'+x.id+'">Desfazer</button>':'<button class="btn sm primary" data-act="adj-did" data-k="daily" data-id="'+x.id+'">Fiz e não marquei</button>')+(!per?'<button class="btn sm" data-act="adj-skip" data-k="daily" data-id="'+x.id+'">'+(sk?'Voltar ao plano':'Não estava no plano')+'</button>':'')+'</span></li>';
+  }).join('');
+  var srows='',others='';
+  ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
+    if(it.status==='espera'||!it.parts.length)return;
+    var tg=targetOf(it,day),q=qtyOf(it,day,ctx.byDay),sk=skipped(it,day);
+    if(tg>0||q>0||sk||(it.daily&&day>=(it.since||ctx.start))){
+      srows+='<li><span>'+esc(it.name)+'<small>'+(tg>0?q+' de '+tg+' '+plural(tg,'sessão','sessões'):q+' '+plural(q,'sessão','sessões'))+(sk?' · não estava no plano':'')+'</small></span><span class="row"><button class="btn sm primary" data-act="adj-did" data-k="'+k+'" data-id="'+it.id+'">Fiz e não marquei</button>'+(q<(tg||1)?'<button class="btn sm" data-act="adj-skip" data-k="'+k+'" data-id="'+it.id+'">'+(sk?'Voltar ao plano':'Não estava no plano')+'</button>':'')+'</span></li>';
+    }else others+='<option value="'+k+':'+it.id+'">'+esc(it.name)+'</option>';
+  });});
+  return '<details class="fold adj"><summary>Ajustar este dia <span class="muted" style="font-weight:500">· o que fiz e não marquei, ou não estava no plano</span></summary>'+
+    '<ul class="adjlist">'+drows+srows+'</ul>'+
+    (others?'<div class="row" style="margin-top:8px"><select id="adj-study" aria-label="Outro estudo"><option value="">Outro estudo…</option>'+others+'</select><button class="btn sm" data-act="adj-did-sel">Registrar sessão neste dia</button></div>':'')+
+    '<p class="muted" style="font-size:12.5px;margin-top:8px">“Fiz e não marquei” cria o registro neste dia. “Não estava no plano” tira o dia da conta (não conta como falta nem quebra a sequência).</p></details>';
+}
 function dayPanel(idx,ctx){
   var d=ui.sel,o=idx[d];
-  var head='<h3>'+esc(fmtLong(d))+(d===today()?' · hoje':'')+'</h3>',nb=needPanel(d,ctx),wb=whyPanel(d);
-  if(!o)return '<div class="daypanel">'+head+nb+'<p class="muted">Nenhum registro neste dia.</p>'+wb+'</div>';
-  function li(e,extra){return '<li>'+esc(e.pname)+'<small>'+(e.k==='daily'?AREA[areaOfEntry(e)]+' · tarefa diária':esc(e.iname)+' · '+(e.k==='cap'?'capacidade':'projeto'))+(extra?' · '+extra:'')+'</small></li>';}
+  var head='<h3>'+esc(fmtLong(d))+(d===today()?' · hoje':'')+'</h3>',nb=needPanel(d,ctx),wb=whyPanel(d),ab=adjustPanel(d,ctx);
+  if(!o)return '<div class="daypanel">'+head+nb+'<p class="muted">Nenhum registro neste dia.</p>'+ab+wb+'</div>';
+  function li(e,extra){return '<li>'+esc(e.pname)+'<small>'+(e.k==='daily'?AREA[areaOfEntry(e)]+' · tarefa':esc(e.iname)+' · '+(e.k==='cap'?'estudo':'projeto'))+(e.retro?' · marcado depois':'')+(extra?' · '+extra:'')+'</small></li>';}
   var w=o.list.filter(function(e){return e.t==='work';}),c=o.list.filter(function(e){return e.t==='done';}),r=o.list.filter(function(e){return e.t==='review';}),y=o.list.filter(function(e){return e.t==='daily';});
   function grp(cls,title,arr,fn){return '<div class="dgroup '+cls+'"><h4>'+title+' <span class="num muted">'+arr.length+'</span></h4>'+(arr.length?'<ul>'+arr.map(fn).join('')+'</ul>':'<p class="muted" style="font-size:13.5px">—</p>')+'</div>';}
   return '<div class="daypanel">'+head+nb+'<div class="dgroups">'+
     grp('w','Trabalho',w,function(e){return li(e);})+
     grp('c','Concluídas',c,function(e){return li(e);})+
     grp('r','Revisões',r,function(e){return li(e,(stageName(e.st,e.item)||'')+' · '+(e.a==='again'?'revisar de novo':'feita'));})+
-    grp('y','Tarefas diárias',y,function(e){return li(e);})+
-  '</div>'+wb+'</div>';
+    grp('y','Tarefas',y,function(e){return li(e);})+
+  '</div>'+ab+wb+'</div>';
 }
-
 function persona(){
   if(!canE()&&!state.persona.trim())return '';
   var body;
@@ -996,7 +1182,11 @@ function persona(){
   return '<section class="persona"><div class="persona-head"><h1 class="disp">Pessoa <span class="hl">necessária</span></h1>'+
     (canE()&&!ui.editPersona?'<button class="btn sm" data-act="persona-edit">Editar texto</button>':'')+'</div>'+body+'</section>';
 }
-
+function renderPersonaPage(){
+  var tk=state.daily.filter(function(d){return d.link==='persona';})[0],done=tk&&dailyDates(tk.id)[today()];
+  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+persona()+
+    (tk&&canE()?'<div class="dhero'+(done?' done':'')+'"><b>'+esc(tk.name)+': '+(done?'feito hoje':'ainda não foi feito hoje')+'</b><button class="btn '+(done?'':'good ')+'sm" data-act="guide-daily" data-id="'+tk.id+'">'+(done?'Desfazer':'Marcar feito hoje')+'</button></div>':'');
+}
 function reviews(){
   var t=today(),rs=state.reviews.slice();
   var rpn=reviewPlan(t),now=rpn.show,wait=rpn.wait;
@@ -1013,7 +1203,7 @@ function reviews(){
   var shown=ui.revAll?next:next.slice(0,4);
   return '<section class="rev" aria-label="Revisão espaçada">'+
    '<div class="sec-head"><h2 class="disp">Revisão espaçada</h2><span class="aside row">'+srOf(null).map(function(n){return 'D+'+n;}).join(' → ')+' → futura'+(canE()?' <button class="btn ghost sm" data-act="guide-config">Ajustar dias</button>':'')+'</span></div>'+
-   (now.length?'<ul class="rev-list">'+now.map(function(r){return row(r,actNow);}).join('')+'</ul>':'<div class="rev-empty">'+(rpn.done&&wait.length?'Limite de hoje feito ('+rpn.done+' de '+rpn.lim+'). ':'')+'Nenhuma revisão para hoje. Ao concluir uma parte de uma capacidade, ela entra aqui no dia seguinte.</div>')+
+   '<p class="muted" style="font-size:13.5px">As revisões de hoje ficam na lista de Tarefas. Aqui estão a fila, as notas, as próximas e as futuras.</p>'+
    (wait.length?'<details class="fold"><summary>Na fila, esperando vaga <span class="num muted">'+wait.length+'</span></summary><p class="muted" style="margin-top:8px;font-size:13.5px">Limite de hoje: '+rpn.lim+' '+plural(rpn.lim,'revisão','revisões')+' ('+rpn.done+' '+plural(rpn.done,'feita','feitas')+'). As novas (D+1) entram primeiro, e o resto sobe nos próximos dias. Dá para adiantar uma daqui se quiser.</p><ul class="rev-list" style="margin-top:8px">'+wait.map(function(r){return row(r,actWait);}).join('')+'</ul></details>':'')+
    (function(){var mp=mdPending(),ma=mdAll();if(!mp.length&&!ma.length)return '';
      return '<details class="fold"'+(mp.length?' open':'')+'><summary>Notas em markdown <span class="num muted">'+mp.length+' '+plural(mp.length,'pendente','pendentes')+' · '+ma.length+' '+plural(ma.length,'salva','salvas')+'</span></summary>'+
@@ -1032,16 +1222,6 @@ function aggregate(k,area){
   state.log.forEach(function(e){if(e.k===k&&e.t==='work'&&e.d>=w[0]&&e.d<=w[1]&&(!area||areaOfEntry(e)===area))a.wkSess++;});
   return a;
 }
-function doors(){
-  function door(k){
-    var a=aggregate(k),pct=a.total?Math.round(a.done/a.total*100):0;
-    return '<button class="door" data-act="nav" data-to="list:'+k+'"><div class="door-top"><h2 class="disp">'+KIND[k].many+'</h2><span class="arrow">'+I.arrow+'</span></div>'+
-     '<div class="door-nums"><div><b class="num">'+a.items+'</b><span>'+(k==='cap'?plural(a.items,'capacidade','capacidades'):plural(a.items,'projeto','projetos'))+'</span></div><div><b class="num">'+a.done+'/'+a.total+'</b><span>partes feitas</span></div><div><b class="num">'+a.wkSess+'</b><span>sessões na semana</span></div></div>'+
-     '<div class="bar-track" role="img" aria-label="'+pct+'% das partes concluídas"><div class="bar-fill" style="width:'+pct+'%"></div></div></button>';
-  }
-  return '<div class="doors">'+door('cap')+door('proj')+'</div>';
-}
-
 function periodBlocks(s){
   return '<div class="periods">'+
    '<div class="period"><span class="label">Total</span><b class="num">'+s.done+'<em>/'+s.total+'</em></b><small>partes feitas</small></div>'+
@@ -1084,7 +1264,7 @@ function renderItem(k,it){
     var st=partStatus(p),wc=workOf(p.id).length,lbl={done:'Concluída',late:'Atrasada',soon:'Prazo próximo',open:'Em aberto'}[st];
     return '<button class="sq '+st+'" data-act="part-open" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"><span class="sq-state">'+lbl+'</span><span class="sq-name">'+esc(p.name)+'</span><span class="sq-foot"><span class="num">'+(p.done?'feita '+fmt(p.done):(p.due?'até '+fmt(p.due):'sem prazo'))+'</span><span class="num">'+wc+(p.reps?'/'+p.reps:'')+' '+plural(wc,'sessão','sessões')+'</span></span></button>';
   }).join('');
-  return '<button class="btn ghost back" data-act="nav" data-to="list:'+k+':'+areaOf(it)+'">'+I.left+' '+KIND[k].many+' '+AREA_PL[areaOf(it)]+'</button>'+
+  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+KIND[k].One+' · '+AREA[areaOf(it)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="row"><span class="dl '+dt.cls+'">'+(it.due?'prazo '+esc(fmtDow(it.due)):'sem prazo')+'</span><span class="muted" style="font-size:13px">'+(it.due?dt.txt:'')+'</span></span></div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    (it.status==='espera'?'<div class="waitbar"><span>Em espera: fica fora das contagens até você começar.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
@@ -1106,20 +1286,6 @@ function areaOfEntry(e){
   var it=(e.k==='cap'||e.k==='proj')?findItem(e.k,e.item):null;return it?areaOf(it):'prof';
 }
 function revArea(r){var f=findPart(r.part);return f?areaOf(f.item):'prof';}
-function statCards(area){
-  var idx=dayIndex(area),t=today(),td=idx[t],n=td?td.list.length:0,st=streak(idx),w=weekRange(t),ws={w:0,c:0,r:0,y:0};
-  for(var d=w[0];d<=w[1];d=addDays(d,1)){var o=idx[d];if(o){ws.w+=o.w;ws.c+=o.c;ws.r+=o.r;ws.y+=o.y;}}
-  var dueNow=reviewPlan(t).show.filter(function(r){return revArea(r)===area;}).length;
-  return '<div class="stats">'+
-   '<div class="stat '+(n?'today-yes':'today-no')+'"><span class="label">Hoje</span><span class="v num">'+n+'<small>'+plural(n,'registro','registros')+'</small></span><span class="s">'+(n?'Trabalhou hoje':'Ainda sem registro hoje')+'</span></div>'+
-   '<div class="stat"><span class="label">Sequência</span><span class="v num">'+st+'<small>'+plural(st,'dia','dias')+'</small></span><span class="s">dias seguidos com registro</span></div>'+
-   '<div class="stat"><span class="label">Esta semana</span><span class="v num">'+ws.w+'<small>'+plural(ws.w,'sessão','sessões')+'</small></span><span class="s">'+ws.c+' '+plural(ws.c,'parte','partes')+' · '+ws.r+' '+plural(ws.r,'revisão','revisões')+' · '+ws.y+' '+plural(ws.y,'diária','diárias')+'</span></div>'+
-   '<div class="stat"><span class="label">Revisões para hoje</span><span class="v num">'+dueNow+'</span><span class="s">'+(dueNow?'esperando você':'tudo em dia')+'</span></div>'+
-  '</div>';
-}
-function statStrip(){
-  return '<section class="statsec" aria-label="Contagem de registros">'+['prof','pess'].map(function(a){return '<div class="stats-group"><span class="label">'+AREA[a]+'</span>'+statCards(a)+'</div>';}).join('')+'</section>';
-}
 function renderChooser(k){
   function box(area){
     var a=aggregate(k,area),pct=a.total?Math.round(a.done/a.total*100):0;
@@ -1148,18 +1314,7 @@ function weekSection(d){
     return '<div class="wkday'+(i===t?' today':'')+'"><b class="wkname">'+WD[i]+(i===t?' · hoje':'')+'</b><div class="wkbody">'+(tx?esc(tx):'<span class="muted">Sem plano</span>')+'</div></div>';
   }).join('')+'</div></div>';
 }
-/* ---------- guia do dia ---------- */
-var SLOTS=[['wake','Ao acordar','07:00'],['day','Durante o dia',''],['am','Trajeto de ida','07:45'],['lunch','Almoço','12:30'],['pm','Trajeto de volta','18:15'],['pre','Antes de estudar','19:10'],['study','Estudo','20:15'],['bed','Antes de dormir','22:00']];
-function slotOf(d){
-  if(d.slot&&SLOTS.some(function(s){return s[0]===d.slot;}))return d.slot;
-  var n=norm(d.name);
-  if(/acordar|cama|dente|orar|oracao/.test(n))return 'wake';
-  if(/listening|speaking|almoc/.test(n))return 'lunch';
-  if(/exerc|treino|scapular|calistenia|caminhada/.test(n))return 'pre';
-  if(/dormir|sono/.test(n))return 'bed';
-  return 'day';
-}
-function gcfg(){var g=state.guide||{};return {t:g.t||{},wk:g.wk>0?g.wk:2,we:g.we>0?g.we:4,rv:g.rv>0?g.rv:2,rw:g.rw>0?g.rw:6};}
+function gcfg(){var g=state.guide||{};return {wk:g.wk>0?g.wk:2,we:g.we>0?g.we:4,rv:g.rv>0?g.rv:2,rw:g.rw>0?g.rw:6};}
 /* revisões de hoje: limite por dia (úteis/fim de semana); as novas (D+1) vêm primeiro e o resto espera na fila */
 function reviewPlan(t){
   t=t||today();var c=gcfg(),we=parse(t).getDay()%6===0,lim=we?c.rw:c.rv;
@@ -1168,7 +1323,6 @@ function reviewPlan(t){
   var room=Math.max(0,lim-done);
   return {lim:lim,done:done,show:q.slice(0,room),wait:q.slice(room)};
 }
-function slotTime(s){var c=gcfg();return (c.t&&c.t[s[0]])||s[2];}
 function srcLine(p){var l=String(p&&p.note||'').split('\n').map(function(x){return x.trim();}).filter(function(x){return /^(source|fonte)\s*:/i.test(x);})[0];return l?l.replace(/^(source|fonte)\s*:\s*/i,'').slice(0,110):'';}
 function workedOn(p,t){return workOf(p.id).some(function(e){return e.d===t;})||p.done===t;}
 function focusPart(it,t){
@@ -1176,137 +1330,63 @@ function focusPart(it,t){
   if(w)return w;
   return it.parts.filter(function(p){return !p.done&&(!p.start||p.start<=t);}).sort(function(a,b){return (a.due||'9999')<(b.due||'9999')?-1:1;})[0]||null;
 }
-function pickParts(n,t,we){
-  var rk={profundo:0,solido:1,conceitual:2},c=[];
-  /* itens de 1 sessão por semana só entram no fim de semana, antes dos demais e na ordem da lista (projetos antes de capacidades) */
-  ['cap','proj'].forEach(function(k){state[k].forEach(function(it,i){
-    if(it.status==='espera'||it.daily||(it.spw===1&&!we))return;
-    var p=focusPart(it,t);if(!p)return;
-    c.push({k:k,it:it,p:p,today:workedOn(p,t),wk:!!(we&&it.spw===1),ix:(k==='proj'?0:1000)+i,late:(p.due||'9999')<=t,rank:rk[it.depth]!=null?rk[it.depth]:1});
-  });});
-  c.sort(function(a,b){
-    if(a.today!==b.today)return a.today?-1:1;
-    if(a.wk!==b.wk)return a.wk?-1:1;
-    if(a.wk&&a.ix!==b.ix)return a.ix-b.ix;
-    if(a.late!==b.late)return a.late?-1:1;
-    if(a.late&&a.p.due!==b.p.due)return a.p.due<b.p.due?-1:1;
-    if(a.rank!==b.rank)return a.rank-b.rank;
-    return (a.p.due||'9999')<(b.p.due||'9999')?-1:1;
-  });
-  return c.slice(0,n);
-}
-function guide(){
-  var t=today(),dow=parse(t).getDay(),we=dow===0||dow===6,by={};
-  function put(s,x){(by[s]=by[s]||[]).push(x);}
-  var late=[];
-  state.daily.forEach(function(d){
-    var sl=slotOf(d),x={type:'daily',d:d,done:!!dailyDates(d.id)[t]},cx=[];
-    if(isWeekly(d)){var wdd=weekDone(d,t);if(wdd&&wdd!==t)return;x.weekly=true;}
-    if(isNeeded(d)&&!isWeekly(d))needLedger(d).debts.forEach(function(day){var pl=d.comp&&d.comp[day];if(pl&&pl>t)return;cx.push({type:'comp',d:d,day:day,plan:pl||'',done:false});});
-    if(sl==='study'){late.push(x);cx.forEach(function(c){late.push(c);});}else{put(sl,x);cx.forEach(function(c){put(sl,c);});}
-  });
-  ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
-    if(!it.daily||it.status==='espera')return;
-    var sl=SLOTS.some(function(z){return z[0]===it.slot;})?it.slot:'study',dp=focusPart(it,t),x;
-    if(!dp)return;
-    x={type:'study',k:k,it:it,p:dp,done:workedOn(dp,t)};
-    if(sl==='study')late.push(x);else put(sl,x);
-  });});
-  var picks=pickParts(we?gcfg().we:gcfg().wk,t,we);
-  if(!we&&picks.length)put('am',{type:'info',title:'Pré-leitura da parte da noite',hint:picks[0].p.name+(srcLine(picks[0].p)?' · '+srcLine(picks[0].p):'')});
-  var rp=reviewPlan(t);
-  put(we?'study':'pm',{type:'reviews',n:rp.show.length,wait:rp.wait.length,lim:rp.lim,did:rp.done,md:mdPending().length,done:!rp.show.length});
-  var st=picks.map(function(c){return {type:'study',k:c.k,it:c.it,p:c.p,done:workedOn(c.p,t)};});
-  var todo=[];
-  if(we)by.study=(by.study||[]).concat(st,todo,late);else{st.concat(todo,late).forEach(function(x){put('study',x);});}
-  return SLOTS.filter(function(s){return !(we&&(s[0]==='am'||s[0]==='pm'))&&by[s[0]]&&by[s[0]].length;}).map(function(s){return {key:s[0],label:s[1],time:slotTime(s),steps:by[s[0]]};});
-}
-function trim90(x){x=String(x||'').replace(/\s+/g,' ').trim();return x.length>92?x.slice(0,90)+'…':x;}
-function stepHtml(x){
-  var t=today();
-  if(x.type==='daily'){
-    var d=x.d,pl=planOn(d,t).split('\n')[0],hint=pl?'Hoje: '+pl:trim90(String(d.text||'').split('\n')[0]);if(x.weekly)hint='Semanal'+(x.done?'':', uma vez até domingo')+(hint?' · '+hint:'');
-    return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button><span class="gtext"><b>'+esc(d.name)+hidPill(d)+'</b>'+(hint?'<small>'+esc(hint)+'</small>':'')+'</span><button class="btn ghost sm" data-act="nav" data-to="daily:'+d.id+'">Abrir</button></li>';
-  }
-  if(x.type==='comp')
-    return '<li class="gstep"><button type="button" class="gchk" role="checkbox" aria-checked="false" aria-label="Compensar '+esc(x.d.name)+'" data-act="guide-comp" data-id="'+x.d.id+'"></button><span class="gtext"><b>Compensar: '+esc(x.d.name)+hidPill(x.d)+'</b><small>faltou em '+esc(fmtDow(x.day))+(x.plan?' · marcada para '+esc(fmtDow(x.plan)):'')+'</small></span><button class="btn ghost sm" data-act="nav" data-to="daily:'+x.d.id+'">Data</button></li>';
-  if(x.type==='study'){
-    var sl=srcLine(x.p),rp=x.p.reps?workOf(x.p.id).length+'/'+x.p.reps+' vezes':'';
-    return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Registrar sessão em '+esc(x.p.name)+'" data-act="guide-study" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'"></button><span class="gtext"><b>'+esc(x.p.name)+'</b><small>'+esc(x.it.name)+(rp?' · '+rp:'')+(sl?' · '+esc(sl):'')+'</small></span><span class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="guide-prompt" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Prompt</button><button class="btn ghost sm" data-act="part-open" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Abrir</button></span></li>';
-  }
-  if(x.type==='reviews')
-    return '<li class="gstep rv'+(x.done?' done':'')+'"><span class="gchk static'+(x.done?' on':'')+'" aria-hidden="true"></span><span class="gtext"><b>Revisões espaçadas</b><small>'+(x.n?x.n+' '+plural(x.n,'revisão','revisões')+' para hoje':(x.did?'Limite de hoje feito ('+x.did+' de '+x.lim+')':'Nenhuma para hoje'))+(x.wait?' · '+x.wait+' na fila para os próximos dias':'')+(x.md?' · '+x.md+' '+plural(x.md,'nota em markdown pendente','notas em markdown pendentes'):'')+'</small></span>'+(x.n||x.md?'<button class="btn ghost sm" data-act="guide-reviews">Ver</button>':'')+'</li>';
-  return '<li class="gstep info"><span class="gchk static" aria-hidden="true"></span><span class="gtext"><b>'+esc(x.title)+'</b><small>'+esc(x.hint)+'</small></span></li>';
-}
-function guideSection(){
-  if(!canE())return '';
-  var G=guide(),total=0,done=0;
-  G.forEach(function(g){g.steps.forEach(function(x){if(x.type!=='info'){total++;if(x.done)done++;}});});
-  var pct=total?Math.round(done/total*100):0;
-  return '<section class="sec guide" aria-label="Guia do dia"><div class="sec-head"><h2 class="disp">Guia do dia</h2><span class="row"><span class="aside num">'+done+' de '+total+' passos</span><button class="btn sm" data-act="guide-config">Ajustar</button></span></div>'+
-   '<div class="bar-track" role="img" aria-label="'+pct+'% dos passos do dia"><div class="bar-fill'+(pct===100?' ok':'')+'" style="width:'+pct+'%"></div></div>'+
-   (pct===100&&total?'<div class="rev-empty" style="background:var(--ok-soft);color:var(--ok)">Dia completo. Descanse.</div>':'')+
-   G.map(function(g){return '<div class="gslot"><div class="gtime">'+(g.time?'<span class="num">'+esc(g.time)+'</span>':'')+'<b>'+esc(g.label)+'</b></div><ul class="gsteps">'+g.steps.map(stepHtml).join('')+'</ul></div>';}).join('')+
-   '<details class="fold"><summary>Dia difícil?</summary><p class="muted" style="font-size:14px;margin-top:8px">Faça o mínimo: 1 sessão de estudo e 10 minutos de exercício (2 exercícios do dia). O dia conta e a sequência continua. Um dia ruim não derruba a meta; o que derruba é falhar dois dias seguidos.</p></details></section>';
-}
 function guideModal(){
-  var c=gcfg();
-  return '<form data-form="guide" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">Ajustar o guia</h2>'+closeBtn()+'</div>'+
-   '<p class="muted" style="font-size:14px">Horários de cada bloco do dia e quantas sessões de estudo entram no guia. Cada tarefa diária escolhe o seu bloco em Editar (ou o app deduz pelo nome).</p>'+
-   '<div class="gcfg">'+SLOTS.filter(function(s){return s[2];}).map(function(s){return '<div class="field"><label for="g-t-'+s[0]+'">'+esc(s[1])+'</label><input type="time" id="g-t-'+s[0]+'" name="t-'+s[0]+'" value="'+esc((c.t&&c.t[s[0]])||s[2])+'"></div>';}).join('')+'</div>'+
-   '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-wk">Sessões em dias úteis</label><input type="number" id="g-wk" name="wk" min="1" max="8" step="1" value="'+c.wk+'"></div>'+
-   '<div class="field" style="flex:1 1 150px"><label for="g-we">Sessões no fim de semana</label><input type="number" id="g-we" name="we" min="1" max="12" step="1" value="'+c.we+'"></div></div>'+
+  var c=gcfg(),q=srOf(null);
+  return '<form data-form="guide" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">Ajustes</h2>'+closeBtn()+'</div>'+
+   '<p class="muted" style="font-size:14px">Limite de revisões por dia e dias entre as repetições. A quantidade de estudo por dia da semana fica em Editar, em cada estudo.</p>'+
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-rv">Revisões em dias úteis</label><input type="number" id="g-rv" name="rv" min="1" max="30" step="1" value="'+c.rv+'"></div>'+
    '<div class="field" style="flex:1 1 150px"><label for="g-rw">Revisões no fim de semana</label><input type="number" id="g-rw" name="rw" min="1" max="30" step="1" value="'+c.rw+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">O que passar do limite espera na fila e sobe nos dias seguintes. As revisões novas (a primeira de cada parte) têm prioridade.</span>'+
-   (function(){var q=srOf(null);return '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 110px"><label for="g-sr0">1ª revisão (dias após concluir)</label><input type="number" id="g-sr0" name="sr0" min="1" max="365" step="1" value="'+q[0]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr1">2ª (dias após a 1ª)</label><input type="number" id="g-sr1" name="sr1" min="1" max="365" step="1" value="'+q[1]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr2">3ª (dias após a 2ª)</label><input type="number" id="g-sr2" name="sr2" min="1" max="365" step="1" value="'+q[2]+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">Padrão de todas as capacidades: 1, 7 e 30. Cada capacidade pode ter o seu em Editar. Uma revisão que precisa voltar sempre volta amanhã.</span>';})()+
+   '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 110px"><label for="g-sr0">1ª revisão (dias após concluir)</label><input type="number" id="g-sr0" name="sr0" min="1" max="365" step="1" value="'+q[0]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr1">2ª (dias após a 1ª)</label><input type="number" id="g-sr1" name="sr1" min="1" max="365" step="1" value="'+q[1]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr2">3ª (dias após a 2ª)</label><input type="number" id="g-sr2" name="sr2" min="1" max="365" step="1" value="'+q[2]+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">Padrão de todas as capacidades: 1, 7 e 30. Cada capacidade pode ter o seu em Editar. Uma revisão que precisa voltar sempre volta amanhã.</span>'+
+   '<details class="fold"><summary>Meta geral de estudo por dia</summary><p class="muted" style="font-size:13.5px;margin:8px 0">Só vale enquanto nenhum estudo tem quantidade própria por dia da semana.</p><div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-wk">Sessões em dias úteis</label><input type="number" id="g-wk" name="wk" min="1" max="8" step="1" value="'+c.wk+'"></div>'+
+   '<div class="field" style="flex:1 1 150px"><label for="g-we">Sessões no fim de semana</label><input type="number" id="g-we" name="we" min="1" max="12" step="1" value="'+c.we+'"></div></div></details>'+
    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
-function slotSelect(cur){
-  return '<div class="field"><label for="d-slot">Quando no dia</label><select id="d-slot" name="slot"><option value="">Automático, pelo nome</option>'+SLOTS.map(function(s){return '<option value="'+s[0]+'"'+(cur===s[0]?' selected':'')+'>'+esc(s[1])+'</option>';}).join('')+'</select></div>';
-}
 function dailyDates(id){var s={};state.log.forEach(function(e){if(e.t==='daily'&&e.item===id)s[e.d]=1;});return s;}
-function streakOf(set){var t=today(),d=set[t]?t:addDays(t,-1),n=0;while(set[d]){n++;d=addDays(d,-1);}return n;}
+function streakOf(set,d0){var t=today(),sk=(d0&&d0.skip)||{},d=(set[t]||sk[t])?t:addDays(t,-1),n=0;while(set[d]||sk[d]){if(set[d])n++;d=addDays(d,-1);}return n;}
+/* frequência das tarefas: dia, semana (segunda a domingo) ou mês */
+function freqOf(d){return d&&d.freq==='week'?'week':d&&d.freq==='month'?'month':'day';}
+function isWeekly(d){return freqOf(d)==='week';}
+function isPeriodic(d){return freqOf(d)!=='day';}
+function periodOf(d,day){var f=freqOf(d);return f==='week'?weekRange(day):f==='month'?monthRange(day):[day,day];}
+function periodDone(d,day){var r=periodOf(d,day),s=dailyDates(d.id),x;for(x=r[0];x<=r[1];x=addDays(x,1)){if(s[x])return x;}return '';}
+function periodPrev(d,st){return freqOf(d)==='week'?addDays(st,-7):addMonths(st,-1);}
+function periodSet(d){var s=dailyDates(d.id),o={};Object.keys(s).forEach(function(k){o[periodOf(d,k)[0]]=1;});return o;}
+function periodStreak(d){var o=periodSet(d),w=periodOf(d,today())[0],n=0;if(!o[w])w=periodPrev(d,w);while(o[w]){n++;w=periodPrev(d,w);}return n;}
+function periodBest(d){var o=periodSet(d),best=0,cur=0,prev=null;Object.keys(o).sort().forEach(function(k){cur=(prev&&periodPrev(d,k)===prev)?cur+1:1;if(cur>best)best=cur;prev=k;});return best;}
+function streakTxt(d,set){var f=freqOf(d);if(f==='week'){var n=periodStreak(d);return n+' '+plural(n,'semana seguida','semanas seguidas');}if(f==='month'){var q=periodStreak(d);return q+' '+plural(q,'mês seguido','meses seguidos');}var k=streakOf(set,d);return k+' '+plural(k,'dia seguido','dias seguidos');}
+/* folgas: dias (ou períodos) em que a tarefa ou o estudo não estava realmente no plano */
+function skipped(x,day){return !!(x&&x.skip&&x.skip[day]);}
+function skippedIn(x,r){var k;if(x&&x.skip){for(k in x.skip){if(k>=r[0]&&k<=r[1])return true;}}return false;}
+/* estudos: meta de sessões por dia da semana (it.tw, índice 0 = domingo) e quantidade trabalhada */
+function targetOf(it,day){var a=it&&it.tw;if(!Array.isArray(a)||(it.twSince&&day<it.twSince))return 0;return Math.max(0,Math.round(+a[parse(day).getDay()]||0));}
+function qtyOf(it,day,byDay){
+  var ev=byDay?(byDay[day]||[]):state.log.filter(function(e){return e.d===day;}),w=0,wp={},dn=[];
+  ev.forEach(function(e){if(e.item!==it.id)return;if(e.t==='work'){w++;wp[e.part]=1;}else if(e.t==='done')dn.push(e.part);});
+  dn.forEach(function(p){if(!wp[p])w++;});
+  return w;
+}
+function anyTarget(){return ['cap','proj'].some(function(k){return state[k].some(function(it){return Array.isArray(it.tw)&&it.tw.some(function(n){return n>0;});});});}
 /* tarefas semanais: vale um registro em qualquer dia da semana (segunda a domingo) */
-function isWeekly(d){return !!d&&d.freq==='week';}
-function weekDone(d,t){var r=weekRange(t||today()),s=dailyDates(d.id),x;for(x=r[0];x<=r[1];x=addDays(x,1)){if(s[x])return x;}return '';}
-function weekSetOf(d){var s=dailyDates(d.id),o={};Object.keys(s).forEach(function(k){o[weekRange(k)[0]]=1;});return o;}
-function weekStreak(d){var o=weekSetOf(d),w=weekRange(today())[0],n=0;if(!o[w])w=addDays(w,-7);while(o[w]){n++;w=addDays(w,-7);}return n;}
-function weekBest(d){var o=weekSetOf(d),best=0,cur=0,prev=null;Object.keys(o).sort().forEach(function(k){cur=(prev&&addDays(prev,7)===k)?cur+1:1;if(cur>best)best=cur;prev=k;});return best;}
-function streakTxt(d,set){if(isWeekly(d)){var n=weekStreak(d);return n+' '+plural(n,'semana seguida','semanas seguidas');}var m=streakOf(set);return m+' '+plural(m,'dia seguido','dias seguidos');}
 function bestStreak(set,ini,fim){
   var best=0,cur=0,prev=null;
   Object.keys(set).filter(function(d){return (!ini||d>=ini)&&(!fim||d<=fim);}).sort().forEach(function(d){cur=(prev&&addDays(prev,1)===d)?cur+1:1;if(cur>best)best=cur;prev=d;});
   return best;
 }
-function dailySection(){
-  var f=ui.dfilter||'',list=state.daily,shown=f?list.filter(function(d){return (d.label||'')===f;}):list,t=today();
-  var chips=state.labels.length&&list.length?'<div class="fchips">'+[''].concat(state.labels).map(function(l){return '<button class="fchip'+(f===l?' on':'')+'" data-act="dfilter" data-l="'+esc(l)+'">'+(l?esc(l):'Todas')+'</button>';}).join('')+'</div>':'';
-  var cards=shown.map(function(d){
-    var set=dailyDates(d.id),wk=isWeekly(d),done=wk?!!weekDone(d,t):!!set[t];
-    return '<button class="dcard'+(done?' done':'')+'" data-act="nav" data-to="daily:'+d.id+'"><span class="dtop"><b>'+esc(d.name)+'</b><span class="dstate">'+(done?(wk?'Feito na semana':'Feito hoje'):'Pendente')+'</span></span>'+
-      '<span class="dmeta">'+hidPill(d)+(wk?'<span class="lchip">Semanal</span>':'')+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'<span>'+AREA[areaOf(d)]+'</span></span>'+
-      '<span class="dstreak"><b class="num">'+streakTxt(d,set).split(' ')[0]+'</b> '+streakTxt(d,set).split(' ').slice(1).join(' ')+'</span>'+(isNeeded(d)&&!wk&&needLedger(d).debts.length?'<span class="dplan"><b>A compensar:</b> '+needLedger(d).debts.length+'</span>':'')+(weekPlan(d)?'<span class="dplan"><b>Hoje:</b> '+esc(planOn(d,t).split('\n')[0]||'sem plano')+'</span>':'')+'</button>';
-  }).join('');
-  return '<section class="sec" aria-label="Tarefas diárias"><div class="sec-head"><h2 class="disp">Tarefas diárias</h2>'+
-    (canE()?'<span class="row"><button class="btn sm" data-act="labels-open">Rótulos</button><button class="btn sm primary" data-act="daily-new">+ Tarefa diária</button></span>':'')+'</div>'+chips+
-    (shown.length?'<div class="dgrid">'+cards+'</div>':'<div class="rev-empty">'+(list.length?'Nenhuma tarefa com este rótulo.':'Nenhuma tarefa diária ainda. Crie tarefas curtas para cumprir todo dia e use rótulos, como “Discipline charge”, para separá-las.')+'</div>')+
-  '</section>';
-}
 function needBlock(d){
   if(!isNeeded(d))return '';
-  if(isWeekly(d))return '<div class="note"><span class="label">Necessária: uma vez por semana</span>'+(weekDone(d)?'Feita nesta semana ('+esc(fmtDow(weekDone(d)))+').':'Ainda não foi feita nesta semana. A semana vai de segunda a domingo; no domingo ela conta no calendário.')+'</div>';
+  if(isPeriodic(d)){var pw=isWeekly(d),dn=periodDone(d,today());return '<div class="note"><span class="label">Necessária: uma vez '+(pw?'por semana':'por mês')+'</span>'+(dn?'Feita '+(pw?'nesta semana':'neste mês')+' ('+esc(fmtDow(dn))+').':'Ainda não foi feita '+(pw?'nesta semana. A semana vai de segunda a domingo; no domingo ela conta no calendário.':'neste mês. No último dia do mês ela conta no calendário.'))+'</div>';}
   var L=needLedger(d),n=L.cnt[today()]||0;
-  return '<div class="note"><span class="label">Necessária: todos os dias, inclusive no fim de semana</span>'+(L.debts.length?'Faltou em '+L.debts.map(function(x){return esc(fmtDow(x));}).join(', ')+'. Faça de novo em outro dia para compensar (cada registro a mais compensa uma falta).':'Sem faltas a compensar.')+(n>1?' Hoje: '+n+' registros.':'')+'</div>'+
-    (L.debts.length?'<div class="stack"><span class="label">Faltas a compensar</span><ul class="hist">'+L.debts.map(function(day){var pl=(d.comp&&d.comp[day])||'';return '<li><span>Faltou em '+esc(fmtDow(day))+'</span>'+(canE()?'<span class="row" style="flex-wrap:nowrap"><input type="date" id="cp-'+day+'" value="'+esc(pl)+'" min="'+today()+'" aria-label="Compensar em" style="border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 8px"><button class="btn sm" data-act="comp-plan" data-id="'+d.id+'" data-day="'+day+'">Marcar</button></span>':(pl?'<span class="num">'+esc(fmt(pl))+'</span>':''))+'</li>';}).join('')+'</ul><p class="muted" style="font-size:13px">Escolha o dia para compensar: o passo Compensar só aparece no guia nesse dia. Sem data, aparece todos os dias.</p></div>':'')+
+  return '<div class="note"><span class="label">Necessária: todos os dias, inclusive no fim de semana</span>'+(L.debts.length?'Faltou em '+L.debts.map(function(x){return esc(fmtDow(x));}).join(', ')+'. Faça de novo em outro dia para compensar (cada registro a mais compensa uma falta). Se o dia não estava no plano, tire-o da conta no calendário, em Ajustar este dia.':'Sem faltas a compensar.')+(n>1?' Hoje: '+n+' registros.':'')+'</div>'+
+    (L.debts.length?'<div class="stack"><span class="label">Faltas a compensar</span><ul class="hist">'+L.debts.map(function(day){var pl=(d.comp&&d.comp[day])||'';return '<li><span>Faltou em '+esc(fmtDow(day))+'</span>'+(canE()?'<span class="row" style="flex-wrap:nowrap"><input type="date" id="cp-'+day+'" value="'+esc(pl)+'" min="'+today()+'" aria-label="Compensar em" style="border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 8px"><button class="btn sm" data-act="comp-plan" data-id="'+d.id+'" data-day="'+day+'">Marcar</button></span>':(pl?'<span class="num">'+esc(fmt(pl))+'</span>':''))+'</li>';}).join('')+'</ul><p class="muted" style="font-size:13px">Escolha o dia para compensar: o botão Compensar só aparece na lista de Tarefas nesse dia. Sem data, aparece todos os dias.</p></div>':'')+
     (canE()&&L.debts.length?'<div class="row"><button class="btn good" data-act="guide-comp" data-id="'+d.id+'">Registrar compensação hoje</button></div>':'');
 }
 function renderDaily(d){
-  var set=dailyDates(d.id),t=today(),wk=isWeekly(d),done=!!set[t],wdn=wk?weekDone(d,t):'',cur=wk?weekStreak(d):streakOf(set),best=wk?weekBest(d):bestStreak(set),total=Object.keys(set).length,last=0,cells='',un=wk?['semana','semanas']:['dia','dias'];
+  var set=dailyDates(d.id),t=today(),fq=freqOf(d),wk=fq!=='day',done=!!set[t],wdn=wk?periodDone(d,t):'',cur=wk?periodStreak(d):streakOf(set,d),best=wk?periodBest(d):bestStreak(set),total=Object.keys(set).length,last=0,cells='',un=fq==='week'?['semana','semanas']:fq==='month'?['mês','meses']:['dia','dias'],pw=fq==='week'?'semana':'mês';
   for(var i=34;i>=0;i--){var day=addDays(t,-i);if(set[day])last++;cells+='<span class="hcell'+(set[day]?' on':'')+(day===t?' today':'')+'" title="'+esc(fmtDow(day))+(set[day]?': feito':'')+'"></span>';}
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">Tarefa '+(wk?'semanal':'diária')+' · '+AREA[areaOf(d)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(d.name)+'</h1>'+(d.label?'<span class="row"><span class="lchip">'+esc(d.label)+'</span></span>':'')+'</div>'+
+   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">Tarefa '+(fq==='week'?'semanal':fq==='month'?'mensal':'diária')+' · '+AREA[areaOf(d)]+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(d.name)+'</h1>'+(d.label?'<span class="row"><span class="lchip">'+esc(d.label)+'</span></span>':'')+'</div>'+
    (canE()?'<button class="btn sm" data-act="daily-edit" data-id="'+d.id+'">Editar</button>':'')+'</div>'+
-   '<div class="dhero'+((wk?wdn:done)?' done':'')+'"><b>'+(wk?(done?'Feito hoje':wdn?'Feita nesta semana ('+fmtDow(wdn)+')':'Ainda não foi feita nesta semana'):(done?'Feito hoje':'Ainda não foi feito hoje'))+'</b>'+(canE()?(done?'<button class="btn sm" data-act="daily-undo">Desfazer registro de hoje</button>':'<button class="btn '+(wk&&wdn?'':'good ')+'lg" data-act="daily-done">'+(wk&&wdn?'Registrar de novo hoje':'Registrar feito hoje')+'</button>'):'')+'</div>'+
+   '<div class="dhero'+((wk?wdn:done)?' done':'')+'"><b>'+(wk?(done?'Feito hoje':wdn?'Feita '+(fq==='week'?'nesta semana':'neste mês')+' ('+fmtDow(wdn)+')':'Ainda não foi feita '+(fq==='week'?'nesta semana':'neste mês')):(done?'Feito hoje':'Ainda não foi feito hoje'))+'</b>'+(canE()?(done?'<button class="btn sm" data-act="daily-undo">Desfazer registro de hoje</button>':'<button class="btn '+(wk&&wdn?'':'good ')+'lg" data-act="daily-done">'+(wk&&wdn?'Registrar de novo hoje':'Registrar feito hoje')+'</button>'):'')+'</div>'+
    needBlock(d)+
    (planOn(d,t)?'<div class="note todaybox"><b>Hoje · '+WD[parse(t).getDay()]+'</b>'+esc(planOn(d,t))+'</div>':'')+
    '<div class="facts f4"><div><span class="label">Sequência atual</span><b class="num">'+cur+' '+plural(cur,un[0],un[1])+'</b></div><div><span class="label">Melhor sequência</span><b class="num">'+best+' '+plural(best,un[0],un[1])+'</b></div><div><span class="label">Últimos 35 dias</span><b class="num">'+last+'/35</b></div><div><span class="label">Total de dias</span><b class="num">'+total+'</b></div></div>'+
@@ -1317,15 +1397,15 @@ function renderDaily(d){
      :(d.text?'<div class="note">'+esc(d.text)+'</div>':'<p class="muted">Sem detalhes.</p>'))+'</div>';
 }
 function dailyForm(m){
-  var d=m.id?dailyById(m.id):null,ar=d?areaOf(d):'prof';
+  var d=m.id?dailyById(m.id):null,ar=d?areaOf(d):'prof',fq=freqOf(d);
   var opts='<option value="">Sem rótulo</option>'+state.labels.map(function(l){return '<option value="'+esc(l)+'"'+(d&&d.label===l?' selected':'')+'>'+esc(l)+'</option>';}).join('');
-  return '<form data-form="daily" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">'+(d?'Editar tarefa diária':'Nova tarefa diária')+'</h2>'+closeBtn()+'</div>'+
-   '<div class="field"><label for="d-name">Nome da tarefa</label><input type="text" id="d-name" name="name" required maxlength="100" value="'+esc(d?d.name:'')+'" placeholder="Ex.: 20 minutos de flashcards" autofocus></div>'+
+  return '<form data-form="daily" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">'+(d?'Editar tarefa':'Nova tarefa')+'</h2>'+closeBtn()+'</div>'+
+   '<div class="field"><label for="d-name">Nome da tarefa</label><input type="text" id="d-name" name="name" required maxlength="100" value="'+esc(d?d.name:'')+'" placeholder="Ex.: Exercício físico" autofocus></div>'+
    '<div class="field"><label for="d-area">Área</label><select id="d-area" name="area"><option value="prof"'+(ar==='prof'?' selected':'')+'>Profissional</option><option value="pess"'+(ar==='pess'?' selected':'')+'>Pessoal</option></select></div>'+
-   '<div class="field"><label for="d-freq">Frequência</label><select id="d-freq" name="freq"><option value="day"'+(isWeekly(d)?'':' selected')+'>Diária: todo dia</option><option value="week"'+(isWeekly(d)?' selected':'')+'>Semanal: uma vez por semana (segunda a domingo)</option></select><span class="hint">Uma tarefa semanal aparece no guia todo dia até você fazê-la, e some depois que a semana está cumprida.</span></div>'+
-   slotSelect(d&&d.slot)+
-   '<div class="field"><label for="d-label">Rótulo</label><select id="d-label" name="label">'+opts+'</select><span class="hint">“'+NEED+'”: obrigatória todos os dias, inclusive no fim de semana. Se faltar, você compensa em outro dia, registrando a tarefa mais de uma vez. Sem esse rótulo, a tarefa é opcional e não entra na conta do calendário.</span></div>'+
+   '<div class="field"><label for="d-freq">Frequência</label><select id="d-freq" name="freq"><option value="day"'+(fq==='day'?' selected':'')+'>Diária: todo dia</option><option value="week"'+(fq==='week'?' selected':'')+'>Semanal: uma vez por semana (segunda a domingo)</option><option value="month"'+(fq==='month'?' selected':'')+'>Mensal: uma vez por mês</option></select><span class="hint">Uma tarefa semanal ou mensal continua na lista até você fazê-la no período.</span></div>'+
+   '<div class="field"><label for="d-label">Rótulo</label><select id="d-label" name="label">'+opts+'</select><span class="hint">“'+NEED+'”: obrigatória (todos os dias, ou uma vez por semana ou mês). Se faltar um dia, você compensa em outro, registrando a tarefa mais de uma vez. Sem esse rótulo, a tarefa é opcional e não entra na conta do calendário.</span></div>'+
    '<div class="field"><label for="d-newlabel">Ou crie um rótulo novo</label><input type="text" id="d-newlabel" name="newlabel" maxlength="40" placeholder="Ex.: Discipline charge"></div>'+
+   '<label class="check"><input type="checkbox" name="link"'+(d&&d.link==='persona'?' checked':'')+'> <span>Ao clicar na tarefa, abrir o texto da pessoa necessária</span></label>'+
    '<div class="row"><button class="btn primary" type="submit">'+(d?'Salvar':'Criar')+'</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
    (d?(m.confirm?'<div class="confirm">Excluir a tarefa “'+esc(d.name)+'”? Os dias já registrados continuam no calendário.<div class="row"><button class="btn danger solid sm" type="button" data-act="daily-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="daily-del-ask" style="align-self:flex-start">Excluir tarefa</button>'):'')+
    '</form>';
@@ -1534,8 +1614,9 @@ function itemForm(m){
    '<div class="field"><label for="f-practice">Regras de prática (opcional)</label><textarea id="f-practice" name="practice" style="min-height:96px" placeholder="Como você quer praticar, sem mudar a ordem das partes. Ex.: desenhe o diagrama antes de escrever a consulta.">'+esc(it?it.practice||'':'')+'</textarea><span class="hint">As regras valem na demonstração, no mini-projeto e nas revisões. Diferente do foco, não mudam a ordem das partes.</span></div>'+
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 180px"><label for="f-depth">Profundidade</label><select id="f-depth" name="depth"><option value="">Não definida</option>'+['conceitual','solido','profundo'].map(function(x){return '<option value="'+x+'"'+(it&&it.depth===x?' selected':'')+'>'+DEPTH[x].n+' · '+DEPTH[x].size.replace('cerca de ','')+'</option>';}).join('')+'</select></div>'+
    '<div class="field" style="flex:1 1 140px"><label for="f-spw">Sessões por semana</label><input type="number" id="f-spw" name="spw" min="1" max="40" step="1" value="'+esc(it&&it.spw?it.spw:'')+'" placeholder="Ex.: 6"></div></div>'+
-   '<label class="check"><input type="checkbox" name="daily"'+(it&&it.daily?' checked':'')+'> <span>Trabalhar todo dia (um passo por dia no guia, inclusive no fim de semana)</span></label>'+
-   '<div class="field"><label for="f-slot">Quando no dia (se trabalhar todo dia)</label><select id="f-slot" name="slot"><option value="">Estudo (padrão)</option>'+SLOTS.map(function(z){return '<option value="'+z[0]+'"'+(it&&it.slot===z[0]?' selected':'')+'>'+esc(z[1])+'</option>';}).join('')+'</select></div>'+
+   '<div class="field"><label for="f-grp">Grupo na tela inicial</label><input type="text" id="f-grp" name="grp" list="grp-list" maxlength="40" value="'+esc(it?it.grp||'':'')+'" placeholder="'+esc(m.k==='proj'?'Projetos':(it?areaOf(it):m.area)==='pess'?'Outros estudos':'Profissionais')+'"><datalist id="grp-list"><option value="Profissionais"><option value="Bíblia"><option value="Livros"><option value="Outros estudos"></datalist><span class="hint">O título sob o qual este estudo aparece. Em branco usa o padrão da área. Dá para criar o seu.</span></div>'+
+   '<div class="field"><label>Quantidade de sessões por dia da semana (opcional)</label><div class="twgrid">'+[1,2,3,4,5,6,0].map(function(i){return '<div><label for="f-tw'+i+'">'+DIAS3[i]+'</label><input type="number" id="f-tw'+i+'" name="tw'+i+'" min="0" max="20" step="1" value="'+esc(it&&Array.isArray(it.tw)&&it.tw[i]>0?it.tw[i]:'')+'" placeholder="0"></div>';}).join('')+'</div><span class="hint">Quantas sessões você precisa fazer neste estudo em cada dia. Entra no calendário como necessário e aparece nas sequências. Em branco: sem meta naquele dia.</span></div>'+
+   '<label class="check"><input type="checkbox" name="daily"'+(it&&it.daily?' checked':'')+'> <span>Trabalhar todo dia (conta no calendário quando houver parte aberta)</span></label>'+
    '<label class="check"><input type="checkbox" name="lang"'+(it&&it.lang?' checked':'')+'> <span>Idioma (gramática e uso): o prompt usa frases suas e exemplos do trabalho, sem bases de dados</span></label>'+
    '<label class="check"><input type="checkbox" name="notes"'+(it&&it.notes?' checked':'')+'> <span>Projeto de leitura e anotações (o prompt de estudo parte do seu markdown)</span></label>'+
    '<label class="check"><input type="checkbox" name="pf"'+(it&&it.pf?' checked':'')+'> <span>Prática primeiro: o tutor ensina com os resultados do seu projeto real e você explica sem ler antes de aprovar (só para o profissional, sem idioma nem leitura)</span></label>'+
@@ -2128,6 +2209,13 @@ document.addEventListener('click',function(ev){
     case 'cal-today':ui.cal=today().slice(0,7);ui.sel=today();render();break;
     case 'cal-day':ui.sel=d.d;if(d.d.slice(0,7)!==ui.cal)ui.cal=d.d.slice(0,7);render();break;
     case 'guide-config':openModal({kind:'guide'});break;
+    case 'adj-did':{var ad=ui.sel,ak=d.k;if(!ad||ad>today())break;
+      if(ak==='daily'){var at=dailyById(d.id);if(at)state.log.push({id:uid(),d:ad,t:'daily',k:'daily',item:at.id,part:null,iname:at.name,pname:at.name,area:areaOf(at),retro:1});}
+      else{var ai=findItem(ak,d.id);if(ai&&ai.parts.length){var apart=focusPart(ai,ad)||ai.parts.filter(function(x){return !x.done;})[0]||ai.parts[0];state.log.push({id:uid(),d:ad,t:'work',k:ak,item:ai.id,part:apart.id,iname:ai.name,pname:apart.name,area:areaOf(ai),retro:1});}}
+      commit('Registrado em '+fmt(ad));break;}
+    case 'adj-did-sel':{var sel=document.getElementById('adj-study'),sv=sel?String(sel.value||''):'';if(!sv||ui.sel>today())break;var sp=sv.split(':'),si=findItem(sp[0],sp[1]);if(si&&si.parts.length){var spart=focusPart(si,ui.sel)||si.parts.filter(function(x){return !x.done;})[0]||si.parts[0];state.log.push({id:uid(),d:ui.sel,t:'work',k:sp[0],item:si.id,part:spart.id,iname:si.name,pname:spart.name,area:areaOf(si),retro:1});commit('Sessão registrada em '+fmt(ui.sel));}break;}
+    case 'adj-undo':{var au=dailyById(d.id),aday=ui.sel;if(!au)break;var li2=-1;state.log.forEach(function(e,ix){if(e.t==='daily'&&e.item===au.id&&e.d===aday)li2=ix;});if(li2>=0)state.log.splice(li2,1);commit('Registro desfeito');break;}
+    case 'adj-skip':{var ax=d.k==='daily'?dailyById(d.id):findItem(d.k,d.id),adx=ui.sel;if(!ax)break;if(!ax.skip)ax.skip={};if(ax.skip[adx])delete ax.skip[adx];else ax.skip[adx]=1;if(!Object.keys(ax.skip).length)delete ax.skip;commit(ax.skip&&ax.skip[adx]?'Dia tirado da conta':'Dia de volta ao plano');break;}
     case 'guide-daily':{var gd=dailyById(d.id),tg=today();if(!gd)break;if(dailyDates(gd.id)[tg])state.log=state.log.filter(function(e){return !(e.t==='daily'&&e.item===gd.id&&e.d===tg);});else state.log.push({id:uid(),d:tg,t:'daily',k:'daily',item:gd.id,part:null,iname:gd.name,pname:gd.name,area:areaOf(gd)});commit();break;}
     case 'guide-comp':{var gc=dailyById(d.id),tc=today();if(!gc)break;var nc=state.log.filter(function(e){return e.t==='daily'&&e.item===gc.id&&e.d===tc;}).length;for(var ci=0;ci<(nc===0?2:1);ci++)state.log.push({id:uid(),d:tc,t:'daily',k:'daily',item:gc.id,part:null,iname:gc.name,pname:gc.name,area:areaOf(gc)});commit('Compensação registrada');break;}
     case 'comp-plan':{var cd=dailyById(d.id),ci2=document.getElementById('cp-'+d.day),cv2=ci2?String(ci2.value||''):'';if(!cd)break;if(!cd.comp)cd.comp={};if(cv2)cd.comp[d.day]=cv2;else delete cd.comp[d.day];commit(cv2?'Compensação marcada para '+fmt(cv2):'Data removida');break;}
@@ -2235,11 +2323,10 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ui.modal){i
 document.addEventListener('submit',function(ev){
   var f0=ev.target,k0=f0.getAttribute&&f0.getAttribute('data-form');
   if(k0==='guide'){
-    ev.preventDefault();var gf=new FormData(f0),gt2={};
-    SLOTS.forEach(function(sl){if(sl[2]){var v=String(gf.get('t-'+sl[0])||'');if(/^\d\d:\d\d$/.test(v)&&v!==sl[2])gt2[sl[0]]=v;}});
-    state.guide={t:gt2,wk:Math.max(1,Math.round(+gf.get('wk')||2)),we:Math.max(1,Math.round(+gf.get('we')||4)),rv:Math.max(1,Math.round(+gf.get('rv')||2)),rw:Math.max(1,Math.round(+gf.get('rw')||6))};
+    ev.preventDefault();var gf=new FormData(f0);
+    state.guide={wk:Math.max(1,Math.round(+gf.get('wk')||2)),we:Math.max(1,Math.round(+gf.get('we')||4)),rv:Math.max(1,Math.round(+gf.get('rv')||2)),rw:Math.max(1,Math.round(+gf.get('rw')||6))};
     var sq=srClean([gf.get('sr0'),gf.get('sr1'),gf.get('sr2')]);if(sq&&sq.join()!==SR_DEF.join())state.sr=sq;else delete state.sr;
-    ui.modal=null;commit('Guia ajustado');return;
+    ui.modal=null;commit('Ajustes salvos');return;
   }
   if(k0==='unlock'){
     ev.preventDefault();var pw=document.getElementById('vault-pass').value,rm=document.getElementById('vault-rem');
@@ -2257,20 +2344,20 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',ipf=fd.get('pf')==='on',isr=srParse(fd.get('sr')),iprl=String(fd.get('prlink')||'').trim().slice(0,300),idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ipf)it.pf=true;else delete it.pf;if(isr)it.sr=isr;else delete it.sr;if(iprl)it.prlink=iprl;else delete it.prlink;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ipf)nw.pf=true;if(isr)nw.sr=isr;if(iprl)nw.prlink=iprl;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',ipf=fd.get('pf')==='on',isr=srParse(fd.get('sr')),iprl=String(fd.get('prlink')||'').trim().slice(0,300),idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',igrp=String(fd.get('grp')||'').trim().slice(0,40),itw=[0,1,2,3,4,5,6].map(function(i){return Math.max(0,Math.min(20,Math.round(+fd.get('tw'+i)||0)));}),itwOn=itw.some(function(n){return n>0;});
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ipf)it.pf=true;else delete it.pf;if(isr)it.sr=isr;else delete it.sr;if(iprl)it.prlink=iprl;else delete it.prlink;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(igrp)it.grp=igrp;else delete it.grp;if(itwOn){if(JSON.stringify(it.tw||null)!==JSON.stringify(itw)){it.tw=itw;it.twSince=today();}}else{delete it.tw;delete it.twSince;}if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ipf)nw.pf=true;if(isr)nw.sr=isr;if(iprl)nw.prlink=iprl;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(igrp)nw.grp=igrp;if(itwOn){nw.tw=itw;nw.twSince=today();}if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim(),preps=Math.max(0,Math.round(+fd.get('reps')||0))||null;if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;if(preps)p.reps=preps;else delete p.reps;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
     else{var np={id:uid(),name:pn,due:pd,done:null,note:pnote};if(preps)np.reps=preps;it2.parts.push(np);ui.modal=null;commit('Parte adicionada');}
   }else if(kind==='daily'){
     var dn=String(fd.get('name')||'').trim();if(!dn)return;
-    var dl2=String(fd.get('newlabel')||'').trim().slice(0,40)||String(fd.get('label')||''),da=fd.get('area')==='pess'?'pess':'prof',dsl=SLOTS.some(function(x){return x[0]===fd.get('slot');})?fd.get('slot'):'';
+    var dl2=String(fd.get('newlabel')||'').trim().slice(0,40)||String(fd.get('label')||''),da=fd.get('area')==='pess'?'pess':'prof',dlk=fd.get('link')==='on'?'persona':'';
     if(dl2&&state.labels.indexOf(dl2)<0)state.labels.push(dl2);
-    var dfq=fd.get('freq')==='week'?'week':'';
-    if(m.id){var dx=dailyById(m.id);if(dx){dx.name=dn;dx.label=dl2;dx.area=da;if(dsl)dx.slot=dsl;else delete dx.slot;if(dfq)dx.freq=dfq;else delete dx.freq;}ui.modal=null;commit('Tarefa atualizada');}
-    else{var dnew={id:uid(),name:dn,label:dl2,area:da,text:'',created:today()};if(dsl)dnew.slot=dsl;if(dfq)dnew.freq=dfq;state.daily.push(dnew);ui.modal=null;commit(dfq?'Tarefa semanal criada':'Tarefa diária criada');}
+    var dfq=fd.get('freq')==='week'?'week':fd.get('freq')==='month'?'month':'';
+    if(m.id){var dx=dailyById(m.id);if(dx){dx.name=dn;dx.label=dl2;dx.area=da;if(dlk)dx.link=dlk;else delete dx.link;if(dfq)dx.freq=dfq;else delete dx.freq;}ui.modal=null;commit('Tarefa atualizada');}
+    else{var dnew={id:uid(),name:dn,label:dl2,area:da,text:'',created:today()};if(dlk)dnew.link=dlk;if(dfq)dnew.freq=dfq;state.daily.push(dnew);ui.modal=null;commit(dfq==='week'?'Tarefa semanal criada':dfq==='month'?'Tarefa mensal criada':'Tarefa criada');}
   }else if(kind==='bulk'){
     var it3=findItem(m.k,m.item);if(!it3)return;
     var lines=String(fd.get('lines')||'').split('\n').map(function(s){return s.replace(/^\s*(?:[-•*]|\d+[.)])\s+/,'').trim();}).filter(Boolean);if(!lines.length)return;

@@ -3,17 +3,24 @@
 App de estudos em um único arquivo (`pessoa-necessaria.html`), publicado como artifact do Claude:
 https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
 
-- **Calendário** no topo: sessões de trabalho, partes concluídas e revisões de cada dia; clique no dia para ver o detalhe.
-- **Pessoa necessária**: texto de motivação para ler todos os dias.
-- **Revisão espaçada**: parte de capacidade concluída → D+1. "Revisar de novo" → +1 dia. "Revisão feita" → D+7 → D+30 → lista futura (sem data).
-- **Capacidades** e **Projetos**: prazos, partes, contagem da semana e do mês, registro de sessões e conclusão.
+## Tela inicial
 
-## Tarefas diárias, áreas e conquistas
+De cima para baixo:
 
-- **Contagem por área**: os cartões de registros aparecem duas vezes, um grupo **Profissional** e outro **Pessoal**, com a mesma contagem (hoje, sequência, semana, revisões).
-- **Capacidades e Projetos** abrem primeiro a escolha da área e só depois a lista. Cada item tem a área em Editar.
-- **Tarefas diárias**: cartões com o nome, se foi feita hoje e a sequência de dias. A página da tarefa tem o botão
-  "Registrar feito hoje", os últimos 35 dias e um texto com o que fazer. Rótulos (ex.: *Discipline charge*) filtram os cartões.
+- **Estudos:** as capacidades e os projetos ativos, direto na tela (não há mais a página Capacidades como porta). Eles ficam em **grupos**
+  (Profissionais, Bíblia, Livros, Outros estudos, Projetos, ou o nome que você criar em **Editar › Grupo**). Cada linha mostra o progresso, a parte de agora
+  e uma caixa para marcar que você trabalhou hoje; clicar abre o estudo. **+ Estudo**, **+ Projeto**, **Importar** e **Gerenciar** (a lista antiga, com a base de prática e os itens em espera) ficam no alto.
+- **Tarefas:** as tarefas diárias, semanais e mensais (exercício, alimentação, oração…), cada uma com a caixa de hoje, o rótulo e o que falta compensar. **As revisões que caem hoje entram
+  na mesma lista** (Prompt, Voltar amanhã, Feita). A tarefa marcada com **Ao clicar na tarefa, abrir o texto da pessoa necessária** abre a pessoa necessária em vez de um retângulo grande na tela.
+- **Sequências:** uma faixa de quadrados por tarefa (60 dias, 26 semanas ou 12 meses, o último quadrado é hoje) e por estudo (sessões por dia; com meta, verde/parcial/faltou).
+- **Calendário:** sessões, partes concluídas e revisões de cada dia. Em **Ajustar este dia** você marca o que fez e não marcou, ou que algo **não estava no plano** (o dia sai da conta e não quebra a sequência).
+- **Revisão espaçada:** a fila, as notas em markdown, as próximas e as futuras. **Gráficos** e **Conquistas** fecham a página.
+
+Os cartões de contagem (registros de hoje, sequência de acessos, semana) e o **Guia do dia** saíram. O código do guia está guardado em [`arquivo/`](arquivo/).
+
+- **Revisão espaçada**: parte de capacidade concluída → 1ª revisão (padrão D+1). "Voltar amanhã" → +1 dia. "Feita" → D+7 → D+30 → lista futura (sem data). Os dias são configuráveis em **Ajustes**.
+- **Tarefas diárias, semanais e mensais**: a página da tarefa tem o botão "Registrar feito hoje", os últimos 35 dias e um texto com o que fazer. Rótulos (ex.: *Discipline charge*) filtram a lista.
+- **Quantidade de estudo por dia da semana:** em **Editar** o estudo, preencha as sessões necessárias de cada dia (dom a sáb). Entram no calendário como necessárias e nas sequências.
 - **Conquistas**: metas com título, descrição, data opcional e uma regra de cálculo — manual, dias com registro no
   período (%), média de registros por dia, partes entregues no prazo (%), total de registros, sequência de dias ou
   sequência de uma tarefa diária. Conquistada, o cartão vira medalha dourada; passado o prazo sem cumprir, fica "não alcançada".
@@ -70,22 +77,16 @@ Os prompts são em **inglês** e o estudo das capacidades acontece em inglês. O
 - [`planejamento/projetos-leitura.txt`](planejamento/projetos-leitura.txt): os projetos de leitura e anotações (João, Lewis, Carnegie, Covey e o curso de gramática).
 - [`planejamento/rotina.md`](planejamento/rotina.md): a rotina decidida (treino, dias úteis, fim de semana, inglês, método de leitura).
 
-## Guia do dia
+## Guia do dia (arquivado)
 
-Na tela inicial, o **Guia do dia** lista os passos de hoje na ordem em que acontecem: ao acordar, trajeto, almoço, antes de estudar,
-estudo e antes de dormir. Cada tarefa diária entra no bloco escolhido em **Quando no dia** (ou deduzido pelo nome); as sessões de estudo vêm das
-capacidades ativas (as partes que vencem ou estão atrasadas, uma parte por capacidade, a mais profunda primeiro); as revisões do dia aparecem no
-trajeto de volta; capacidades ativas sem partes aparecem como lembrete para dividir. Marcar um passo registra o dia no app. **Ajustar** muda os
-horários e o número de sessões em dias úteis e no fim de semana. Só quem edita vê o guia.
-
-**Fim de semana.** Itens com **1 sessão por semana** só entram no guia no sábado e no domingo, antes dos demais e na ordem da lista (projetos antes de capacidades).
-É assim que os projetos de leitura e anotações (João, Lewis, curso de gramática) vêm primeiro e os estudos profissionais depois. Tarefas diárias do bloco
-**Estudo** (como o Listening) aparecem depois das sessões de estudo.
+O guia que ficava no topo da tela inicial (blocos de horário com as tarefas, as partes de estudo do dia, as faltas a compensar e as revisões) foi removido.
+O código está em [`arquivo/guia-do-dia.js`](arquivo/guia-do-dia.js), para o caso de querer reimplementá-lo de outro jeito. Os horários e o número de sessões do guia não existem mais;
+a quantidade de estudo agora é por estudo e por dia da semana.
 
 ## Tarefas necessárias, calendário e motivos
 
 - **Necessária** é um rótulo de tarefa diária: a tarefa vale todos os dias, inclusive no fim de semana. Tarefas sem esse rótulo (como as de "Discipline charge") são opcionais e não entram na conta.
-- **Compensar:** um dia sem registro vira uma falta. Registrar a tarefa mais de uma vez em outro dia compensa as faltas mais antigas; o guia mostra um passo **Compensar** para cada falta aberta.
+- **Compensar:** um dia sem registro vira uma falta. Registrar a tarefa mais de uma vez em outro dia compensa as faltas mais antigas; a linha da tarefa mostra o botão **Compensar** (no dia marcado, se você escolheu uma data). Um dia que não estava no plano pode ser tirado da conta em **Ajustar este dia**.
 - **Calendário:** cada dia mostra **feitas/necessárias** (tarefas necessárias, capacidades "todo dia" e sessões de estudo do guia) e vale também para os dias passados, desde o primeiro registro. O painel do dia lista o que era necessário e o que foi feito, e tem o campo **Por que não fiz tudo neste dia?** (guardado só na parte privada, se houver senha).
 - **Capacidades "todo dia":** em Editar, a opção **Trabalhar todo dia** coloca um passo por dia no guia (no bloco escolhido) e conta como necessária. Uma parte pode ter **Vezes para trabalhar**; você marca a parte como concluída quando conseguir.
 - **Idioma (gramática e uso):** a opção **Idioma** em Editar troca os prompts de bases de dados por prática de idioma: o tutor explica o uso com exemplos do seu trabalho, mostra os erros comuns de quem fala português e pede frases suas, que ele corrige. O flashcard ganha **PRACTICE** (3 frases novas) no lugar de **PRACTICE FOR WORK**.
