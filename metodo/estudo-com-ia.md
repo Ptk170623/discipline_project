@@ -102,8 +102,19 @@ Aqui você aprende **na página de prática**. O Projeto Claude só responde às
   **amanhã**, não na semana ou no mês seguinte. Não há flashcard nem texto para ouvir nesse prompt.
 - **Marcar a parte:** depois do APPROVED, marque como concluída. A revisão é D+1, D+7 e D+30, com o limite diário.
 - **Prompt de revisão (curto):** o tutor dá o mapa, você explica cada conceito de memória com os exemplos reais, e ele
-  responde REVIEW DONE ou REVIEW AGAIN (que volta amanhã). Na **última revisão (D+30)**, depois do REVIEW DONE, ele escreve
-  a nota em markdown para o seu cofre do Obsidian: título, mapa, sua explicação de cada conceito com o exemplo real,
-  onde foi aplicado no projeto (pelo menos um lugar) e links [[nota]] para notas relacionadas.
+  responde REVIEW DONE ou REVIEW AGAIN (que volta amanhã).
+
+## Ferramenta de repetição espaçada
+
+- **Controle dos dias:** o padrão são 3 repetições, 1, 7 e 30 dias (a 1ª depois de concluir a parte, a 2ª depois da 1ª,
+  a 3ª depois da 2ª). Mude em **Ajustar o guia** (vale para tudo) ou em **Editar** a capacidade (só para ela, ex.: 3, 10, 40).
+  Revisão que precisa voltar volta sempre amanhã. O limite por dia (2 em dias úteis, 6 no fim de semana) continua.
+- **Prazo da capacidade com a última repetição:** na página da capacidade, o app mostra o fim previsto (a última
+  repetição de cada parte, feita ou por fazer), compara com o prazo e diz até quando estudar a última parte
+  (prazo menos a soma dos dias). O "prazo pelas partes" sugerido já soma os dias da última repetição.
+- **Nota em markdown ao terminar a repetição:** quando você marca a última repetição de uma parte (capacidades com
+  Prática primeiro), o app pede a nota do Obsidian: aparece "nota pendente" no guia e na seção de revisões, e na parte há o
+  botão **Copiar prompt: nota em markdown**. Cole a nota gerada em **Colar nota**; dá para **Baixar .md** de uma parte ou
+  **Baixar todas as notas** (um arquivo).
 
 Teste inicial: capacidade **Statistics for Data Science**, com a página "Statistics in Practice".

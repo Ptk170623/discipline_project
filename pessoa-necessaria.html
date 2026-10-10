@@ -464,6 +464,14 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function plural(n,a,b){return n===1?a:b;}
 var KIND={cap:{one:'capacidade',many:'Capacidades',One:'Capacidade'},proj:{one:'projeto',many:'Projetos',One:'Projeto'}};
 var STAGE=['D+1','D+7','D+30','Futura'];
+/* dias das 3 repetições (depois de concluir, depois da 1ª, depois da 2ª); padrão geral em Ajustar o guia, ou por capacidade em Editar */
+var SR_DEF=[1,7,30];
+function srClean(a){if(!Array.isArray(a)||a.length!==3)return null;var o=a.map(function(x){return Math.round(+x);});return o.every(function(x){return x>=1&&x<=365;})?o:null;}
+function srOf(it){return srClean(it&&it.sr)||srClean(state.sr)||SR_DEF;}
+function srSum(it){return srOf(it).reduce(function(a,b){return a+b;},0);}
+function stageName(st,itemId){if(st>=3)return 'Futura';var it=itemId?findItem('cap',itemId):null;return 'D+'+srOf(it)[st];}
+function stageEn(st,itemId){return st>=3?'future':stageName(st,itemId);}
+function srParse(v){var a=String(v||'').split(/[^0-9]+/).filter(Boolean).map(Number);return srClean(a);}
 
 /* ---------- armazenamento por visitante (só conveniência) ---------- */
 function ssGet(k){try{return window.sessionStorage.getItem(k);}catch(e){return null;}}
@@ -559,7 +567,7 @@ function scheduleSave(){
   dirty=true;saveErr=false;paintChip();
   clearTimeout(saveTimer);saveTimer=setTimeout(flush,2200);
 }
-function busy(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;if(ui.modal&&ui.modal.kind!=='part')return true;if(ui.modal&&(ui.modal.edit||ui.modal.cardEdit))return true;if(ui.editPersona)return true;return false;}
+function busy(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;if(ui.modal&&ui.modal.kind!=='part')return true;if(ui.modal&&(ui.modal.edit||ui.modal.cardEdit||ui.modal.mdEdit))return true;if(ui.editPersona)return true;return false;}
 function stashUi(){ssSet('pn-ui',JSON.stringify({route:ui.route,cal:ui.cal,sel:ui.sel,revAll:ui.revAll,modal:ui.modal}));}
 function flush(force){
   clearTimeout(saveTimer);
@@ -974,7 +982,7 @@ function dayPanel(idx,ctx){
   return '<div class="daypanel">'+head+nb+'<div class="dgroups">'+
     grp('w','Trabalho',w,function(e){return li(e);})+
     grp('c','Concluídas',c,function(e){return li(e);})+
-    grp('r','Revisões',r,function(e){return li(e,(STAGE[e.st]||'')+' · '+(e.a==='again'?'revisar de novo':'feita'));})+
+    grp('r','Revisões',r,function(e){return li(e,(stageName(e.st,e.item)||'')+' · '+(e.a==='again'?'revisar de novo':'feita'));})+
     grp('y','Tarefas diárias',y,function(e){return li(e);})+
   '</div>'+wb+'</div>';
 }
@@ -997,16 +1005,20 @@ function reviews(){
   function row(r,actions){
     var f=findPart(r.part);if(!f)return '';
     var dt,cls;if(!r.due){dt='sem data';cls='soon';}else if(actions===actWait){dt='na fila';cls='soon';}else{var n=diff(t,r.due);if(n<0){dt='atrasada '+(-n)+' '+plural(-n,'dia','dias');cls='late';}else if(n===0){dt='hoje';cls='now';}else{dt=(n===1?'amanhã':'em '+n+' dias')+' · '+fmt(r.due);cls='soon';}}
-    return '<li class="rev-item'+(cls==='late'?' late':'')+'"><span class="stage">'+STAGE[r.stage]+'</span><button class="rev-main rev-open" data-act="part-open" data-k="'+f.k+'" data-item="'+f.item.id+'" data-id="'+f.part.id+'"><b>'+esc(f.part.name)+'</b><small>'+esc(f.item.name)+(f.part.card?' · com cartão':'')+'</small></button><span class="due '+cls+'">'+dt+'</span>'+(canE()&&actions?'<span class="row">'+actions(r)+'</span>':'')+'</li>';
+    return '<li class="rev-item'+(cls==='late'?' late':'')+'"><span class="stage">'+stageName(r.stage,r.item)+'</span><button class="rev-main rev-open" data-act="part-open" data-k="'+f.k+'" data-item="'+f.item.id+'" data-id="'+f.part.id+'"><b>'+esc(f.part.name)+'</b><small>'+esc(f.item.name)+(f.part.card?' · com cartão':'')+'</small></button><span class="due '+cls+'">'+dt+'</span>'+(canE()&&actions?'<span class="row">'+actions(r)+'</span>':'')+'</li>';
   }
   function actNow(r){return '<button class="btn ghost sm" data-act="pr-review" data-id="'+r.id+'">Prompt</button><button class="btn sm" data-act="rev-again" data-id="'+r.id+'">Revisar de novo</button><button class="btn sm good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita</button>';}
   function actFut(r){return '<button class="btn sm" data-act="rev-back" data-id="'+r.id+'">Revisar amanhã</button>';}
   function actWait(r){return actNow(r);}
   var shown=ui.revAll?next:next.slice(0,4);
   return '<section class="rev" aria-label="Revisão espaçada">'+
-   '<div class="sec-head"><h2 class="disp">Revisão espaçada</h2><span class="aside">D+1 → D+7 → D+30 → futura</span></div>'+
+   '<div class="sec-head"><h2 class="disp">Revisão espaçada</h2><span class="aside row">'+srOf(null).map(function(n){return 'D+'+n;}).join(' → ')+' → futura'+(canE()?' <button class="btn ghost sm" data-act="guide-config">Ajustar dias</button>':'')+'</span></div>'+
    (now.length?'<ul class="rev-list">'+now.map(function(r){return row(r,actNow);}).join('')+'</ul>':'<div class="rev-empty">'+(rpn.done&&wait.length?'Limite de hoje feito ('+rpn.done+' de '+rpn.lim+'). ':'')+'Nenhuma revisão para hoje. Ao concluir uma parte de uma capacidade, ela entra aqui no dia seguinte.</div>')+
    (wait.length?'<details class="fold"><summary>Na fila, esperando vaga <span class="num muted">'+wait.length+'</span></summary><p class="muted" style="margin-top:8px;font-size:13.5px">Limite de hoje: '+rpn.lim+' '+plural(rpn.lim,'revisão','revisões')+' ('+rpn.done+' '+plural(rpn.done,'feita','feitas')+'). As novas (D+1) entram primeiro, e o resto sobe nos próximos dias. Dá para adiantar uma daqui se quiser.</p><ul class="rev-list" style="margin-top:8px">'+wait.map(function(r){return row(r,actWait);}).join('')+'</ul></details>':'')+
+   (function(){var mp=mdPending(),ma=mdAll();if(!mp.length&&!ma.length)return '';
+     return '<details class="fold"'+(mp.length?' open':'')+'><summary>Notas em markdown <span class="num muted">'+mp.length+' '+plural(mp.length,'pendente','pendentes')+' · '+ma.length+' '+plural(ma.length,'salva','salvas')+'</span></summary>'+
+       (mp.length?'<ul class="rev-list" style="margin-top:10px">'+mp.map(function(x){return '<li class="rev-item"><span class="stage">nota</span><button class="rev-main rev-open" data-act="part-open" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'"><b>'+esc(x.p.name)+'</b><small>'+esc(x.it.name)+' · última repetição feita em '+esc(fmtDow(x.p.mdq))+'</small></button></li>';}).join('')+'</ul>':'<p class="muted" style="margin-top:8px;font-size:14px">Nenhuma nota pendente.</p>')+
+       (ma.length&&dl?'<div class="row" style="margin-top:8px"><button class="btn sm" data-act="md-dl-all">Baixar todas as notas (um arquivo .md)</button></div>':'')+'</details>';})()+
    '<details class="fold"'+(next.length&&ui.revAll?' open':'')+'><summary>Próximas <span class="num muted">'+next.length+'</span></summary>'+
      (next.length?'<ul class="rev-list">'+shown.map(function(r){return row(r,null);}).join('')+'</ul>'+(next.length>4?'<button class="btn ghost sm" data-act="rev-all" style="margin-top:6px">'+(ui.revAll?'Mostrar menos':'Ver todas as '+next.length)+'</button>':''):'<p class="muted" style="margin-top:8px;font-size:14px">Nada agendado.</p>')+'</details>'+
    '<details class="fold"><summary>Revisão futura, sem data <span class="num muted">'+fut.length+'</span></summary>'+
@@ -1055,9 +1067,15 @@ function planRow(k,it){
   info.push('<b>Profundidade:</b> '+(dp?dp.n:'não definida'));
   info.push('<b>Sessões por semana:</b> '+(spw||'não definidas'));
   var right='';
-  if(sug)right='<span class="row"><span>Prazo pelas partes: <b class="num">'+fmtY(sug)+'</b> <span class="muted">('+open+' '+plural(open,'parte','partes')+' em aberto)</span></span>'+(canE()&&sug!==it.due?'<button class="btn sm" data-act="due-apply" data-k="'+k+'" data-id="'+it.id+'">Usar este prazo</button>':'')+'</span>';
+  if(sug)right='<span class="row"><span>Prazo pelas partes: <b class="num">'+fmtY(sug)+'</b> <span class="muted">('+open+' '+plural(open,'parte','partes')+' em aberto'+(cycleOf(it)?', com +'+cycleOf(it)+' dias da última repetição':'')+')</span></span>'+(canE()&&sug!==it.due?'<button class="btn sm" data-act="due-apply" data-k="'+k+'" data-id="'+it.id+'">Usar este prazo</button>':'')+'</span>';
   else right='<span class="muted">'+(!it.parts.length?'Divida em partes para calcular o prazo.':!spw?'Defina as sessões por semana em Editar para calcular o prazo.':'Todas as partes concluídas.')+'</span>';
-  return '<div class="planrow"><span>'+info.join(' · ')+'</span>'+right+'</div>';
+  var fc=endForecast(it),cy=cycleOf(it),extra='';
+  if(fc&&cy){
+    var sr3=srOf(it),late=fc.end&&it.due&&fc.end>it.due,gap=late?diff(it.due,fc.end):0;
+    extra='<div class="planrow"><span><b>Repetições:</b> '+sr3.join(' + ')+' = '+cy+' dias depois de concluir cada parte'+(fc.end?' · <b>Fim previsto com a última repetição:</b> <b class="num">'+fmtY(fc.end)+'</b>':'')+(fc.unplanned?' <span class="muted">('+fc.unplanned+' '+plural(fc.unplanned,'parte sem prazo fora da conta','partes sem prazo fora da conta')+')</span>':'')+'</span>'+
+      (it.due?'<span>'+(late?'<b style="color:var(--bad)">'+gap+' '+plural(gap,'dia','dias')+' depois do prazo.</b> ':'<span style="color:var(--ok)">Dentro do prazo.</span> ')+'Última parte estudada até <b class="num">'+fmtY(addDays(it.due,-cy))+'</b></span>':'<span class="muted">Defina o prazo da capacidade para ver até quando estudar a última parte.</span>')+'</div>';
+  }
+  return '<div class="planrow"><span>'+info.join(' · ')+'</span>'+right+'</div>'+extra;
 }
 function renderItem(k,it){
   var s=itemStats(it),dt=dueText(it.due);
@@ -1197,7 +1215,7 @@ function guide(){
   var picks=pickParts(we?gcfg().we:gcfg().wk,t,we);
   if(!we&&picks.length)put('am',{type:'info',title:'Pré-leitura da parte da noite',hint:picks[0].p.name+(srcLine(picks[0].p)?' · '+srcLine(picks[0].p):'')});
   var rp=reviewPlan(t);
-  put(we?'study':'pm',{type:'reviews',n:rp.show.length,wait:rp.wait.length,lim:rp.lim,did:rp.done,done:!rp.show.length});
+  put(we?'study':'pm',{type:'reviews',n:rp.show.length,wait:rp.wait.length,lim:rp.lim,did:rp.done,md:mdPending().length,done:!rp.show.length});
   var st=picks.map(function(c){return {type:'study',k:c.k,it:c.it,p:c.p,done:workedOn(c.p,t)};});
   var todo=[];
   if(we)by.study=(by.study||[]).concat(st,todo,late);else{st.concat(todo,late).forEach(function(x){put('study',x);});}
@@ -1217,7 +1235,7 @@ function stepHtml(x){
     return '<li class="gstep'+(x.done?' done':'')+'"><button type="button" class="gchk" role="checkbox" aria-checked="'+x.done+'" aria-label="Registrar sessão em '+esc(x.p.name)+'" data-act="guide-study" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'"></button><span class="gtext"><b>'+esc(x.p.name)+'</b><small>'+esc(x.it.name)+(rp?' · '+rp:'')+(sl?' · '+esc(sl):'')+'</small></span><span class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="guide-prompt" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Prompt</button><button class="btn ghost sm" data-act="part-open" data-k="'+x.k+'" data-item="'+x.it.id+'" data-id="'+x.p.id+'">Abrir</button></span></li>';
   }
   if(x.type==='reviews')
-    return '<li class="gstep rv'+(x.done?' done':'')+'"><span class="gchk static'+(x.done?' on':'')+'" aria-hidden="true"></span><span class="gtext"><b>Revisões espaçadas</b><small>'+(x.n?x.n+' '+plural(x.n,'revisão','revisões')+' para hoje':(x.did?'Limite de hoje feito ('+x.did+' de '+x.lim+')':'Nenhuma para hoje'))+(x.wait?' · '+x.wait+' na fila para os próximos dias':'')+'</small></span>'+(x.n?'<button class="btn ghost sm" data-act="guide-reviews">Ver</button>':'')+'</li>';
+    return '<li class="gstep rv'+(x.done?' done':'')+'"><span class="gchk static'+(x.done?' on':'')+'" aria-hidden="true"></span><span class="gtext"><b>Revisões espaçadas</b><small>'+(x.n?x.n+' '+plural(x.n,'revisão','revisões')+' para hoje':(x.did?'Limite de hoje feito ('+x.did+' de '+x.lim+')':'Nenhuma para hoje'))+(x.wait?' · '+x.wait+' na fila para os próximos dias':'')+(x.md?' · '+x.md+' '+plural(x.md,'nota em markdown pendente','notas em markdown pendentes'):'')+'</small></span>'+(x.n||x.md?'<button class="btn ghost sm" data-act="guide-reviews">Ver</button>':'')+'</li>';
   return '<li class="gstep info"><span class="gchk static" aria-hidden="true"></span><span class="gtext"><b>'+esc(x.title)+'</b><small>'+esc(x.hint)+'</small></span></li>';
 }
 function guideSection(){
@@ -1239,7 +1257,8 @@ function guideModal(){
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-wk">Sessões em dias úteis</label><input type="number" id="g-wk" name="wk" min="1" max="8" step="1" value="'+c.wk+'"></div>'+
    '<div class="field" style="flex:1 1 150px"><label for="g-we">Sessões no fim de semana</label><input type="number" id="g-we" name="we" min="1" max="12" step="1" value="'+c.we+'"></div></div>'+
    '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 150px"><label for="g-rv">Revisões em dias úteis</label><input type="number" id="g-rv" name="rv" min="1" max="30" step="1" value="'+c.rv+'"></div>'+
-   '<div class="field" style="flex:1 1 150px"><label for="g-rw">Revisões no fim de semana</label><input type="number" id="g-rw" name="rw" min="1" max="30" step="1" value="'+c.rw+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">O que passar do limite espera na fila e sobe nos dias seguintes. As revisões novas (D+1) têm prioridade.</span>'+
+   '<div class="field" style="flex:1 1 150px"><label for="g-rw">Revisões no fim de semana</label><input type="number" id="g-rw" name="rw" min="1" max="30" step="1" value="'+c.rw+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">O que passar do limite espera na fila e sobe nos dias seguintes. As revisões novas (a primeira de cada parte) têm prioridade.</span>'+
+   (function(){var q=srOf(null);return '<div class="row" style="align-items:flex-start"><div class="field" style="flex:1 1 110px"><label for="g-sr0">1ª revisão (dias após concluir)</label><input type="number" id="g-sr0" name="sr0" min="1" max="365" step="1" value="'+q[0]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr1">2ª (dias após a 1ª)</label><input type="number" id="g-sr1" name="sr1" min="1" max="365" step="1" value="'+q[1]+'"></div><div class="field" style="flex:1 1 110px"><label for="g-sr2">3ª (dias após a 2ª)</label><input type="number" id="g-sr2" name="sr2" min="1" max="365" step="1" value="'+q[2]+'"></div></div><span class="hint" style="font-size:12.5px;color:var(--muted)">Padrão de todas as capacidades: 1, 7 e 30. Cada capacidade pode ter o seu em Editar. Uma revisão que precisa voltar sempre volta amanhã.</span>';})()+
    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 function slotSelect(cur){
@@ -1457,7 +1476,7 @@ function partModal(m){
   var t=today(),w=workOf(p.id).slice().sort(function(a,b){return a.d<b.d?1:-1;}),st=partStatus(p);
   var stTxt={done:'Concluída',late:'Atrasada',soon:'Prazo próximo',open:'Em aberto'}[st];
   var todayN=w.filter(function(e){return e.d===t;}).length,r=reviewOf(p.id);
-  var revTxt='';if(m.k==='cap'&&p.done&&r)revTxt=r.due?'Próxima revisão: '+STAGE[r.stage]+' em '+fmtDow(r.due):'Na lista de revisão futura (sem data)';
+  var revTxt='';if(m.k==='cap'&&p.done&&r)revTxt=r.due?'Próxima revisão: '+stageName(r.stage,r.item)+' em '+fmtDow(r.due):'Na lista de revisão futura (sem data)';
   var acts='';
   if(canE()){
     acts='<div class="row">'+(!p.done?'<button class="btn primary lg" data-act="part-work">'+(todayN?'Registrar mais uma sessão hoje':'Trabalhei nesta parte hoje')+'</button><button class="btn good lg" data-act="part-done">Marcar como concluída</button>':'<button class="btn lg" data-act="part-work">Registrar sessão hoje</button><button class="btn lg" data-act="part-reopen">Reabrir parte</button>')+'</div>';
@@ -1466,12 +1485,26 @@ function partModal(m){
    '<div class="facts"><div><span class="label">Prazo</span><b class="num">'+(p.due?fmt(p.due):'—')+'</b></div><div><span class="label">Status</span><b>'+stTxt+'</b></div><div><span class="label">Sessões</span><b class="num">'+w.length+(p.reps?'/'+p.reps:'')+'</b></div></div>'+
    (todayN?'<p class="chip ok" style="align-self:flex-start">'+todayN+' '+plural(todayN,'sessão registrada','sessões registradas')+' hoje</p>':'')+
    acts+(revTxt?'<div class="revbox">'+esc(revTxt)+'</div>':'')+
-   (canE()&&m.k==='cap'&&p.done&&r?'<div class="row"><button class="btn" data-act="'+(r.due?'rev-again':'rev-back')+'" data-id="'+r.id+'">Revisar amanhã</button>'+(r.due?'<button class="btn good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita: próxima ('+(r.stage<2?STAGE[r.stage+1]:'futura')+')</button>':'')+'</div>':'')+
+   (canE()&&m.k==='cap'&&p.done&&r?'<div class="row"><button class="btn" data-act="'+(r.due?'rev-again':'rev-back')+'" data-id="'+r.id+'">Revisar amanhã</button>'+(r.due?'<button class="btn good" data-act="rev-ok" data-id="'+r.id+'">Revisão feita: próxima ('+(r.stage<2?stageName(r.stage+1,r.item):'futura')+')</button>':'')+'</div>':'')+
    (p.note?'<div class="note"><span class="label">Valor prático e notas</span>'+esc(p.note)+'</div>':'')+
-   studyBlock(m,it,p,r)+
+   studyBlock(m,it,p,r)+mdBlock(m,it,p)+
    '<div style="display:flex;flex-direction:column;gap:8px"><span class="label">Histórico</span>'+
    ((w.length||p.done)?'<ul class="hist">'+(p.done?'<li><span>Concluída</span><span class="num">'+esc(fmtDow(p.done))+'</span></li>':'')+w.map(function(e){return '<li><span>Sessão de trabalho</span><span class="row"><span class="num">'+esc(fmtDow(e.d))+'</span>'+(canE()?'<button class="btn ghost sm" data-act="work-del" data-id="'+e.id+'" aria-label="Apagar sessão de '+fmt(e.d)+'">'+I.x+'</button>':'')+'</span></li>';}).join('')+'</ul>':'<p class="muted" style="font-size:14px">Nenhuma sessão ainda.</p>')+'</div>'+
    (canE()?'<div class="row" style="justify-content:flex-end"><button class="btn sm" data-act="part-edit">Editar parte</button></div>':'');
+}
+function slugMd(t){return String(t||'nota').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'nota';}
+function mdPending(){var a=[];state.cap.forEach(function(it){if(!isPF(it))return;it.parts.forEach(function(p){if(p.mdq&&!p.md)a.push({k:'cap',it:it,p:p});});});return a;}
+function mdAll(){var a=[];state.cap.forEach(function(it){it.parts.forEach(function(p){if(p.md)a.push({it:it,p:p});});});return a;}
+function mdBlock(m,it,p){
+  if(m.k!=='cap'||!isPF(it)||!p.done)return '';
+  var h='<div class="stack"><span class="label">Nota do Obsidian (markdown)</span>';
+  h+='<p class="muted" style="font-size:13.5px">'+(p.md?'Nota salva.':p.mdq?'Pedida em '+esc(fmtDow(p.mdq))+': pendente. Gere no Projeto e cole aqui.':'O app pede esta nota quando você termina a última repetição da parte. Dá para gerar antes, se quiser.')+'</p>';
+  if(m.mdEdit)h+='<textarea id="md-text" class="cardtxt" style="min-height:200px;width:100%;resize:vertical;color:var(--ink)" placeholder="Cole aqui a nota em markdown que o Projeto gerou">'+esc(p.md||'')+'</textarea><div class="row"><button class="btn primary sm" data-act="md-save">Salvar nota</button><button class="btn sm" data-act="md-cancel">Cancelar</button></div>';
+  else{
+    if(p.md)h+='<div class="cardtxt">'+esc(p.md)+'</div>';
+    h+='<div class="row">'+(canE()?'<button class="btn sm" data-act="pr-note">Copiar prompt: nota em markdown</button><button class="btn sm" data-act="md-edit">'+(p.md?'Editar nota':'Colar nota')+'</button>':'')+(p.md&&dl?'<button class="btn sm" data-act="md-dl">Baixar .md</button>':'')+'</div>';
+  }
+  return h+'</div>';
 }
 function studyBlock(m,it,p,r){
   var h='<div class="stack"><span class="label">Estudo com IA</span>';
@@ -1506,6 +1539,7 @@ function itemForm(m){
    '<label class="check"><input type="checkbox" name="lang"'+(it&&it.lang?' checked':'')+'> <span>Idioma (gramática e uso): o prompt usa frases suas e exemplos do trabalho, sem bases de dados</span></label>'+
    '<label class="check"><input type="checkbox" name="notes"'+(it&&it.notes?' checked':'')+'> <span>Projeto de leitura e anotações (o prompt de estudo parte do seu markdown)</span></label>'+
    '<label class="check"><input type="checkbox" name="pf"'+(it&&it.pf?' checked':'')+'> <span>Prática primeiro: o tutor ensina com os resultados do seu projeto real e você explica sem ler antes de aprovar (só para o profissional, sem idioma nem leitura)</span></label>'+
+   (m.k==='cap'?'<div class="field"><label for="f-sr">Dias das revisões desta capacidade (opcional)</label><input type="text" id="f-sr" name="sr" maxlength="20" value="'+esc(it&&it.sr?it.sr.join(', '):'')+'" placeholder="'+esc(srOf(null).join(', '))+'"><span class="hint">Três números: dias após concluir a parte, após a 1ª revisão e após a 2ª. Em branco usa o padrão. O prazo da capacidade já conta a última revisão.</span></div>':'')+
    '<div class="field"><label for="f-prlink">Resultados da prática: link (opcional)</label><input type="text" id="f-prlink" name="prlink" maxlength="300" value="'+esc(it?it.prlink||'':'')+'" placeholder="https://claude.ai/artifact/…"><span class="hint">A página com os resultados calculados no seu projeto. Entra nas instruções do Projeto, junto com o STUDY_PACK.md anexado.</span></div>'+
    '<div class="field"><label for="f-status">Situação</label><select id="f-status" name="status"><option value="">Ativa</option><option value="espera"'+(it&&it.status==='espera'?' selected':'')+'>Em espera (próximas ondas)</option></select><span class="hint">O prazo é opcional: dá para deixar em branco e calcular depois pelas partes.</span></div>'+
    (m.k==='cap'?'<div class="field"><label for="f-base">Base de prática desta capacidade (opcional)</label><textarea id="f-base" name="base" class="mono" style="min-height:84px" placeholder="Em branco: usa a base padrão configurada em Capacidades">'+esc(it?it.base||'':'')+'</textarea><span class="hint">Útil quando a capacidade pede outra base, como um repositório de teste para git.</span></div>':'')+
@@ -1557,7 +1591,21 @@ function kindOf(it){return state.proj.indexOf(it)>=0?'proj':'cap';}
 var DEPTH={conceitual:{n:'Conceitual',en:'Conceptual',goal:'understand the topic and discuss it with confidence',size:'about 10 to 15 parts',f:1.2},solido:{n:'Sólido',en:'Solid',goal:'use it at work without getting stuck',size:'about 20 to 35 parts',f:1.2},profundo:{n:'Profundo',en:'Deep',goal:'master it, build things with it and be able to teach it',size:'about 40 to 70 parts, with mini-projects',f:1.5}};
 var STAGE_EN=['day-1','week','month','future'];
 function spwOf(it){var n=+(it&&it.spw);return n>0?n:null;}
-function suggestDue(it){var open=it.parts.filter(function(p){return !p.done;}).length,spw=spwOf(it);if(!open||!spw)return null;var f=(DEPTH[it.depth]||{f:1.2}).f;return addDays(today(),Math.ceil(open*f/spw)*7);}
+function cycleOf(it){return (kindOf(it)==='cap'&&!it.mirror)?srSum(it):0;}
+function suggestDue(it){var open=it.parts.filter(function(p){return !p.done;}).length,spw=spwOf(it);if(!open||!spw)return null;var f=(DEPTH[it.depth]||{f:1.2}).f;return addDays(addDays(today(),Math.ceil(open*f/spw)*7),cycleOf(it));}
+/* fim previsto da capacidade: a última repetição de cada parte (feita ou por fazer) */
+function endForecast(it){
+  if(!cycleOf(it))return null;
+  var sr=srOf(it),end='',unpl=0,t=today();
+  it.parts.forEach(function(p){
+    var e='';
+    if(p.done){var r=reviewOf(p.id);if(r&&r.due&&r.stage<3){var rest=0,i;for(i=r.stage+1;i<3;i++)rest+=sr[i];e=addDays(r.due,rest);}}
+    else if(p.due)e=addDays(p.due<t?t:p.due,sr[0]+sr[1]+sr[2]);
+    else unpl++;
+    if(e&&e>end)end=e;
+  });
+  return {end:end,unplanned:unpl};
+}
 function srcLines(it){var b=booksOf(it);return {main:b[0]||'',rest:b.slice(1)};}
 function pracOf(it){return String(it&&it.practice||'').trim();}
 function hasPrac(it){return !!(String(it&&it.focus||'').trim()||pracOf(it));}
@@ -1729,6 +1777,20 @@ function promptMirror(it,p){
   }
   return L.join('\n');
 }
+function promptNote(it,p){
+  var L=[];
+  L.push('Write the note for my Obsidian vault, in markdown, for the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project. I just finished the last spaced review of this part, so base the note on what I explained correctly in my reviews. The whole note is in English.','');
+  L.push('Format:');
+  L.push('- Front matter (YAML): title, capability, part, tags and date ('+today()+').');
+  L.push('- # Title with the concept.');
+  L.push('- ## Map: the concept and all its sub-concepts, by name only.');
+  L.push('- ## Explanation: for each concept, my explanation in my own words, each with its real example from the practice results (with the numbers).');
+  L.push('- ## Where I applied it: at least one place in my project (page, tab or analysis). If I have not applied it yet, say so and suggest where.');
+  L.push('- ## Watch out: what I got wrong or forgot along the way.');
+  L.push('- ## Related: links to related notes as [[note name]], using the names of other parts of this capability from parts.txt.','');
+  L.push('Give me only the markdown, in one block, with nothing before or after it.');
+  return L.join('\n');
+}
 function promptStudyPF(it,p){
   var L=[];
   L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project, and follow the Project instructions. The whole session is in English.');
@@ -1785,7 +1847,7 @@ function reviewCard(card){
 function promptReview(it,p,r){
   var L=[];
   if(isNotes(it)){
-    L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the chapter "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". The whole review is in English.','');
+    L.push('Spaced review ('+(r?stageEn(r.stage,r.item)+' review':'review')+') of the chapter "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". The whole review is in English.','');
     if(p.card)L.push('This is my review card: the question is the chapter\'s big idea, the hints are the lines of reasoning, and the answer is my corrected explanation. Do not show me the answer; use it only to check me:','---',p.card,'---','');
     else L.push('I do not have a review card for this chapter yet. Ask me to explain the chapter from scratch and use my markdown notes (pasted or attached below) as the reference.','');
     L.push('1. Ask me only the big-idea question and let me explain from scratch, in my own words, with a simple example as for a beginner. Wait for me.');
@@ -1795,16 +1857,15 @@ function promptReview(it,p,r){
     return L.join('\n');
   }
   if(isPF(it)){
-    L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project, and follow the Project instructions. The whole review is in English.','');
+    L.push('Spaced review ('+(r?stageEn(r.stage,r.item)+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project, and follow the Project instructions. The whole review is in English.','');
     if(p.card)L.push('This is my review card. Do not show me its content; use it only to check me:','---',reviewCard(p.card),'---','');
     L.push('1. Give me the map of this part: the concept and all its sub-concepts, by name only. No definitions and no hints.');
     L.push('2. I will explain each one from memory, using the real examples from my practice results, in one message. You only answer my questions and correct me: what is right, what I forgot, what is wrong and what I need to improve.');
     L.push('3. Finish with one line: "REVIEW DONE" if I explained the essentials with the real examples, or "REVIEW AGAIN" with what to improve; then I will try again tomorrow.');
-    if(r&&r.stage===2)L.push('4. Only after "REVIEW DONE": this is the last review, so write the note for my Obsidian vault, in markdown: a title with the concept; the map; my explanation of each concept in my own words, each with its real example from the practice results; where it was applied in my project (at least one place: page, tab or analysis); and links to related notes as [[note name]].');
     L.push('','Keep your messages short. Start with step 1.');
     return L.join('\n');
   }
-  L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
+  L.push('Spaced review ('+(r?stageEn(r.stage,r.item)+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
   if(p.card)L.push('This is my review card. Do not show me its content; use it only to check me:','---',reviewCard(p.card),'---','');
   else L.push('I do not have a review card for this part yet; use '+(focusOf(it)?'the best attached source for this concept':'the main source')+' as the reference.','');
   L.push('1. Give me the map: the concept of this part and all its sub-concepts in one list, by name only (taken from '+(p.card?'my card':(focusOf(it)?'the best attached source':'the main source'))+'). No definitions, no hints and no questions. Then wait: I will define each one from scratch, in my own words and in English, at my own pace, and send everything in one message.');
@@ -2094,9 +2155,8 @@ document.addEventListener('click',function(ev){
       if(a==='rev-back'){r.stage=0;r.due=addDays(t,1);commit('Voltou para a revisão de amanhã');break;}
       if(f)addLog('review','cap',f.item,f.part,{a:a==='rev-again'?'again':'ok',st:r.stage});
       if(a==='rev-again'){r.due=addDays(t,1);msg='Revisar de novo amanhã ('+fmt(r.due)+')';}
-      else if(r.stage===0){r.stage=1;r.due=addDays(t,7);msg='Próxima revisão em 1 semana: '+fmt(r.due);}
-      else if(r.stage===1){r.stage=2;r.due=addMonths(t,1);msg='Próxima revisão em 1 mês: '+fmt(r.due);}
-      else{r.stage=3;r.due=null;msg='Movida para a revisão futura';}
+      else if(r.stage===0||r.stage===1){var srr=srOf(f&&f.item);r.stage++;r.due=addDays(t,srr[r.stage]);msg='Próxima revisão em '+srr[r.stage]+' '+plural(srr[r.stage],'dia','dias')+': '+fmt(r.due);}
+      else{r.stage=3;r.due=null;msg='Movida para a revisão futura';if(f&&isPF(f.item)&&!f.part.md){f.part.mdq=t;msg='Última repetição feita. Peça a nota em markdown na parte.';}}
       commit(msg);break;}
     case 'rev-all':ui.revAll=!ui.revAll;render();break;
     case 'item-new':openModal({kind:'item',k:d.k,area:d.area||'prof'});break;
@@ -2109,7 +2169,7 @@ document.addEventListener('click',function(ev){
     case 'part-open':openModal({kind:'part',k:d.k,item:d.item,id:d.id});break;
     case 'part-work':{var c=curPart();if(!c)break;addLog('work',c.k,c.item,c.part);commit('Sessão registrada em '+fmt(today()));break;}
     case 'part-done':{var c2=curPart();if(!c2)break;var t2=today();c2.part.done=t2;addLog('done',c2.k,c2.item,c2.part);mirrorDone(c2.item,c2.part);
-      if(c2.k==='cap'&&!c2.item.mirror){state.reviews=state.reviews.filter(function(r){return r.part!==c2.part.id;});state.reviews.push({id:uid(),part:c2.part.id,item:c2.item.id,stage:0,due:addDays(t2,1)});commit('Parte concluída. Revisão marcada para amanhã.');}
+      if(c2.k==='cap'&&!c2.item.mirror){state.reviews=state.reviews.filter(function(r){return r.part!==c2.part.id;});state.reviews.push({id:uid(),part:c2.part.id,item:c2.item.id,stage:0,due:addDays(t2,srOf(c2.item)[0])});commit(srOf(c2.item)[0]===1?'Parte concluída. Revisão marcada para amanhã.':'Parte concluída. Primeira revisão em '+fmt(addDays(t2,srOf(c2.item)[0]))+'.');}
       else commit('Parte concluída');break;}
     case 'part-reopen':{var c3=curPart();if(!c3)break;var pid=c3.part.id,dd=c3.part.done;c3.part.done=null;var rm=false;state.log=state.log.filter(function(e){if(!rm&&e.t==='done'&&e.part===pid&&e.d===dd){rm=true;return false;}return true;});state.reviews=state.reviews.filter(function(r){return r.part!==pid;});commit('Parte reaberta');break;}
     case 'work-del':state.log=state.log.filter(function(e){return e.id!==d.id;});commit('Sessão apagada');break;
@@ -2155,6 +2215,12 @@ document.addEventListener('click',function(ev){
     case 'pr-proj':{var ip=findItem(d.k,d.id);if(ip)copyText(promptProject(ip),'Instruções do Projeto');break;}
     case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'parts.txt');break;}
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
+    case 'pr-note':{var cn=curPart();if(cn)copyText(promptNote(cn.item,cn.part),'Prompt da nota em markdown');break;}
+    case 'md-edit':ui.modal.mdEdit=true;renderModal();var mt=document.getElementById('md-text');if(mt)mt.focus();break;
+    case 'md-cancel':ui.modal.mdEdit=false;renderModal();if(dirty)scheduleSave();break;
+    case 'md-save':{var cm=curPart(),mv=document.getElementById('md-text');if(!cm||!mv)break;cm.part.md=mv.value.trim();if(!cm.part.md)delete cm.part.md;ui.modal.mdEdit=false;commit(cm.part.md?'Nota salva':'Nota removida');break;}
+    case 'md-dl':{var cd=curPart();if(cd&&cd.part.md&&dl)dl.save({filename:slugMd(cd.part.name)+'.md',data:cd.part.md}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Copie o texto da nota.');});break;}
+    case 'md-dl-all':{var ma2=mdAll();if(ma2.length&&dl)dl.save({filename:'notas-obsidian.md',data:ma2.map(function(x){return x.p.md;}).join('\n\n---\n\n')}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui.');});break;}
     case 'pr-study':{var cs=curPart();if(cs)copyText(promptStudy(cs.item,cs.part),'Prompt da sessão de estudo');break;}
     case 'pr-review-part':{var cr=curPart();if(cr)copyText(promptReview(cr.item,cr.part,reviewOf(cr.part.id)),'Prompt de revisão');break;}
     case 'pr-review':{var rv=state.reviews.find(function(x){return x.id===d.id;}),fr=rv&&findPart(rv.part);if(fr)copyText(promptReview(fr.item,fr.part,rv),'Prompt de revisão');break;}
@@ -2172,6 +2238,7 @@ document.addEventListener('submit',function(ev){
     ev.preventDefault();var gf=new FormData(f0),gt2={};
     SLOTS.forEach(function(sl){if(sl[2]){var v=String(gf.get('t-'+sl[0])||'');if(/^\d\d:\d\d$/.test(v)&&v!==sl[2])gt2[sl[0]]=v;}});
     state.guide={t:gt2,wk:Math.max(1,Math.round(+gf.get('wk')||2)),we:Math.max(1,Math.round(+gf.get('we')||4)),rv:Math.max(1,Math.round(+gf.get('rv')||2)),rw:Math.max(1,Math.round(+gf.get('rw')||6))};
+    var sq=srClean([gf.get('sr0'),gf.get('sr1'),gf.get('sr2')]);if(sq&&sq.join()!==SR_DEF.join())state.sr=sq;else delete state.sr;
     ui.modal=null;commit('Guia ajustado');return;
   }
   if(k0==='unlock'){
@@ -2190,9 +2257,9 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',ipf=fd.get('pf')==='on',iprl=String(fd.get('prlink')||'').trim().slice(0,300),idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ipf)it.pf=true;else delete it.pf;if(iprl)it.prlink=iprl;else delete it.prlink;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ipf)nw.pf=true;if(iprl)nw.prlink=iprl;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
+    var ibase=String(fd.get('base')||'').trim(),iarea=fd.get('area')==='pess'?'pess':'prof',idepth=DEPTH[fd.get('depth')]?fd.get('depth'):'',ispw=Math.max(0,Math.round(+fd.get('spw')||0))||null,istatus=fd.get('status')==='espera'?'espera':'',ifocus=String(fd.get('focus')||'').trim(),ipractice=String(fd.get('practice')||'').trim(),inotes=fd.get('notes')==='on',ipf=fd.get('pf')==='on',isr=srParse(fd.get('sr')),iprl=String(fd.get('prlink')||'').trim().slice(0,300),idaily=fd.get('daily')==='on',ilang=fd.get('lang')==='on',islot=SLOTS.some(function(z){return z[0]===fd.get('slot');})?fd.get('slot'):'';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.area=iarea;it.depth=idepth;it.spw=ispw;it.status=istatus;if(ifocus)it.focus=ifocus;else delete it.focus;if(ipractice)it.practice=ipractice;else delete it.practice;if(inotes)it.notes=true;else delete it.notes;if(ipf)it.pf=true;else delete it.pf;if(isr)it.sr=isr;else delete it.sr;if(iprl)it.prlink=iprl;else delete it.prlink;if(ilang)it.lang=true;else delete it.lang;if(idaily){it.daily=true;if(!it.since)it.since=today();}else{delete it.daily;delete it.since;}if(islot)it.slot=islot;else delete it.slot;if(m.k==='cap')it.base=ibase;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:iarea,depth:idepth,spw:ispw,status:istatus,parts:[]};if(ifocus)nw.focus=ifocus;if(ipractice)nw.practice=ipractice;if(inotes)nw.notes=true;if(ipf)nw.pf=true;if(isr)nw.sr=isr;if(iprl)nw.prlink=iprl;if(ilang)nw.lang=true;if(idaily){nw.daily=true;nw.since=today();}if(islot)nw.slot=islot;if(m.k==='cap'&&ibase)nw.base=ibase;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit((m.k==='cap'?'Capacidade criada':'Projeto criado')+'. Agora divida em partes.');}
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim(),preps=Math.max(0,Math.round(+fd.get('reps')||0))||null;if(!pn)return;
     if(m.id){var p=it2.parts.find(function(x){return x.id===m.id;});if(p){p.name=pn;p.due=pd;p.note=pnote;if(preps)p.reps=preps;else delete p.reps;}ui.modal={kind:'part',k:m.k,item:m.item,id:m.id};commit('Parte atualizada');}
