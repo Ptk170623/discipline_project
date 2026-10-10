@@ -86,18 +86,24 @@ Você estuda em casa, na tablet, onde não dá para rodar código. Por isso o pr
 ## Prática primeiro (opção por capacidade)
 
 Em **Editar** a capacidade, marque **Prática primeiro** e, se quiser, cole o **link dos resultados da prática** (a página
-com os números calculados no seu projeto real). Vale para capacidades profissionais; o idioma e a leitura seguem como antes.
-As partes continuam as mesmas. O que muda:
+com os números e as explicações dos conceitos, calculados no seu projeto real). Vale para capacidades profissionais; o
+idioma e a leitura seguem como antes. As partes continuam as mesmas.
 
-- **Instruções do Projeto:** entram o material de resultados da prática (link e STUDY_PACK.md) e a regra "ensine com os
-  meus resultados: depois de explicar do livro, mostre o resultado correspondente, com a aba e o número exato". A parte
-  "Prática" com scripts para o trabalho sai, porque a prática vem dos resultados do harness.
-- **Prompt da sessão de estudo:** 1) mapa (conceito e subconceitos, só os nomes, na ordem do material de prática e com a
-  aba de cada um; se a página ainda não tem a aba da parte, o tutor escreve o prompt para o harness e espera o
-  resultado); 2) percurso pela prática, **um ou dois conceitos por vez**, na ordem da página: o tutor mostra o resultado
-  (aba e números) e já ajuda a interpretá-lo e a entender o conceito, e para para você perguntar; 3) você explica tudo sem
-  ler e o tutor responde APROVADO ou DE NOVO. Só depois da aprovação saem o flashcard (CONCEPT, SOURCE, MAP, MY DEFINITION,
-  REAL CASE, WATCH OUT, KEY TERMS) e o texto para ouvir.
-- **Revisão:** não muda. Ela lista o mapa, você define de novo e o tutor corrige. O REAL CASE fica só no cartão.
+Aqui você aprende **na página de prática**. O Projeto Claude só responde às suas perguntas e corrige as suas explicações.
+
+- **Instruções do Projeto:** as fontes, o parts.txt, a descrição das bases e os resultados da prática (link e
+  STUDY_PACK.md), mais o combinado: você usa o mapa de conceitos da parte, faz active recall explicando cada conceito
+  na prática com os exemplos reais, e o tutor só responde e corrige; quando você explica tudo, ele aprova e você volta
+  para revisar depois de um intervalo. As regras de idioma ficam.
+- **Prompt da sessão de estudo (curto):** 1) mapa (conceito e subconceitos, só os nomes, na ordem da página, com a aba
+  de cada um; se a página não tem a aba da parte, o tutor avisa e para); 2) você estuda na página e tenta explicar cada
+  conceito com os exemplos reais; o tutor só responde e corrige, dizendo o que acertou, o que esqueceu, o que errou e o
+  que melhorar; 3) quando você explica tudo ele diz APPROVED; se não, diz AGAIN com o que melhorar e você tenta de novo
+  **amanhã**, não na semana ou no mês seguinte. Não há flashcard nem texto para ouvir nesse prompt.
+- **Marcar a parte:** depois do APPROVED, marque como concluída. A revisão é D+1, D+7 e D+30, com o limite diário.
+- **Prompt de revisão (curto):** o tutor dá o mapa, você explica cada conceito de memória com os exemplos reais, e ele
+  responde REVIEW DONE ou REVIEW AGAIN (que volta amanhã). Na **última revisão (D+30)**, depois do REVIEW DONE, ele escreve
+  a nota em markdown para o seu cofre do Obsidian: título, mapa, sua explicação de cada conceito com o exemplo real,
+  onde foi aplicado no projeto (pelo menos um lugar) e links [[nota]] para notas relacionadas.
 
 Teste inicial: capacidade **Statistics for Data Science**, com a página "Statistics in Practice".

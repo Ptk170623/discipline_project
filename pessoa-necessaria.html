@@ -1572,7 +1572,23 @@ var LANG_RULES=['Teach entirely in English: explanations, examples, code comment
   'If I answer in Portuguese, reply in English and ask me to try again in English.',
   'After each of my answers, point out at most two English mistakes that hurt clarity (one short line, with the corrected phrase), then move on. Do not let this take over the lesson.',
   'My dataset descriptions and column names may be in Portuguese: keep column names exactly as written and explain everything in English.'];
+function promptProjectPF(it){
+  var s=srcLines(it),dp=DEPTH[it.depth],base=baseOf(it),L=[];
+  L.push('You are my private tutor for the '+kindEn(it)+' "'+it.name+'". I will not study the whole source on my own: you will teach me its concepts following the author\'s line of reasoning (or the order of the course/repository).','');
+  if(dp)L.push('Depth I want: '+dp.en+' ('+dp.goal+').','');
+  L.push('Materials in this Project:');
+  L.push('- Main source (attached): '+(s.main||'[main book, repository or course]')+'.');
+  if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');
+  L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
+  L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
+  L.push('- Practice results from my own project ('+(it.prlink?'the practice-results page, '+it.prlink+', and its text version ':'')+'STUDY_PACK.md, attached). They hold real results, computed on my anonymized project data, and the explanations of the concepts I study. The page has one tab per concept group, and more tabs will be added as I go. '+(it.prlink?'If you cannot open the link, use STUDY_PACK.md: it has the same content in text form. ':'')+'These are snapshots, not live data.','');
+  L.push('I learn from the practice results page. I will use the map of concepts of the part that you list to me, and I will use active recall: I try to explain each concept in the practice, with the real examples from my real data. You just answer my questions and correct my attempts to explain the concepts. When I can explain every one, you approve me, and I come back here to review it after an interval of time.','');
+  L.push('Language:');
+  LANG_RULES.slice(0,4).forEach(function(x,i){L.push((i+1)+'. '+x);});
+  return L.join('\n');
+}
 function promptProject(it){
+  if(isPF(it))return promptProjectPF(it);
   var k=kindOf(it),s=srcLines(it),books=booksOf(it),base=baseOf(it),dp=DEPTH[it.depth],L=[];
   L.push('You are my private tutor for the '+kindEn(it)+' "'+it.name+'". '+(focusOf(it)?'I will not read the books cover to cover: you will teach me the concepts in my learning focus, drawing on the attached sources.':'I will not study the whole source on my own: you will teach me its concepts following the author\'s line of reasoning (or the order of the course/repository).'),'');
   var fo=focusOf(it);
@@ -1585,7 +1601,6 @@ function promptProject(it){
   if(s.rest.length)L.push('- Complementary sources: '+s.rest.join('; ')+'.');}
   L.push('- parts.txt: how this '+kindEn(it)+' was split into parts, with deadline, source, why the concept appears there, practical value and mini-project.');
   if(!lifeOf(it)&&!it.lang)L.push('- Description and schema of my datasets (attached file)'+(base&&base.length<=2500?':\n---\n'+base+'\n---':(base?'. Summary: '+firstLine(base)+'.':'.')));
-  if(isPF(it))L.push('- Practice results from my own project ('+(it.prlink?'the practice-results page, '+it.prlink+', and its text version ':'')+'STUDY_PACK.md, attached). They hold real results, computed on my anonymized project data, for each concept I study. The page has one tab per concept group, and more tabs will be added as I go. '+(it.prlink?'If you cannot open the link, use STUDY_PACK.md: it has the same numbers in text form. ':'')+'These are snapshots, not live data.');
   L.push('','How to teach:');
   if(fo){
     L.push('1. My learning focus leads, not any one source. Teach each concept from the attached source that explains it best, say which one and where (chapter and section, or module and file), and show why the concept matters for '+(it.lang?'the English I use at work':'the data work I do')+'. If no attached source covers a concept well, say so and teach it with '+(it.lang?'examples from my work':'an exercise on my datasets')+' instead of inventing a citation.');
@@ -1594,13 +1609,11 @@ function promptProject(it){
   L.push('1. The main source leads. Follow the author\'s order, examples and way of explaining (for a repository or course, the order of the modules and the code examples) and always show why the concept appears at that point: what problem it solves and what it sets up next. Cite chapter and section, or module and file.');
   L.push('2. Use the complementary sources to fill gaps. When the main source is confusing, verbose or outdated, add your own explanation and make clear what is the author\'s and what is yours.');
   }
-  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source.'+(isPF(it)?'':' '+(lifeOf(it)?LIFE_HINT:it.lang?LANG_HINT:DOMAIN_HINT)));
-  L.push(isPF(it)?'4. Do one step at a time and wait for my answer before moving on.':'4. Work in small steps and wait for my answer before moving on. I lead the pace and I want to question you, so answer my questions fully and ask me questions back.');
+  L.push('3. The goal is for me to understand and be able to use the concept, not to summarize the source. '+(lifeOf(it)?LIFE_HINT:it.lang?LANG_HINT:DOMAIN_HINT));
+  L.push('4. Work in small steps and wait for my answer before moving on. I lead the pace and I want to question you, so answer my questions fully and ask me questions back.');
   var life=lifeOf(it);
-  if(!isPF(it))L.push('','Practice:');
-  if(isPF(it)){
-    L.push('5. Teach with my practice results. Follow the order of the practice material (first section first), one or two concepts at a time. For each one, show me the matching result (name the tab or section and the exact number) and help me interpret it right away: what it says about my project and what the concept is, using the book. Do not just present results.');
-  }else if(it.lang){
+  L.push('','Practice:');
+  if(it.lang){
     L.push('5. Practice is language practice, not code. For each topic, ask me to write or say new sentences about my work that use it, and correct them. I study on a tablet and I can also practice later at work, in real emails and meetings.');
     L.push('6. Give me a short mini-task for each topic (for example 5 sentences or a short email using the rule) and review what I bring back in a later session.');
     L.push('7. Never ask for or display personal data about me or other people (names, CPF, phone numbers, addresses). Use roles or invented names in examples.');
@@ -1614,7 +1627,7 @@ function promptProject(it){
     L.push('7. Never ask for or display personal data (names, CPF, phone numbers, addresses). In the scripts, work with aggregates or anonymized columns.');
     L.push('8. If the concept does not fit my datasets, generate sample data inside the script.');
   }
-  var nx=isPF(it)?6:(life||it.lang)?8:9;
+  var nx=(life||it.lang)?8:9;
   if(hasPrac(it)){L.push(nx+'. Apply my practice rules in every hands-on step and mini-project.'+(usesDiagram(it)?' Diagrams are Mermaid text, so I can edit and review them.':''));nx++;}
   L.push('','Language:');
   LANG_RULES.slice(0,(life||it.lang)?3:4).forEach(function(x,i){L.push((nx+i)+'. '+x);});
@@ -1717,26 +1730,14 @@ function promptMirror(it,p){
   return L.join('\n');
 }
 function promptStudyPF(it,p){
-  var L=[],fo=focusOf(it);
-  L.push('Study session, practice first: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources, the parts.txt and the practice results attached to this Project, and follow the Project instructions. The whole session is in English.');
+  var L=[];
+  L.push('Study session: part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project, and follow the Project instructions. The whole session is in English.');
   if(p.note)L.push('Plan notes: '+p.note.replace(/\n+/g,' · '));
-  L.push('','Do ONE step at a time and wait for my answer before moving on.','');
-  L.push('Step 1 — Map: list the concept of this part and all its sub-concepts, numbered, by name only, following the order of the practice material (first section or tab first). Next to each one, name the tab or section of the practice material where its result is. Do not explain yet. If the practice material has no section for this part yet, stop here: write a short, direct prompt for my work harness and wait for me to bring the result. The prompt must: add a new tab or page to the practice material for the concepts of this map; touch no existing page, data or logic; use no personal data (only column names, counts and aggregates); give insights with charts where useful; and end with a RESULT REPORT, one block per concept: CONCEPT / WHERE / WHAT I RAN / WHAT IT SHOWED (numbers) / WHAT IT MEANS FOR THE PROJECT / PROBLEMS OR SURPRISES.');
-  L.push('Step 2 — Walk through the practice, one or two concepts at a time, in the order of the practice material. For each one: point to its result (tab or section and the exact numbers) and, in the same message, help me read it: what the result says about my project, what the concept is (the author\'s explanation in a few lines, with chapter and section, and the formal definition) and why it matters. Do not only present results. Keep it short, then stop and wait. I will ask questions until I understand; answer them and do not quiz me. Move to the next one or two concepts only when I say so.');
-  L.push('Step 3 — My explanation: when I say "ready", I explain the concept and every sub-concept in my own words, without reading anything, in one message. Check each one (what is right, what I forgot, what is wrong, with the correction) and say "APPROVED" or "AGAIN" with what to reinforce. If AGAIN, I try again.','');
-  L.push('Only after APPROVED, create two things:','');
-  L.push('A) Flashcard — one card for this part, in plain text, for me to save in my app and to answer from memory in the spaced reviews:','');
-  L.push('CONCEPT: '+p.name);
-  L.push('SOURCE: (chapter and section, or module and file)');
-  L.push('MAP: (the concept and all its sub-concepts, one per line, by name only, in the order we studied them)');
-  L.push('MY DEFINITION: (a definition in my own words of the concept and of EACH sub-concept in the MAP, one per line, corrected with your feedback; mark what you corrected with [fix: ...])');
-  L.push('REAL CASE: (1 to 3 lines: what it showed in my project, with the numbers; no personal data)');
-  L.push('WATCH OUT: (what I got wrong or forgot)');
-  L.push('KEY TERMS: (the new English terms from this session, each with a short meaning)','');
-  L.push('B) Listening — one long talk about the whole part, which I will paste into a text-to-speech tool and use in my Listening task tonight. Output only the text to be read, separate from the flashcard, with no introduction and no notes.');
-  L.push('Rules for the text: plain prose, as if you were speaking to me. No headings, no bullet points, no tables, no markdown symbols and no code. Short, clear sentences in natural English, without idioms. Say numbers, formulas, symbols and commands in words, and describe code and diagrams in words: what they do, not their syntax. Use my corrected ideas and the mistakes I made.');
-  L.push('Length: about 1,500 words, around ten minutes of audio. If you need more room, split it into chunks of at most 1,500 words, each one starting with the words "Part 1 of 2", "Part 2 of 2" and so on.');
-  L.push('Order: (1) why the concept matters and where it sits in the source; (2) the concepts and the explanation of each; (3) what my practice results showed, told in words, with the numbers said clearly; (4) my mistakes and the common confusions; (5) the key terms, each with a one-sentence meaning; (6) three questions for me to answer out loud: ask each one, say "Pause the audio and answer out loud", then say "Here is the answer" and give a short model answer. Finish with a two-sentence summary.','','Start now with Step 1.');
+  L.push('');
+  L.push('1. Map: list the concept of this part and all its sub-concepts, numbered, by name only, in the order of the practice results, with the tab or section of each one. If the practice results have no section for this part yet, say so and stop.');
+  L.push('2. I will study in the practice results and try to explain each concept using the real examples from my data. You only answer my questions and correct my attempts: what is right, what I forgot, what is wrong and what I need to improve.');
+  L.push('3. When I can explain every concept, say "APPROVED". If not, say "AGAIN" and list what I need to improve; I will try again tomorrow, not in a week or a month.','');
+  L.push('Keep your messages short. Start with step 1.');
   return L.join('\n');
 }
 function promptStudy(it,p){
@@ -1791,6 +1792,16 @@ function promptReview(it,p,r){
     L.push('2. Then tell me what is right, what I forgot and what is wrong. For what I forgot, give hints by name only. Use only the card'+(p.card?'':' and my notes')+'; if you add anything else, say "outside my notes".');
     L.push('3. I try again and you check it. I can ask you questions at any time.');
     L.push('4. Finish with one line: "REVIEW DONE" if I explained the essentials without help, or "REVIEW AGAIN" with what to reinforce. If my explanation improved, give me the updated card in the same format.');
+    return L.join('\n');
+  }
+  if(isPF(it)){
+    L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the practice results, the sources and the parts.txt attached to this Project, and follow the Project instructions. The whole review is in English.','');
+    if(p.card)L.push('This is my review card. Do not show me its content; use it only to check me:','---',reviewCard(p.card),'---','');
+    L.push('1. Give me the map of this part: the concept and all its sub-concepts, by name only. No definitions and no hints.');
+    L.push('2. I will explain each one from memory, using the real examples from my practice results, in one message. You only answer my questions and correct me: what is right, what I forgot, what is wrong and what I need to improve.');
+    L.push('3. Finish with one line: "REVIEW DONE" if I explained the essentials with the real examples, or "REVIEW AGAIN" with what to improve; then I will try again tomorrow.');
+    if(r&&r.stage===2)L.push('4. Only after "REVIEW DONE": this is the last review, so write the note for my Obsidian vault, in markdown: a title with the concept; the map; my explanation of each concept in my own words, each with its real example from the practice results; where it was applied in my project (at least one place: page, tab or analysis); and links to related notes as [[note name]].');
+    L.push('','Keep your messages short. Start with step 1.');
     return L.join('\n');
   }
   L.push('Spaced review ('+(r?STAGE_EN[r.stage]+' review':'review')+') of the part "'+p.name+'" of the '+kindEn(it)+' "'+it.name+'". Use the sources and the parts.txt attached to this Project and follow the Project instructions. The whole review is in English.','');
