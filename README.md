@@ -8,7 +8,8 @@ O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.
 1. **Tarefas diárias.** Uma lista curta, com uma caixa para hoje. **Escolher tarefas** deixa só o que você faz de verdade (esconder ou excluir
    várias de uma vez). **Últimos 14 dias** mostra uma grade: toque num quadrado para marcar o que você fez e não marcou, ou para desmarcar.
 2. **Estudos e a ordem das partes.** Cada estudo tem partes na ordem, e cada parte tem uma descrição (o grupo de conceitos). A caixa da parte marca
-   como concluída. Adicione partes uma a uma, várias de uma vez (uma por linha) ou por **Importar**.
+   como concluída. Adicione partes uma a uma, várias de uma vez (uma por linha) ou por **Importar**. **Copiar partes** e **Baixar .txt** (na página do estudo)
+   exportam a divisão em partes, com a ordem, as fontes e as descrições, para dar de contexto ao Projeto do Claude.
 3. **Calendário.** Cada dia mostra quantas tarefas **necessárias** (rótulo *Necessária*) foram feitas, e quantos trabalhos você fez em estudos
    profissionais (azul) e pessoais (laranja): partes concluídas, revisões e sessões. Em **Ajustar este dia** dá para marcar o que você fez e não marcou,
    ou dizer que algo não estava no plano. O rótulo de cada tarefa aparece na lista e se escolhe em **Escolher tarefas**.

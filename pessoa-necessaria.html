@@ -1245,6 +1245,7 @@ function renderItem(k,it){
    (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
    ((fc&&fc.end)||it.due?'<div class="planrow"><span>'+(fc&&fc.end?'<b>Última repetição prevista:</b> <b class="num">'+fmtY(fc.end)+'</b>':'')+'</span><span>'+(it.due?'Prazo: <b class="num">'+fmtY(it.due)+'</b>'+(fc&&fc.end&&fc.end>it.due?' <b style="color:var(--bad)">('+diff(it.due,fc.end)+' dias depois)</b>':''):'')+'</span></div>':'')+
    '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes, na ordem</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
+   (rows?'<div class="aibar"><span class="books">Dar a divisão em partes de contexto ao Projeto do Claude: copie o texto (ou baixe o arquivo) e cole ou anexe no Projeto. Tem a ordem das partes, as fontes e as descrições.</span><span class="row"><button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes</button>'+(dl?'<button class="btn sm" data-act="parts-dl" data-k="'+k+'" data-id="'+it.id+'">Baixar .txt</button>':'')+'</span></div>':'')+
    (rows?'<ul class="plist2">'+rows+'</ul><p class="muted" style="font-size:13px">A caixa marca a parte como concluída e começa as revisões. Toque no nome para ver a descrição.</p>':'<div class="empty-state"><p>Ainda sem partes. Use + Parte, + Várias (uma por linha) ou Importar.</p></div>');
 }
 /* ---------- áreas: profissional / pessoal ---------- */
@@ -2271,6 +2272,7 @@ document.addEventListener('click',function(ev){
     case 'due-apply':{var ia=findItem(d.k,d.id),sd=ia&&suggestDue(ia);if(sd){ia.due=sd;commit('Prazo definido: '+fmtY(sd));}break;}
     case 'item-activate':{var iv=findItem(d.k,d.id);if(iv){iv.status='';commit('Começou! Divida em partes e calcule o prazo.');}break;}
     case 'pr-proj':{var ip=findItem(d.k,d.id);if(ip)copyText(promptProject(ip),'Instruções do Projeto');break;}
+    case 'parts-dl':{var xi=findItem(d.k,d.id);if(xi&&dl)dl.save({filename:'partes-'+slugMd(xi.name)+'.txt',data:exportParts(xi)}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Use Copiar partes.');});break;}
     case 'pr-parts':{var ix=findItem(d.k,d.id);if(ix)copyText(exportParts(ix),'parts.txt');break;}
     case 'pr-plan':copyText(promptPlan(d.id?findItem(d.k,d.id):null),'Prompt de divisão em partes');break;
     case 'pr-note':{var cn=curPart();if(cn)copyText(promptNote(cn.item,cn.part),'Prompt da nota em markdown');break;}
