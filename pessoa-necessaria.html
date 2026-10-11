@@ -501,9 +501,14 @@ span.mxc{cursor:default}
 .pbody b{font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
 .pbody small{font-size:12.5px;color:var(--muted)}
 .pbody small.lt{color:var(--bad)}
-.tkrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
-.tkrow input[type=text]{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 10px;min-width:0}
-@media (max-width:480px){.tkrow{grid-template-columns:1fr 1fr}.tkrow input[type=text]{grid-column:1/-1}}
+.tkrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto auto;gap:10px;align-items:center}
+.tkrow input[type=text]{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 10px;min-width:0}
+@media (max-width:560px){.tkrow{grid-template-columns:1fr 1fr}.tkrow input[type=text]{grid-column:1/-1}}
+.mks{display:flex;gap:3px;flex-wrap:wrap}
+.mk{font-style:normal;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:16px;padding:0 4px;border-radius:8px;font-size:11px;font-weight:700;line-height:1;color:#fff}
+.mk.p{background:var(--accent);color:var(--accent-ink)}
+.mk.e{background:var(--dly);color:#fff}
+.legend .mk{margin-right:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div id="app"></div>
@@ -960,7 +965,7 @@ function exampleBanner(){
   return '<div class="banner"><span>Tudo o que aparece agora é <b>exemplo</b>, para mostrar como o app funciona.</span><button class="btn sm" data-act="clear-ask">Apagar exemplos e começar</button></div>';
 }
 
-function renderHome(){return tasksToday()+reviewsToday()+studiesList()+matrixSection()+upcomingFold();}
+function renderHome(){return tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold();}
 /* ---------- tarefas de hoje ---------- */
 function visibleTasks(){return state.daily.filter(function(d){return !d.off;});}
 function tasksToday(){
@@ -969,7 +974,7 @@ function tasksToday(){
     var done=!!dailyDates(d.id)[t],go=d.link==='persona'?'persona':'daily:'+d.id,pl=planOn(d,t).split('\n')[0];
     if(done)n++;
     return '<li class="trow'+(done?' done':'')+'">'+(canE()?'<button type="button" class="gchk" role="checkbox" aria-checked="'+done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button>':'<span class="gchk static" aria-hidden="true"></span>')+
-      '<button type="button" class="tmain" data-act="nav" data-to="'+go+'"><span class="tname"><b>'+esc(d.name)+'</b>'+hidPill(d)+'</span>'+(pl?'<small>Hoje: '+esc(pl)+'</small>':'')+'</button></li>';
+      '<button type="button" class="tmain" data-act="nav" data-to="'+go+'"><span class="tname"><b>'+esc(d.name)+'</b>'+hidPill(d)+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'</span>'+(pl?'<small>Hoje: '+esc(pl)+'</small>':'')+'</button></li>';
   }).join('');
   return '<section class="sec" aria-label="Tarefas de hoje"><div class="sec-head"><h2 class="disp">Hoje</h2><span class="row"><span class="aside">'+esc(fmtLong(t))+(list.length?' · '+n+'/'+list.length:'')+'</span>'+(canE()?'<button class="btn sm" data-act="tasks-edit">Escolher tarefas</button>':'')+'</span></div>'+
     (list.length?'<ul class="tlist">'+rows+'</ul>':'<div class="rev-empty">Nenhuma tarefa na lista.'+(canE()?' Toque em Escolher tarefas.':'')+'</div>')+'</section>';
@@ -1056,14 +1061,14 @@ function needLedger(d){
 function candCount(we){var n=0;['cap','proj'].forEach(function(k){state[k].forEach(function(it){if(it.status==='espera'||it.daily||!it.parts.length)return;if(it.spw===1&&!we)return;n++;});});return n;}
 function tallyCtx(){
   var led={},byDay={};
-  state.daily.forEach(function(d){if(isNeeded(d)&&!isWeekly(d))led[d.id]=needLedger(d);});
+  state.daily.forEach(function(d){if(isNeeded(d)&&!isPeriodic(d)&&!d.off)led[d.id]=needLedger(d);});
   state.log.forEach(function(e){(byDay[e.d]=byDay[e.d]||[]).push(e);});
   return {led:led,byDay:byDay,cand:{wk:candCount(false),we:candCount(true)},start:appStart(),anyTw:anyTarget()};
 }
 function dayTally(day,ctx){
   var t=today(),rows=[],req=0,done=0;
   state.daily.forEach(function(d){
-    if(!isNeeded(d))return;
+    if(!isNeeded(d)||d.off)return;
     if(isPeriodic(d)){
       var pr=periodOf(d,day);
       if(day!==pr[1]||pr[1]<periodOf(d,d.created||ctx.start)[0])return;
@@ -1076,50 +1081,36 @@ function dayTally(day,ctx){
     if(n===0&&skipped(d,day))return;
     rows.push({kind:'need',name:d.name,n:n,st:st,by:L.cov[day]||null});req++;if(st==='ok'||st==='comp')done++;
   });
-  ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
-    if(it.status==='espera'||!it.parts.length)return;
-    var tg=targetOf(it,day);
-    if(tg>0){
-      if(day<ctx.start)return;
-      var q=qtyOf(it,day,ctx.byDay);
-      if(q===0&&skipped(it,day))return;
-      rows.push({kind:'study',name:it.name,n:q,req:tg,st:q>=tg?'ok':day<t?'miss':'todo'});req+=tg;done+=Math.min(q,tg);return;
-    }
-    if(!it.daily)return;
-    if(day<(it.since||ctx.start))return;
-    var did=qtyOf(it,day,ctx.byDay)>0;
-    if(!did&&skipped(it,day))return;
-    if(!did&&!it.parts.some(function(q2){return (!q2.start||q2.start<=day)&&(!q2.done||q2.done>=day);}))return;
-    rows.push({kind:'cap',name:it.name,n:did?1:0,st:did?'ok':day<t?'miss':'todo'});req++;if(did)done++;
-  });});
-  if(!ctx.anyTw){
-    var we=parse(day).getDay()%6===0,rq=Math.min(we?gcfg().we:gcfg().wk,we?ctx.cand.we:ctx.cand.wk);
-    if(rq>0){
-      var seen={};(ctx.byDay[day]||[]).forEach(function(e){if(e.part&&(e.t==='work'||e.t==='done')){var f=findItem(e.k,e.item);if(f&&!f.daily)seen[e.part]=1;}});
-      var dn=Math.min(Object.keys(seen).length,rq);
-      rows.push({kind:'study',name:'Sessões de estudo',n:dn,req:rq,st:dn>=rq?'ok':day<t?'miss':'todo'});req+=rq;done+=dn;
-    }
-  }
   return {rows:rows,req:req,done:done};
+}
+function workCounts(){
+  var c={};
+  state.log.forEach(function(e){
+    if(e.k!=='cap'&&e.k!=='proj')return;
+    if(e.t!=='work'&&e.t!=='done'&&e.t!=='review')return;
+    var o=c[e.d]||(c[e.d]={p:0,e:0,list:[]});
+    if(areaOfEntry(e)==='pess')o.e++;else o.p++;
+    o.list.push(e);
+  });
+  return c;
 }
 function calendar(){
   var ym=ui.cal.split('-').map(Number),y=ym[0],m=ym[1],first=new Date(y,m-1,1),off=(first.getDay()+6)%7,dim=new Date(y,m,0).getDate();
-  var weeks=Math.ceil((off+dim)/7),start=addDays(iso(first),-off),idx=dayIndex(),t=today(),cells='',ctx=tallyCtx();
+  var weeks=Math.ceil((off+dim)/7),start=addDays(iso(first),-off),wc=workCounts(),t=today(),cells='',ctx=tallyCtx();
   for(var i=0;i<weeks*7;i++){
-    var d=addDays(start,i),dd=parse(d),o=idx[d],tot=o?o.list.length:0,tl=(d>=ctx.start&&d<=t)?dayTally(d,ctx):null;
-    var lv=tot===0?0:tot<=2?1:tot<=4?2:tot<=7?3:4;
-    var cls='day lv'+lv+(tl&&tl.req?(tl.done>=tl.req?' tl-ok':(d<t&&tl.done===0)?' tl-miss':' tl-part'):'')+(dd.getMonth()!==m-1?' out':'')+(d===t?' today':'')+(d===ui.sel?' sel':'');
-    var marks=tl&&tl.req?'<i class="frac num">'+tl.done+'/'+tl.req+'</i>':o?((o.w?'<i class="m w">'+o.w+'</i>':'')+(o.c?'<i class="m c">'+o.c+'</i>':'')+(o.r?'<i class="m r">'+o.r+'</i>':'')+(o.y?'<i class="m y">'+o.y+'</i>':'')):'';
-    var al=fmtLong(d)+(tl&&tl.req?': '+tl.done+' de '+tl.req+' necessárias':o?': '+o.w+' trabalho, '+o.c+' concluídas, '+o.r+' revisões, '+o.y+' diárias':': sem registros');
+    var d=addDays(start,i),dd=parse(d),o=wc[d]||{p:0,e:0},tl=(d>=ctx.start&&d<=t)?dayTally(d,ctx):null;
+    var cls='day'+(tl&&tl.req?(tl.done>=tl.req?' tl-ok':(d<t&&tl.done===0)?' tl-miss':' tl-part'):'')+(dd.getMonth()!==m-1?' out':'')+(d===t?' today':'')+(d===ui.sel?' sel':'');
+    var marks=(tl&&tl.req?'<i class="frac num">'+tl.done+'/'+tl.req+'</i>':'')+'<span class="mks">'+(o.p?'<i class="mk p num" title="trabalhos profissionais">'+o.p+'</i>':'')+(o.e?'<i class="mk e num" title="trabalhos pessoais">'+o.e+'</i>':'')+'</span>';
+    var al=fmtLong(d)+(tl&&tl.req?': '+tl.done+' de '+tl.req+' necessárias':'')+'; '+o.p+' trabalhos profissionais, '+o.e+' pessoais';
     cells+='<button class="'+cls+'" data-act="cal-day" data-d="'+d+'" aria-label="'+esc(al)+'"'+(d===ui.sel?' aria-pressed="true"':'')+'><span class="dn num">'+dd.getDate()+'</span><span class="marks">'+marks+'</span></button>';
   }
-  return '<section class="cal" aria-label="Calendário de estudo">'+
+  return '<section class="cal" aria-label="Calendário">'+
    '<div class="cal-head"><h2 class="disp">'+MESES[m-1]+' <span class="muted num" style="font-weight:500">'+y+'</span></h2><div class="cal-nav">'+
    '<button class="icon-btn" data-act="cal-prev" aria-label="Mês anterior">'+I.left+'</button><button class="btn sm" data-act="cal-today">Hoje</button><button class="icon-btn" data-act="cal-next" aria-label="Próximo mês">'+I.right+'</button></div></div>'+
    '<div class="dows">'+['seg','ter','qua','qui','sex','sáb','dom'].map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'+
    '<div class="days">'+cells+'</div>'+
-   '<div class="legend"><span><b class="num">3/5</b> feitas de necessárias no dia</span><span class="lgkey tl-ok">completo</span><span class="lgkey tl-part">parcial</span><span class="lgkey tl-miss">faltou</span></div>'+
-   dayPanel(idx,ctx)+'</section>';
+   '<div class="legend"><span><b class="num">3/5</b> tarefas necessárias feitas</span><span><i class="mk p num">2</i> trabalhos profissionais</span><span><i class="mk e num">1</i> trabalhos pessoais</span><span class="lgkey tl-ok">completo</span><span class="lgkey tl-part">parcial</span><span class="lgkey tl-miss">faltou</span></div>'+
+   dayPanel(wc,ctx)+'</section>';
 }
 var ST_TXT={ok:'feita',comp:'compensada',miss:'faltou',todo:'pendente'};
 function needPanel(d,ctx){
@@ -1136,37 +1127,22 @@ function whyPanel(d){
 }
 function adjustPanel(day,ctx){
   if(!canE()||day>today()||day<ctx.start)return '';
-  var drows=state.daily.filter(function(x){return (x.created||ctx.start)<=day;}).map(function(x){
+  var drows=state.daily.filter(function(x){return isNeeded(x)&&!x.off&&(x.created||ctx.start)<=day;}).map(function(x){
     var f=freqOf(x),pr=periodOf(x,day),has=!!dailyDates(x.id)[day],per=f==='day'?has:!!periodDone(x,day),sk=f==='day'?skipped(x,day):skippedIn(x,pr);
     var st=has?'feita neste dia':per?'feita no '+(f==='week'?'período (semana)':'período (mês)'):sk?'não estava no plano':'sem registro';
     return '<li><span>'+esc(x.name)+'<small>'+st+'</small></span><span class="row">'+(has?'<button class="btn sm" data-act="adj-undo" data-id="'+x.id+'">Desfazer</button>':'<button class="btn sm primary" data-act="adj-did" data-k="daily" data-id="'+x.id+'">Fiz e não marquei</button>')+(!per?'<button class="btn sm" data-act="adj-skip" data-k="daily" data-id="'+x.id+'">'+(sk?'Voltar ao plano':'Não estava no plano')+'</button>':'')+'</span></li>';
   }).join('');
-  var srows='',others='';
-  ['cap','proj'].forEach(function(k){state[k].forEach(function(it){
-    if(it.status==='espera'||!it.parts.length)return;
-    var tg=targetOf(it,day),q=qtyOf(it,day,ctx.byDay),sk=skipped(it,day);
-    if(tg>0||q>0||sk||(it.daily&&day>=(it.since||ctx.start))){
-      srows+='<li><span>'+esc(it.name)+'<small>'+(tg>0?q+' de '+tg+' '+plural(tg,'sessão','sessões'):q+' '+plural(q,'sessão','sessões'))+(sk?' · não estava no plano':'')+'</small></span><span class="row"><button class="btn sm primary" data-act="adj-did" data-k="'+k+'" data-id="'+it.id+'">Fiz e não marquei</button>'+(q<(tg||1)?'<button class="btn sm" data-act="adj-skip" data-k="'+k+'" data-id="'+it.id+'">'+(sk?'Voltar ao plano':'Não estava no plano')+'</button>':'')+'</span></li>';
-    }else others+='<option value="'+k+':'+it.id+'">'+esc(it.name)+'</option>';
-  });});
-  return '<details class="fold adj"><summary>Ajustar este dia <span class="muted" style="font-weight:500">· o que fiz e não marquei, ou não estava no plano</span></summary>'+
-    '<ul class="adjlist">'+drows+srows+'</ul>'+
-    (others?'<div class="row" style="margin-top:8px"><select id="adj-study" aria-label="Outro estudo"><option value="">Outro estudo…</option>'+others+'</select><button class="btn sm" data-act="adj-did-sel">Registrar sessão neste dia</button></div>':'')+
-    '<p class="muted" style="font-size:12.5px;margin-top:8px">“Fiz e não marquei” cria o registro neste dia. “Não estava no plano” tira o dia da conta (não conta como falta nem quebra a sequência).</p></details>';
+  if(!drows)return '';
+  return '<details class="fold adj"><summary>Ajustar este dia <span class="muted" style="font-weight:500">· o que fiz e não marquei, ou não estava no plano</span></summary><ul class="adjlist">'+drows+'</ul>'+
+    '<p class="muted" style="font-size:12.5px;margin-top:8px">“Fiz e não marquei” cria o registro neste dia. “Não estava no plano” tira o dia da conta (não conta como falta).</p></details>';
 }
-function dayPanel(idx,ctx){
-  var d=ui.sel,o=idx[d];
+function dayPanel(wc,ctx){
+  var d=ui.sel,o=wc[d]||{p:0,e:0,list:[]};
   var head='<h3>'+esc(fmtLong(d))+(d===today()?' · hoje':'')+'</h3>',nb=needPanel(d,ctx),wb=whyPanel(d),ab=adjustPanel(d,ctx);
-  if(!o)return '<div class="daypanel">'+head+nb+'<p class="muted">Nenhum registro neste dia.</p>'+ab+wb+'</div>';
-  function li(e,extra){return '<li>'+esc(e.pname)+'<small>'+(e.k==='daily'?AREA[areaOfEntry(e)]+' · tarefa':esc(e.iname)+' · '+(e.k==='cap'?'estudo':'projeto'))+(e.retro?' · marcado depois':'')+(extra?' · '+extra:'')+'</small></li>';}
-  var w=o.list.filter(function(e){return e.t==='work';}),c=o.list.filter(function(e){return e.t==='done';}),r=o.list.filter(function(e){return e.t==='review';}),y=o.list.filter(function(e){return e.t==='daily';});
-  function grp(cls,title,arr,fn){return '<div class="dgroup '+cls+'"><h4>'+title+' <span class="num muted">'+arr.length+'</span></h4>'+(arr.length?'<ul>'+arr.map(fn).join('')+'</ul>':'<p class="muted" style="font-size:13.5px">—</p>')+'</div>';}
-  return '<div class="daypanel">'+head+nb+'<div class="dgroups">'+
-    grp('w','Trabalho',w,function(e){return li(e);})+
-    grp('c','Concluídas',c,function(e){return li(e);})+
-    grp('r','Revisões',r,function(e){return li(e,(stageName(e.st,e.item)||'')+' · '+(e.a==='again'?'revisar de novo':'feita'));})+
-    grp('y','Tarefas',y,function(e){return li(e);})+
-  '</div>'+ab+wb+'</div>';
+  function li(e){var tp=e.t==='done'?'parte concluída':e.t==='review'?'revisão '+(stageName(e.st,e.item)||'')+(e.a==='again'?' (não lembrei)':''):'sessão';return '<li>'+esc(e.pname)+'<small>'+esc(e.iname)+' · '+tp+(e.retro?' · marcado depois':'')+'</small></li>';}
+  function grp(cls,title,arr){return '<div class="dgroup '+cls+'"><h4>'+title+' <span class="num muted">'+arr.length+'</span></h4>'+(arr.length?'<ul>'+arr.map(li).join('')+'</ul>':'<p class="muted" style="font-size:13.5px">—</p>')+'</div>';}
+  var pl=o.list.filter(function(e){return areaOfEntry(e)!=='pess';}),el=o.list.filter(function(e){return areaOfEntry(e)==='pess';});
+  return '<div class="daypanel">'+head+nb+'<div class="dgroups" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+grp('w','Trabalhos profissionais',pl)+grp('y','Trabalhos pessoais',el)+'</div>'+ab+wb+'</div>';
 }
 function persona(){
   if(!canE()&&!state.persona.trim())return '';
@@ -1526,12 +1502,13 @@ function openModal(m){ui.modal=m;renderModal();setTimeout(function(){var f=docum
 function closeModal(){ui.modal=null;renderModal();if(dirty)scheduleSave();}
 function tasksModal(){
   var rows=state.daily.map(function(d){
-    return '<div class="tkrow"><input type="text" name="n_'+d.id+'" value="'+esc(d.name)+'" maxlength="100" aria-label="Nome da tarefa"><label class="check"><input type="checkbox" name="s_'+d.id+'"'+(d.off?'':' checked')+'> <span>Na lista</span></label><label class="check"><input type="checkbox" name="x_'+d.id+'"> <span>Excluir</span></label></div>';
+    return '<div class="tkrow"><input type="text" name="n_'+d.id+'" value="'+esc(d.name)+'" maxlength="100" aria-label="Nome da tarefa"><input type="text" name="l_'+d.id+'" value="'+esc(d.label||'')+'" list="lbl-list" maxlength="40" placeholder="Rótulo" aria-label="Rótulo"><label class="check"><input type="checkbox" name="s_'+d.id+'"'+(d.off?'':' checked')+'> <span>Na lista</span></label><label class="check"><input type="checkbox" name="x_'+d.id+'"> <span>Excluir</span></label></div>';
   }).join('');
   return '<form data-form="tasks" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><h2 class="disp">Minhas tarefas</h2>'+closeBtn()+'</div>'+
-   '<p class="muted" style="font-size:14px">Deixe só o que você faz de verdade. Desmarque “Na lista” para esconder, ou marque “Excluir” para apagar a tarefa (os dias já marcados continuam salvos nos dados).</p>'+
+   '<p class="muted" style="font-size:14px">Deixe só o que você faz de verdade. “Na lista” esconde a tarefa quando desmarcado; “Excluir” apaga (os dias já marcados continuam salvos). O rótulo <b>'+esc(NEED)+'</b> faz a tarefa contar no calendário: só as necessárias aparecem lá.</p>'+
+   '<datalist id="lbl-list">'+state.labels.map(function(l){return '<option value="'+esc(l)+'">';}).join('')+'</datalist>'+
    (rows||'<p class="muted">Nenhuma tarefa ainda.</p>')+
-   '<div class="field"><label for="t-new">Nova tarefa</label><input type="text" id="t-new" name="newtask" maxlength="100" placeholder="Ex.: Exercício físico"></div>'+
+   '<div class="tkrow"><input type="text" id="t-new" name="newtask" maxlength="100" placeholder="Nova tarefa" aria-label="Nova tarefa"><input type="text" name="newlabel" list="lbl-list" maxlength="40" placeholder="Rótulo" aria-label="Rótulo da nova tarefa"></div>'+
    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 function renderModal(){
@@ -2345,12 +2322,14 @@ document.addEventListener('submit',function(ev){
     state.daily.forEach(function(d){
       if(fd.get('x_'+d.id)==='on')return;
       var nm=String(fd.get('n_'+d.id)||'').trim();if(nm)d.name=nm.slice(0,100);
+      var lb=String(fd.get('l_'+d.id)||'').trim().slice(0,40);d.label=lb;if(lb&&state.labels.indexOf(lb)<0)state.labels.push(lb);
       if(fd.get('s_'+d.id)==='on')delete d.off;else d.off=true;
       keep.push(d);
     });
     var gone=state.daily.filter(function(d){return keep.indexOf(d)<0;}).map(function(d){return d.id;});
     state.daily=keep;state.ach.forEach(function(x){if(x.rule&&gone.indexOf(x.rule.daily)>=0)x.rule.daily=null;});
-    var nt=String(fd.get('newtask')||'').trim();if(nt)state.daily.push({id:uid(),name:nt.slice(0,100),label:'',area:'pess',text:'',created:today()});
+    var nt=String(fd.get('newtask')||'').trim(),nl=String(fd.get('newlabel')||'').trim().slice(0,40);if(nl&&state.labels.indexOf(nl)<0)state.labels.push(nl);
+    if(nt)state.daily.push({id:uid(),name:nt.slice(0,100),label:nl,area:'pess',text:'',created:today()});
     ui.modal=null;commit('Tarefas salvas');
   }else if(kind==='part'){
     var it2=findItem(m.k,m.item);if(!it2)return;var pn=String(fd.get('name')||'').trim(),pd=String(fd.get('due')||'')||null,pnote=String(fd.get('note')||'').trim(),preps=Math.max(0,Math.round(+fd.get('reps')||0))||null;if(!pn)return;
