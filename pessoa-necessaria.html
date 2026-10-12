@@ -538,6 +538,13 @@ details.msec summary{font-size:16px;font-weight:700}
 .mgn{font-size:20px}
 .mreal{display:flex;flex-direction:column;gap:2px;font-size:14px}
 .mnote{font-size:13.5px;margin:4px 0 8px}
+.idesc{font-size:14px;margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.nbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.mnode.real .nbox{border-color:var(--accent)}
+.nhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nname{display:block;font-size:16px;margin:2px 0 4px;overflow-wrap:anywhere}
+.ndesc{font-size:13.5px;margin:0 0 8px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted)}
+.mnode .mlist{border-right:0;padding-right:0}
 @media (min-width:720px){
   .gmap{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(200px,280px);align-items:center;gap:0}
   .mcol{position:relative;padding-right:0}
@@ -547,6 +554,8 @@ details.msec summary{font-size:16px;font-weight:700}
   .mlist{border-right:2px solid var(--line);padding-right:14px}
   .gmap.cur .mlist{border-right-color:var(--accent)}
   .mrow{position:relative}
+  .mnode .mrow::after{display:none}
+  .mnode .mmain .mbar{flex:0 0 36%}
   .mrow::after{content:"";position:absolute;right:-14px;top:50%;width:14px;height:2px;background:var(--line)}
   .gmap.cur .mrow::after{background:var(--accent)}
   .gmap::before{content:"";grid-column:2;grid-row:1;height:2px;background:var(--line);align-self:center}
@@ -616,7 +625,7 @@ var NEED='Necessária';
 function ensureNeed(){if(state.labels.indexOf(NEED)<0)state.labels.push(NEED);}
 ensureNeed();
 
-var ui={route:'home',cal:today().slice(0,7),sel:today(),modal:null,editPersona:false,revAll:false,clearAsk:false};
+var ui={route:'home',cal:today().slice(0,7),sel:today(),modal:null,mo:{},editPersona:false,revAll:false,clearAsk:false};
 (function restore(){var s=ssGet('pn-ui');if(!s)return;try{var o=JSON.parse(s);['route','cal','sel','revAll'].forEach(function(k){if(o[k]!=null)ui[k]=o[k];});if(o.modal&&o.modal.kind==='part')ui.modal={kind:'part',k:o.modal.k,item:o.modal.item,id:o.modal.id};}catch(e){}})();
 
 function exampleState(){
@@ -1210,9 +1219,10 @@ function goalItems(g){
   });
   return a;
 }
-function goalsOf(it){return state.goals.filter(function(g){return (g.links||[]).indexOf(it.id)>=0;});}
+function goalsOf(it){return state.goals.filter(function(g){return (g.links||[]).indexOf(it.id)>=0||(g.nodes||[]).some(function(n){return (n.links||[]).indexOf(it.id)>=0;});});}
 function goalNow(){return state.goals.find(function(g){return g.id===state.goalNow;})||state.goals[0]||null;}
-function goalStats(g){var t=0,d=0;goalItems(g).forEach(function(x){t+=x.it.parts.length;d+=x.it.parts.filter(function(p){return p.done;}).length;});return {t:t,d:d,n:goalItems(g).length};}
+function goalAll(g){var seen={},a=[];goalItems(g).concat((g.nodes||[]).reduce(function(r,n){return r.concat(nodeItems(n));},[])).forEach(function(x){if(!seen[x.it.id]){seen[x.it.id]=1;a.push(x);}});return a;}
+function goalStats(g){var t=0,d=0,all=goalAll(g);all.forEach(function(x){t+=x.it.parts.length;d+=x.it.parts.filter(function(p){return p.done;}).length;});return {t:t,d:d,n:all.length};}
 function goalStrip(){
   var g=goalNow();
   if(!g)return canE()?'<section class="sec goalstrip" aria-label="Objetivo"><div class="sec-head"><h2 class="disp">Objetivo</h2><button class="btn sm primary" data-act="nav" data-to="map">Criar o mapa</button></div><p class="muted" style="font-size:14px">Dê um objetivo ao que você estuda: o mapa liga cada estudo à pessoa que você precisa ser.</p></section>':'';
@@ -1231,16 +1241,27 @@ function mapRow(x){
   return '<li class="mrow'+(it.status==='espera'?' wait':'')+'"><button type="button" class="mmain" data-act="nav" data-to="item:'+x.k+':'+it.id+'">'+partsBar(it)+
     '<span class="mname"><b>'+esc(it.name)+'</b><small>'+(it.parts.length?done+' de '+it.parts.length+' partes'+(np&&it.status!=='espera'?' · próxima: '+esc(np.name):''):'sem partes ainda')+(it.status==='espera'?' · em espera':'')+'</small></span></button></li>';
 }
+function nodeItems(n){return (n.links||[]).map(function(id){var k=state.cap.some(function(x){return x.id===id;})?'cap':state.proj.some(function(x){return x.id===id;})?'proj':null;return k?{k:k,it:findItem(k,id)}:null;}).filter(Boolean);}
+function nodeBox(g,n){
+  var its=nodeItems(n),ts=(n.tasks||[]).map(dailyById).filter(Boolean),real=n.kind==='real';
+  return '<li class="mrow mnode'+(real?' real':'')+'"><div class="nbox"><div class="nhead"><span class="label">'+(real?'Capacidade real':'Outra característica')+'</span>'+(canE()?'<button type="button" class="linkb" data-act="node-edit" data-goal="'+g.id+'" data-id="'+n.id+'">Editar</button>':'')+'</div>'+
+    '<b class="nname">'+esc(n.name)+'</b>'+(n.desc?'<p class="ndesc">'+esc(n.desc)+'</p>':'')+
+    (its.length?'<ul class="mlist">'+its.map(mapRow).join('')+'</ul>':'')+
+    (ts.length?'<p class="label" style="margin:8px 0 4px">Tarefas</p><ul class="mlist">'+ts.map(function(d){return '<li class="mrow"><button type="button" class="mmain" data-act="nav" data-to="daily:'+d.id+'"><span class="mname"><b>'+esc(d.name)+'</b><small>'+(d.label?esc(d.label)+' · ':'')+(freqOf(d)==='week'?'semanal':freqOf(d)==='month'?'mensal':'diária')+'</small></span></button></li>';}).join('')+'</ul>':'')+
+    (!its.length&&!ts.length?'<p class="muted" style="font-size:13px;margin:4px 0 0">Nada ligado ainda.</p>':'')+'</div></li>';
+}
 function goalSection(g,i){
-  var cur=goalNow()===g,st=goalStats(g),items=goalItems(g);
+  var cur=goalNow()===g,st=goalStats(g),items=goalItems(g),nodes=g.nodes||[];
   var act=items.filter(function(x){return x.it.status!=='espera';}),wait=items.filter(function(x){return x.it.status==='espera';});
   var pct=st.t?Math.round(st.d/st.t*100):0;
-  var body='<div class="gmap'+(cur?' cur':'')+'"><div class="mcol"><ul class="mlist">'+act.map(mapRow).join('')+(wait.length?'</ul><p class="label mwait">Em espera</p><ul class="mlist">'+wait.map(mapRow).join(''):'')+'</ul>'+(items.length?'':'<p class="muted" style="font-size:14px">Nenhum estudo ligado a este objetivo ainda.'+(canE()?' Toque em Editar objetivo.':'')+'</p>')+'</div>'+
+  var left=nodes.length?'<ul class="mlist mnodes">'+nodes.map(function(n){return nodeBox(g,n);}).join('')+'</ul>':'<ul class="mlist">'+act.map(mapRow).join('')+(wait.length?'</ul><p class="label mwait">Em espera</p><ul class="mlist">'+wait.map(mapRow).join(''):'')+'</ul>'+(items.length?'':'<p class="muted" style="font-size:14px">Nenhum estudo ligado a este objetivo ainda.'+(canE()?' Toque em Editar objetivo.':'')+'</p>');
+  var body='<div class="gmap'+(cur?' cur':'')+(nodes.length?' nodes':'')+'"><div class="mcol">'+left+'</div>'+
     '<div class="mgoal"><span class="label">Objetivo</span><b class="disp mgn">'+esc(g.name)+'</b>'+(g.real?'<span class="mreal"><span class="label">Objetivo real</span>'+esc(g.real)+'</span>':'')+
     '<span class="bar-track" role="img" aria-label="'+pct+'% das partes"><span class="bar-fill" style="width:'+pct+'%"></span></span><small class="muted">'+st.d+' de '+st.t+' partes · '+st.n+' '+plural(st.n,'estudo','estudos')+'</small></div></div>'+
     (g.note?'<p class="muted mnote">'+esc(g.note)+'</p>':'')+
-    (canE()?'<div class="row"><button class="btn sm" data-act="goal-edit" data-id="'+g.id+'">Editar objetivo</button>'+(cur?'':'<button class="btn sm" data-act="goal-now" data-id="'+g.id+'">Estou nesta etapa</button>')+'</div>':'');
-  return '<details class="fold msec'+(cur?' cur':'')+'"'+(cur?' open':'')+'><summary><span class="mstage">Etapa '+(i+1)+'</span> '+esc(g.name)+(cur?' <span class="pill" style="margin-left:6px">você está aqui</span>':'')+'</summary>'+body+'</details>';
+    (canE()?'<div class="row"><button class="btn sm" data-act="goal-edit" data-id="'+g.id+'">Editar objetivo</button><button class="btn sm" data-act="node-new" data-goal="'+g.id+'">+ Capacidade real / característica</button>'+(cur?'':'<button class="btn sm" data-act="goal-now" data-id="'+g.id+'">Estou nesta etapa</button>')+'</div>':'');
+  var isOpen=ui.mo[g.id]!==undefined?ui.mo[g.id]:cur;
+  return '<details class="fold msec'+(cur?' cur':'')+'" data-gid="'+g.id+'"'+(isOpen?' open':'')+'><summary><span class="mstage">Etapa '+(i+1)+'</span> '+esc(g.name)+(cur?' <span class="pill" style="margin-left:6px">você está aqui</span>':'')+'</summary>'+body+'</details>';
 }
 function renderMap(){
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
@@ -1258,6 +1279,22 @@ function goalForm(m){
     '<div class="field"><label>Estudos que levam a este objetivo</label><div class="stack" style="gap:6px;max-height:260px;overflow:auto">'+state.cap.map(chk).join('')+(state.proj.length?'<span class="label" style="margin-top:6px">Projetos</span>'+state.proj.map(chk).join(''):'')+'</div></div>'+
     '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
     (g?(m.confirm?'<div class="confirm">Excluir este objetivo? Os estudos continuam.<div class="row"><button class="btn danger solid sm" type="button" data-act="goal-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="goal-del-ask" style="align-self:flex-start">Excluir objetivo</button>'):'')+'</form>';
+}
+
+function nodeForm(m){
+  var g=state.goals.find(function(x){return x.id===m.goal;});if(!g)return '';
+  var n=m.id?(g.nodes||[]).find(function(x){return x.id===m.id;}):null;
+  function chk(x){return '<label class="check"><input type="checkbox" name="l_'+x.id+'"'+(n&&(n.links||[]).indexOf(x.id)>=0?' checked':'')+'> <span>'+esc(x.name)+(x.status==='espera'?' <span class="muted">(em espera)</span>':'')+'</span></label>';}
+  function tchk(d){return '<label class="check"><input type="checkbox" name="t_'+d.id+'"'+(n&&(n.tasks||[]).indexOf(d.id)>=0?' checked':'')+'> <span>'+esc(d.name)+'</span></label>';}
+  var vis=state.daily.filter(function(d){return !d.off;});
+  return '<form data-form="node" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+esc(g.name)+'</span><h2 class="disp">'+(n?'Editar':'Nova capacidade real ou característica')+'</h2></div>'+closeBtn()+'</div>'+
+    '<div class="field"><label for="nd-kind">Tipo</label><select id="nd-kind" name="kind"><option value="real"'+(n&&n.kind==='real'?' selected':'')+'>Capacidade real</option><option value="trait"'+(n&&n.kind!=='real'?' selected':'')+'>Outra característica</option></select></div>'+
+    '<div class="field"><label for="nd-name">Nome</label><input type="text" id="nd-name" name="name" required maxlength="140" value="'+esc(n?n.name:'')+'" placeholder="Ex.: Engenheiro que entrega sistemas completos" autofocus></div>'+
+    '<div class="field"><label for="nd-desc">Descrição</label><textarea id="nd-desc" name="desc" style="min-height:120px" placeholder="O que é, como provo, o que ainda preciso descobrir">'+esc(n?n.desc||'':'')+'</textarea></div>'+
+    '<div class="field"><label>Estudos e projetos que levam a isto</label><div class="stack" style="gap:6px;max-height:240px;overflow:auto">'+state.cap.map(chk).join('')+(state.proj.length?'<span class="label" style="margin-top:6px">Projetos</span>'+state.proj.map(chk).join(''):'')+'</div></div>'+
+    (vis.length?'<div class="field"><label>Tarefas que sustentam isto (opcional)</label><div class="stack" style="gap:6px;max-height:160px;overflow:auto">'+vis.map(tchk).join('')+'</div></div>':'')+
+    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
+    (n?(m.confirm?'<div class="confirm">Excluir “'+esc(n.name)+'”? Os estudos continuam.<div class="row"><button class="btn danger solid sm" type="button" data-act="node-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="node-del-ask" style="align-self:flex-start">Excluir</button>'):'')+'</form>';
 }
 
 /* ---------- ideias para depois ---------- */
@@ -1363,7 +1400,7 @@ function renderItem(k,it){
       '<button type="button" class="pmain" data-act="part-open" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"><span class="pnum num">'+(i+1)+'</span><span class="pbody"><b>'+esc(p.name)+'</b><small'+(late?' class="lt"':'')+'>'+st+(late?' · atrasada':'')+'</small></span></button></li>';
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+done+' de '+total+' '+plural(total,'parte','partes')+' concluídas</span>'+(goalsOf(it).length?'<span class="leads">Leva a: '+goalsOf(it).map(function(g){return '<button type="button" class="linkb" data-act="nav" data-to="map">'+esc(g.name)+'</button>';}).join(', ')+'</span>':'')+'</div>'+
+   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+done+' de '+total+' '+plural(total,'parte','partes')+' concluídas</span>'+(it.desc?'<p class="idesc">'+esc(it.desc)+'</p>':'')+(goalsOf(it).length?'<span class="leads">Leva a: '+goalsOf(it).map(function(g){return '<button type="button" class="linkb" data-act="nav" data-to="map">'+esc(g.name)+'</button>';}).join(', ')+'</span>':'')+'</div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    '<div class="bar-track" role="img" aria-label="'+pct+'% das partes concluídas"><div class="bar-fill'+(pct===100?' ok':'')+'" style="width:'+pct+'%"></div></div>'+
    (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
@@ -1654,6 +1691,7 @@ function renderModal(){
   else if(m.kind==='guide')h=guideModal();
   else if(m.kind==='tasks')h=tasksModal();
   else if(m.kind==='goal')h=goalForm(m);
+  else if(m.kind==='node')h=nodeForm(m);
   else if(m.kind==='idea')h=ideaForm();
   if(!h){ui.modal=null;root.innerHTML='';return;}
   root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'||m.kind==='prompt'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
@@ -1709,6 +1747,7 @@ function itemForm(m){
   return '<form data-form="item" class="sheet-body" style="display:flex;flex-direction:column;gap:16px"><div class="sheet-head"><h2 class="disp">'+(it?'Editar estudo':'Novo estudo')+'</h2>'+closeBtn()+'</div>'+
    '<div class="field"><label for="f-name">Nome</label><input type="text" id="f-name" name="name" required maxlength="120" value="'+esc(it?it.name:'')+'" placeholder="Ex.: Statistics for Data Science" autofocus></div>'+
    '<div class="field"><label for="f-grp">Grupo na tela inicial</label><input type="text" id="f-grp" name="grp" list="grp-list" maxlength="40" value="'+esc(it?it.grp||'':'')+'" placeholder="'+esc(m.k==='proj'?'Projetos':(it?areaOf(it):m.area)==='pess'?'Outros estudos':'Profissionais')+'"><datalist id="grp-list"><option value="Profissionais"><option value="Bíblia"><option value="Livros"><option value="Outros estudos"></datalist><span class="hint">Em branco usa Profissionais. Dá para criar o seu.</span></div>'+
+   '<div class="field"><label for="f-desc">Descrição (opcional)</label><textarea id="f-desc" name="desc" style="min-height:110px" placeholder="O que é este estudo ou projeto e o que ele entrega">'+esc(it?it.desc||'':'')+'</textarea></div>'+
    '<div class="field"><label for="f-due">Prazo de término (opcional)</label><input type="date" id="f-due" name="due" value="'+esc(it?it.due||'':'')+'"></div>'+
    '<div class="field"><label for="f-books">Fontes (opcional)</label><textarea id="f-books" name="books" style="min-height:70px" placeholder="Livro: Practical Statistics for Data Scientists">'+esc(it?it.books||'':'')+'</textarea></div>'+
    '<div class="field"><label for="f-sr">Dias das revisões deste estudo (opcional)</label><input type="text" id="f-sr" name="sr" maxlength="20" value="'+esc(it&&it.sr?it.sr.join(', '):'')+'" placeholder="'+esc(srOf(null).join(', '))+'"><span class="hint">Três números: dias depois de concluir a parte, depois da 1ª revisão e depois da 2ª. Em branco usa o padrão (1, 7, 30).</span></div>'+
@@ -2286,6 +2325,7 @@ document.addEventListener('drop',function(e){var z=e.target.closest&&e.target.cl
 function curPart(){var m=ui.modal;if(!m)return null;var it=findItem(m.k,m.item);if(!it)return null;var p=it.parts.find(function(x){return x.id===m.id;});return p?{k:m.k,item:it,part:p}:null;}
 function addLog(t,k,it,p,extra){var e={id:uid(),d:today(),t:t,k:k,item:it.id,part:p.id,iname:it.name,pname:p.name,area:areaOf(it)};if(extra)for(var x in extra)e[x]=extra[x];state.log.push(e);}
 
+document.addEventListener('toggle',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('msec')&&t.dataset.gid)ui.mo[t.dataset.gid]=t.open;},true);
 document.addEventListener('click',function(ev){
   var el=ev.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
@@ -2302,6 +2342,10 @@ document.addEventListener('click',function(ev){
     case 'idea-new':openModal({kind:'idea'});break;
     case 'idea-del':state.ideas=state.ideas.filter(function(x){return x.id!==d.id;});commit();break;
     case 'goal-edit':openModal({kind:'goal',id:d.id});break;
+    case 'node-new':openModal({kind:'node',goal:d.goal});break;
+    case 'node-edit':openModal({kind:'node',goal:d.goal,id:d.id});break;
+    case 'node-del-ask':ui.modal.confirm=true;renderModal();break;
+    case 'node-del-yes':{var ng=state.goals.find(function(x){return x.id===ui.modal.goal;}),nid=ui.modal.id;if(ng)ng.nodes=(ng.nodes||[]).filter(function(x){return x.id!==nid;});ui.modal=null;commit('Excluído');break;}
     case 'goal-now':state.goalNow=d.id;commit('Etapa atual definida');break;
     case 'goal-del-ask':ui.modal.confirm=true;renderModal();break;
     case 'goal-del-yes':{var gid=ui.modal.id;state.goals=state.goals.filter(function(x){return x.id!==gid;});if(state.goalNow===gid)state.goalNow=state.goals[0]?state.goals[0].id:'';ui.modal=null;commit('Objetivo excluído');break;}
@@ -2449,12 +2493,21 @@ document.addEventListener('submit',function(ev){
   var fd=new FormData(f),m=ui.modal;if(!m)return;
   if(kind==='item'){
     var name=String(fd.get('name')||'').trim(),due=String(fd.get('due')||'')||null,books=String(fd.get('books')||'').trim();if(!name)return;
-    var igrp=String(fd.get('grp')||'').trim().slice(0,40),isr=srParse(fd.get('sr')),istatus=fd.get('status')==='espera'?'espera':'';
-    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.status=istatus;if(igrp)it.grp=igrp;else delete it.grp;if(isr)it.sr=isr;else delete it.sr;}ui.modal=null;commit('Alterações salvas');}
-    else{var nw={id:uid(),name:name,due:due,books:books,area:'prof',status:istatus,parts:[]};if(igrp)nw.grp=igrp;if(isr)nw.sr=isr;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit('Estudo criado. Agora adicione as partes.');}
+    var idesc=String(fd.get('desc')||'').trim().slice(0,1500),igrp=String(fd.get('grp')||'').trim().slice(0,40),isr=srParse(fd.get('sr')),istatus=fd.get('status')==='espera'?'espera':'';
+    if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.status=istatus;if(idesc)it.desc=idesc;else delete it.desc;if(igrp)it.grp=igrp;else delete it.grp;if(isr)it.sr=isr;else delete it.sr;}ui.modal=null;commit('Alterações salvas');}
+    else{var nw={id:uid(),name:name,due:due,books:books,area:'prof',status:istatus,parts:[]};if(idesc)nw.desc=idesc;if(igrp)nw.grp=igrp;if(isr)nw.sr=isr;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit('Estudo criado. Agora adicione as partes.');}
   }else if(kind==='idea'){
     var it0=String(fd.get('text')||'').trim().slice(0,500);if(!it0)return;
     state.ideas.unshift({id:uid(),t:it0,d:today()});ui.modal=null;commit('Ideia guardada. Volte ao trabalho.');
+  }else if(kind==='node'){
+    var ng2=state.goals.find(function(x){return x.id===m.goal;}),nn=String(fd.get('name')||'').trim().slice(0,140);if(!ng2||!nn)return;
+    var nv={kind:fd.get('kind')==='real'?'real':'trait',name:nn,desc:String(fd.get('desc')||'').trim().slice(0,1500),
+      links:state.cap.concat(state.proj).filter(function(x){return fd.get('l_'+x.id)==='on';}).map(function(x){return x.id;}),
+      tasks:state.daily.filter(function(x){return fd.get('t_'+x.id)==='on';}).map(function(x){return x.id;})};
+    if(!ng2.nodes)ng2.nodes=[];
+    if(m.id){var ne=ng2.nodes.find(function(x){return x.id===m.id;});if(ne){ne.kind=nv.kind;ne.name=nv.name;ne.desc=nv.desc;ne.links=nv.links;ne.tasks=nv.tasks;}}
+    else{nv.id=uid();ng2.nodes.push(nv);}
+    ui.modal=null;commit('Salvo');
   }else if(kind==='goal'){
     var gn=String(fd.get('name')||'').trim().slice(0,120);if(!gn)return;
     var gl=state.cap.concat(state.proj).filter(function(x){return fd.get('l_'+x.id)==='on';}).map(function(x){return x.id;});
