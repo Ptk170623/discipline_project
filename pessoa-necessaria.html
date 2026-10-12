@@ -607,6 +607,7 @@ if(!state||typeof state!=='object')state=exampleState();
 ['cap','proj','reviews','log'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(typeof state.persona!=='string')state.persona='';
 if(!Array.isArray(state.goals))state.goals=[];
+if(!Array.isArray(state.ideas))state.ideas=[];
 if(typeof state.base!=='string')state.base='';
 ['daily','ach'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(!Array.isArray(state.labels))state.labels=['Discipline charge'];
@@ -1004,7 +1005,7 @@ function render(){
   renderModal();
 }
 function topBar(){
-  return '<div class="bar"><div class="brand"><b>Pessoa Necessária</b><span>'+esc(fmtLong(today()))+'</span></div><span class="row" style="flex-wrap:nowrap">'+(canE()?'<button class="btn sm" data-act="share-open">Compartilhar</button>':'')+'<span id="savechip">'+chipHtml()+'</span></span></div>'+
+  return '<div class="bar"><div class="brand"><b>Pessoa Necessária</b><span>'+esc(fmtLong(today()))+'</span></div><span class="row" style="flex-wrap:nowrap">'+(canE()?'<button class="btn sm" data-act="idea-new">+ Ideia</button><button class="btn sm" data-act="share-open">Compartilhar</button>':'')+'<span id="savechip">'+chipHtml()+'</span></span></div>'+
   vaultBanner()+(state.example&&canE()?exampleBanner():'');
 }
 function exampleBanner(){
@@ -1012,7 +1013,7 @@ function exampleBanner(){
   return '<div class="banner"><span>Tudo o que aparece agora é <b>exemplo</b>, para mostrar como o app funciona.</span><button class="btn sm" data-act="clear-ask">Apagar exemplos e começar</button></div>';
 }
 
-function renderHome(){return goalStrip()+tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold();}
+function renderHome(){return goalStrip()+tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold()+ideasFold();}
 /* ---------- tarefas de hoje ---------- */
 function visibleTasks(){return state.daily.filter(function(d){return !d.off;});}
 function tasksToday(){
@@ -1257,6 +1258,23 @@ function goalForm(m){
     '<div class="field"><label>Estudos que levam a este objetivo</label><div class="stack" style="gap:6px;max-height:260px;overflow:auto">'+state.cap.map(chk).join('')+(state.proj.length?'<span class="label" style="margin-top:6px">Projetos</span>'+state.proj.map(chk).join(''):'')+'</div></div>'+
     '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
     (g?(m.confirm?'<div class="confirm">Excluir este objetivo? Os estudos continuam.<div class="row"><button class="btn danger solid sm" type="button" data-act="goal-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="goal-del-ask" style="align-self:flex-start">Excluir objetivo</button>'):'')+'</form>';
+}
+
+/* ---------- ideias para depois ---------- */
+function ideaForm(){
+  var g=state.goals[0];
+  return '<form data-form="idea" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><h2 class="disp">Guardar uma ideia</h2>'+closeBtn()+'</div>'+
+    '<p class="muted" style="font-size:14px">Anote em uma ou duas frases e volte ao trabalho. As ideias ficam guardadas para depois'+(g?' de alcançar o objetivo da Etapa 1 ('+esc(g.name)+')':'')+'. Não mude o app agora.</p>'+
+    '<div class="field"><label for="idea-text">A ideia</label><textarea id="idea-text" name="text" required maxlength="500" style="min-height:110px" autofocus placeholder="O que você pensou?"></textarea></div>'+
+    '<div class="row"><button class="btn primary" type="submit">Guardar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
+}
+function ideasFold(){
+  if(!canE()&&!state.ideas.length)return '';
+  var g=state.goals[0];
+  return '<details class="fold"><summary>Ideias para depois <span class="num muted">'+state.ideas.length+'</span></summary>'+
+    '<p class="muted" style="font-size:13.5px;margin:8px 0">Tem uma ideia? Guarde aqui e volte ao trabalho. Só olho esta lista'+(g?' depois de alcançar o objetivo da Etapa 1 ('+esc(g.name)+')':'')+'.</p>'+
+    (canE()?'<div class="row" style="margin-bottom:8px"><button class="btn sm primary" data-act="idea-new">+ Ideia</button></div>':'')+
+    (state.ideas.length?'<ul class="tlist">'+state.ideas.map(function(x){return '<li class="trow"><span class="tmain" style="cursor:default"><span class="tname"><b style="font-weight:500">'+esc(x.t)+'</b></span><small>'+esc(fmtDow(x.d))+'</small></span>'+(canE()?'<button class="btn ghost sm" data-act="idea-del" data-id="'+x.id+'" aria-label="Apagar ideia">'+I.x+'</button>':'')+'</li>';}).join('')+'</ul>':'<p class="muted" style="font-size:14px">Nenhuma ideia guardada.</p>')+'</details>';
 }
 function renderPersonaPage(){
   var tk=state.daily.filter(function(d){return d.link==='persona';})[0],done=tk&&dailyDates(tk.id)[today()];
@@ -1636,6 +1654,7 @@ function renderModal(){
   else if(m.kind==='guide')h=guideModal();
   else if(m.kind==='tasks')h=tasksModal();
   else if(m.kind==='goal')h=goalForm(m);
+  else if(m.kind==='idea')h=ideaForm();
   if(!h){ui.modal=null;root.innerHTML='';return;}
   root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'||m.kind==='prompt'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
 }
@@ -2280,6 +2299,8 @@ document.addEventListener('click',function(ev){
     case 'guide-config':openModal({kind:'guide'});break;
     case 'tasks-edit':openModal({kind:'tasks'});break;
     case 'goal-new':openModal({kind:'goal'});break;
+    case 'idea-new':openModal({kind:'idea'});break;
+    case 'idea-del':state.ideas=state.ideas.filter(function(x){return x.id!==d.id;});commit();break;
     case 'goal-edit':openModal({kind:'goal',id:d.id});break;
     case 'goal-now':state.goalNow=d.id;commit('Etapa atual definida');break;
     case 'goal-del-ask':ui.modal.confirm=true;renderModal();break;
@@ -2431,6 +2452,9 @@ document.addEventListener('submit',function(ev){
     var igrp=String(fd.get('grp')||'').trim().slice(0,40),isr=srParse(fd.get('sr')),istatus=fd.get('status')==='espera'?'espera':'';
     if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.status=istatus;if(igrp)it.grp=igrp;else delete it.grp;if(isr)it.sr=isr;else delete it.sr;}ui.modal=null;commit('Alterações salvas');}
     else{var nw={id:uid(),name:name,due:due,books:books,area:'prof',status:istatus,parts:[]};if(igrp)nw.grp=igrp;if(isr)nw.sr=isr;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit('Estudo criado. Agora adicione as partes.');}
+  }else if(kind==='idea'){
+    var it0=String(fd.get('text')||'').trim().slice(0,500);if(!it0)return;
+    state.ideas.unshift({id:uid(),t:it0,d:today()});ui.modal=null;commit('Ideia guardada. Volte ao trabalho.');
   }else if(kind==='goal'){
     var gn=String(fd.get('name')||'').trim().slice(0,120);if(!gn)return;
     var gl=state.cap.concat(state.proj).filter(function(x){return fd.get('l_'+x.id)==='on';}).map(function(x){return x.id;});
