@@ -976,7 +976,7 @@ function tasksToday(){
     return '<li class="trow'+(done?' done':'')+'">'+(canE()?'<button type="button" class="gchk" role="checkbox" aria-checked="'+done+'" aria-label="Marcar '+esc(d.name)+'" data-act="guide-daily" data-id="'+d.id+'"></button>':'<span class="gchk static" aria-hidden="true"></span>')+
       '<button type="button" class="tmain" data-act="nav" data-to="'+go+'"><span class="tname"><b>'+esc(d.name)+'</b>'+hidPill(d)+(d.label?'<span class="lchip">'+esc(d.label)+'</span>':'')+'</span>'+(pl?'<small>Hoje: '+esc(pl)+'</small>':'')+'</button></li>';
   }).join('');
-  return '<section class="sec" aria-label="Tarefas de hoje"><div class="sec-head"><h2 class="disp">Hoje</h2><span class="row"><span class="aside">'+esc(fmtLong(t))+(list.length?' · '+n+'/'+list.length:'')+'</span>'+(canE()?'<button class="btn sm" data-act="tasks-edit">Escolher tarefas</button>':'')+'</span></div>'+
+  return '<section class="sec" aria-label="Tarefas de hoje"><div class="sec-head"><h2 class="disp">Hoje</h2><span class="row"><span class="aside">'+esc(fmtLong(t))+(list.length?' · '+n+'/'+list.length:'')+'</span><button class="btn sm" data-act="nav" data-to="persona">Pessoa necessária</button>'+(canE()?'<button class="btn sm" data-act="tasks-edit">Escolher tarefas</button>':'')+'</span></div>'+
     (list.length?'<ul class="tlist">'+rows+'</ul>':'<div class="rev-empty">Nenhuma tarefa na lista.'+(canE()?' Toque em Escolher tarefas.':'')+'</div>')+'</section>';
 }
 /* ---------- revisões de hoje ---------- */
@@ -1155,7 +1155,8 @@ function persona(){
 }
 function renderPersonaPage(){
   var tk=state.daily.filter(function(d){return d.link==='persona';})[0],done=tk&&dailyDates(tk.id)[today()];
-  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+persona()+
+  var ptxt=persona();
+  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+(ptxt||'<div class="rev-empty">O texto da pessoa necessária está protegido pela senha. Desbloqueie no aviso do topo para ler.</div>')+
     (tk&&canE()?'<div class="dhero'+(done?' done':'')+'"><b>'+esc(tk.name)+': '+(done?'feito hoje':'ainda não foi feito hoje')+'</b><button class="btn '+(done?'':'good ')+'sm" data-act="guide-daily" data-id="'+tk.id+'">'+(done?'Desfazer':'Marcar feito hoje')+'</button></div>':'');
 }
 function reviews(){
