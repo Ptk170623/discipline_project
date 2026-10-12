@@ -3,7 +3,7 @@
 App simples, em um único arquivo (`pessoa-necessaria.html`), publicado como artifact do Claude:
 https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
 
-O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.md). O app só cuida de quatro coisas:
+O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.md). O app só cuida de cinco coisas:
 
 1. **Tarefas diárias.** Uma lista curta, com uma caixa para hoje. **Escolher tarefas** deixa só o que você faz de verdade (esconder ou excluir
    várias de uma vez). **Últimos 14 dias** mostra uma grade: toque num quadrado para marcar o que você fez e não marcou, ou para desmarcar.
@@ -13,7 +13,9 @@ O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.
 3. **Calendário.** Cada dia mostra quantas tarefas **necessárias** (rótulo *Necessária*) foram feitas, e quantos trabalhos você fez em estudos
    profissionais (azul) e pessoais (laranja): partes concluídas, revisões e sessões. Em **Ajustar este dia** dá para marcar o que você fez e não marcou,
    ou dizer que algo não estava no plano. O rótulo de cada tarefa aparece na lista e se escolhe em **Escolher tarefas**.
-4. **Datas das revisões.** Ao concluir uma parte, as revisões caem em 1, 7 e 30 dias (dá para mudar). **Lembrei** leva para a próxima data.
+4. **Mapa de objetivos.** Cada objetivo é uma etapa (você trabalha numa de cada vez): as partes de trabalho formam os estudos, e os estudos levam ao objetivo.
+   Cada objetivo tem o **objetivo real** (o que ele dá de verdade) e os estudos ligados. A tela inicial mostra a etapa atual, e a página de cada estudo diz a que objetivo ele leva.
+5. **Datas das revisões.** Ao concluir uma parte, as revisões caem em 1, 7 e 30 dias (dá para mudar). **Lembrei** leva para a próxima data.
    **Não lembrei** volta no dia seguinte. A tela mostra as revisões de hoje e as próximas.
 
 Não há prompts no app por enquanto: você cria os seus fora dele. As notas em markdown e o projeto de aplicação também ficam fora do app.

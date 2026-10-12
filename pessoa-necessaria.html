@@ -509,6 +509,51 @@ span.mxc{cursor:default}
 .mk.p{background:var(--accent);color:var(--accent-ink)}
 .mk.e{background:var(--dly);color:#fff}
 .legend .mk{margin-right:4px}
+/* mapa de objetivos */
+.goalstrip{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 16px;gap:6px}
+.gtitle{font-size:clamp(22px,5vw,30px)}
+.greal{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.leads{font-size:13.5px;color:var(--muted)}
+.linkb{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}
+details.msec{border:1px solid var(--line);border-radius:20px;background:var(--surface);padding:12px 14px;display:block}
+details.msec.cur{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+details.msec summary{font-size:16px;font-weight:700}
+.mstage{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-right:6px}
+.gmap{display:flex;flex-direction:column;gap:12px;margin:12px 0 6px}
+.mlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mwait{margin:10px 0 4px}
+.mrow.wait{opacity:.7}
+.mmain{width:100%;display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer;color:inherit;font:inherit}
+.mmain:hover{border-color:var(--accent)}
+.mbar{display:flex;gap:1px;height:12px;min-width:0;width:100%}
+.mbar .pt{flex:1 1 0;min-width:1px;border-radius:1px;background:var(--line)}
+.mbar .pt.on{background:var(--ok)}
+.mbar .pt.nx{background:var(--accent)}
+.mbar.empty{border:1px dashed var(--line);border-radius:3px;background:transparent}
+.mname{display:flex;flex-direction:column;min-width:0}
+.mname b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.mname small{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.mgoal{display:flex;flex-direction:column;gap:8px;background:var(--accent-soft);border-radius:16px;padding:14px;order:-1}
+.gmap:not(.cur) .mgoal{background:var(--surface-2)}
+.mgn{font-size:20px}
+.mreal{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.mnote{font-size:13.5px;margin:4px 0 8px}
+@media (min-width:720px){
+  .gmap{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(200px,280px);align-items:center;gap:0}
+  .mcol{position:relative;padding-right:0}
+  .mmain{flex-direction:row;align-items:center;gap:12px}
+  .mmain .mbar{flex:0 0 42%;width:auto}
+  .mmain .mname{flex:1}
+  .mlist{border-right:2px solid var(--line);padding-right:14px}
+  .gmap.cur .mlist{border-right-color:var(--accent)}
+  .mrow{position:relative}
+  .mrow::after{content:"";position:absolute;right:-14px;top:50%;width:14px;height:2px;background:var(--line)}
+  .gmap.cur .mrow::after{background:var(--accent)}
+  .gmap::before{content:"";grid-column:2;grid-row:1;height:2px;background:var(--line);align-self:center}
+  .gmap.cur::before{background:var(--accent)}
+  .mcol{grid-column:1;grid-row:1}
+  .mgoal{grid-column:3;grid-row:1;order:0;align-self:center}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <div id="app"></div>
@@ -561,6 +606,7 @@ try{var raw=document.getElementById('pn-data').textContent.trim();if(raw&&raw!==
 if(!state||typeof state!=='object')state=exampleState();
 ['cap','proj','reviews','log'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(typeof state.persona!=='string')state.persona='';
+if(!Array.isArray(state.goals))state.goals=[];
 if(typeof state.base!=='string')state.base='';
 ['daily','ach'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(!Array.isArray(state.labels))state.labels=['Discipline charge'];
@@ -950,6 +996,7 @@ function render(){
   if(r.indexOf('item:')===0){var p=r.split(':'),pk=p[1]==='proj'?'proj':'cap';var it=findItem(pk,p[2]);html=it?renderItem(pk,it):renderChooser(pk);if(!it)ui.route='list:'+pk;}
   else if(r==='charts'){html=renderCharts();}
   else if(r==='persona'){html=renderPersonaPage();}
+  else if(r==='map'){html=renderMap();}
   else if(r.indexOf('daily:')===0){var dd=dailyById(r.slice(6));if(dd)html=renderDaily(dd);else{ui.route='home';html=renderHome();}}
   else if(r.indexOf('list:')===0){var q=r.split(':'),lk=q[1]==='proj'?'proj':'cap';html=q[2]?renderList(lk,q[2]==='pess'?'pess':'prof'):renderChooser(lk);}
   else {ui.route='home';html=renderHome();}
@@ -965,7 +1012,7 @@ function exampleBanner(){
   return '<div class="banner"><span>Tudo o que aparece agora é <b>exemplo</b>, para mostrar como o app funciona.</span><button class="btn sm" data-act="clear-ask">Apagar exemplos e começar</button></div>';
 }
 
-function renderHome(){return tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold();}
+function renderHome(){return goalStrip()+tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold();}
 /* ---------- tarefas de hoje ---------- */
 function visibleTasks(){return state.daily.filter(function(d){return !d.off;});}
 function tasksToday(){
@@ -1153,6 +1200,64 @@ function persona(){
   return '<section class="persona"><div class="persona-head"><h1 class="disp">Pessoa <span class="hl">necessária</span></h1>'+
     (canE()&&!ui.editPersona?'<button class="btn sm" data-act="persona-edit">Editar texto</button>':'')+'</div>'+body+'</section>';
 }
+
+/* ---------- objetivos: o mapa (etapas) ---------- */
+function goalItems(g){
+  var a=[];(g.links||[]).forEach(function(id){
+    var k=state.cap.some(function(x){return x.id===id;})?'cap':state.proj.some(function(x){return x.id===id;})?'proj':null;
+    if(k)a.push({k:k,it:findItem(k,id)});
+  });
+  return a;
+}
+function goalsOf(it){return state.goals.filter(function(g){return (g.links||[]).indexOf(it.id)>=0;});}
+function goalNow(){return state.goals.find(function(g){return g.id===state.goalNow;})||state.goals[0]||null;}
+function goalStats(g){var t=0,d=0;goalItems(g).forEach(function(x){t+=x.it.parts.length;d+=x.it.parts.filter(function(p){return p.done;}).length;});return {t:t,d:d,n:goalItems(g).length};}
+function goalStrip(){
+  var g=goalNow();
+  if(!g)return canE()?'<section class="sec goalstrip" aria-label="Objetivo"><div class="sec-head"><h2 class="disp">Objetivo</h2><button class="btn sm primary" data-act="nav" data-to="map">Criar o mapa</button></div><p class="muted" style="font-size:14px">Dê um objetivo ao que você estuda: o mapa liga cada estudo à pessoa que você precisa ser.</p></section>':'';
+  var i=state.goals.indexOf(g),st=goalStats(g);
+  return '<section class="sec goalstrip" aria-label="Objetivo"><div class="sec-head"><span class="label">Etapa '+(i+1)+' · você está aqui</span><button class="btn sm" data-act="nav" data-to="map">Ver o mapa</button></div>'+
+    '<h2 class="disp gtitle">'+esc(g.name)+'</h2>'+(g.real?'<p class="muted greal">'+esc(g.real)+'</p>':'')+
+    '<span class="muted" style="font-size:12.5px">'+st.n+' '+plural(st.n,'estudo','estudos')+' · '+st.d+' de '+st.t+' partes concluídas</span></section>';
+}
+function partsBar(it){
+  if(!it.parts.length)return '<span class="mbar empty" aria-hidden="true"></span>';
+  var nx=false;
+  return '<span class="mbar" role="img" aria-label="'+it.parts.filter(function(p){return p.done;}).length+' de '+it.parts.length+' partes concluídas">'+it.parts.map(function(p){var c='pt';if(p.done)c+=' on';else if(!nx){c+=' nx';nx=true;}return '<i class="'+c+'"></i>';}).join('')+'</span>';
+}
+function mapRow(x){
+  var it=x.it,done=it.parts.filter(function(p){return p.done;}).length,np=nextPart(it);
+  return '<li class="mrow'+(it.status==='espera'?' wait':'')+'"><button type="button" class="mmain" data-act="nav" data-to="item:'+x.k+':'+it.id+'">'+partsBar(it)+
+    '<span class="mname"><b>'+esc(it.name)+'</b><small>'+(it.parts.length?done+' de '+it.parts.length+' partes'+(np&&it.status!=='espera'?' · próxima: '+esc(np.name):''):'sem partes ainda')+(it.status==='espera'?' · em espera':'')+'</small></span></button></li>';
+}
+function goalSection(g,i){
+  var cur=goalNow()===g,st=goalStats(g),items=goalItems(g);
+  var act=items.filter(function(x){return x.it.status!=='espera';}),wait=items.filter(function(x){return x.it.status==='espera';});
+  var pct=st.t?Math.round(st.d/st.t*100):0;
+  var body='<div class="gmap'+(cur?' cur':'')+'"><div class="mcol"><ul class="mlist">'+act.map(mapRow).join('')+(wait.length?'</ul><p class="label mwait">Em espera</p><ul class="mlist">'+wait.map(mapRow).join(''):'')+'</ul>'+(items.length?'':'<p class="muted" style="font-size:14px">Nenhum estudo ligado a este objetivo ainda.'+(canE()?' Toque em Editar objetivo.':'')+'</p>')+'</div>'+
+    '<div class="mgoal"><span class="label">Objetivo</span><b class="disp mgn">'+esc(g.name)+'</b>'+(g.real?'<span class="mreal"><span class="label">Objetivo real</span>'+esc(g.real)+'</span>':'')+
+    '<span class="bar-track" role="img" aria-label="'+pct+'% das partes"><span class="bar-fill" style="width:'+pct+'%"></span></span><small class="muted">'+st.d+' de '+st.t+' partes · '+st.n+' '+plural(st.n,'estudo','estudos')+'</small></div></div>'+
+    (g.note?'<p class="muted mnote">'+esc(g.note)+'</p>':'')+
+    (canE()?'<div class="row"><button class="btn sm" data-act="goal-edit" data-id="'+g.id+'">Editar objetivo</button>'+(cur?'':'<button class="btn sm" data-act="goal-now" data-id="'+g.id+'">Estou nesta etapa</button>')+'</div>':'');
+  return '<details class="fold msec'+(cur?' cur':'')+'"'+(cur?' open':'')+'><summary><span class="mstage">Etapa '+(i+1)+'</span> '+esc(g.name)+(cur?' <span class="pill" style="margin-left:6px">você está aqui</span>':'')+'</summary>'+body+'</details>';
+}
+function renderMap(){
+  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
+    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:6px"><span class="label">O que eu preciso alcançar</span><h1 class="disp">Mapa</h1></div>'+(canE()?'<button class="btn sm primary" data-act="goal-new">+ Objetivo</button>':'')+'</div>'+
+    '<p class="muted" style="font-size:14px">As partes de trabalho formam os estudos, e os estudos levam ao objetivo (no computador, da esquerda para a direita; no celular, o objetivo fica em cima). Cada etapa é um objetivo; você trabalha numa de cada vez.</p>'+
+    (state.goals.length?state.goals.map(goalSection).join(''):'<div class="empty-state"><p>Nenhum objetivo ainda.</p>'+(canE()?'<button class="btn primary" data-act="goal-new">Criar o primeiro objetivo</button>':'')+'</div>');
+}
+function goalForm(m){
+  var g=m.id?state.goals.find(function(x){return x.id===m.id;}):null;
+  function chk(x){return '<label class="check"><input type="checkbox" name="l_'+x.id+'"'+(g&&(g.links||[]).indexOf(x.id)>=0?' checked':'')+'> <span>'+esc(x.name)+(x.status==='espera'?' <span class="muted">(em espera)</span>':'')+'</span></label>';}
+  return '<form data-form="goal" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><h2 class="disp">'+(g?'Editar objetivo':'Novo objetivo')+'</h2>'+closeBtn()+'</div>'+
+    '<div class="field"><label for="go-name">Objetivo</label><input type="text" id="go-name" name="name" required maxlength="120" value="'+esc(g?g.name:'')+'" placeholder="Ex.: Trabalho remoto" autofocus></div>'+
+    '<div class="field"><label for="go-real">Objetivo real</label><textarea id="go-real" name="real" style="min-height:90px" placeholder="O que esse objetivo realmente me dá">'+esc(g?g.real||'':'')+'</textarea></div>'+
+    '<div class="field"><label for="go-note">Detalhes (opcional)</label><textarea id="go-note" name="note" style="min-height:70px" placeholder="Outras características, o que fica para depois…">'+esc(g?g.note||'':'')+'</textarea></div>'+
+    '<div class="field"><label>Estudos que levam a este objetivo</label><div class="stack" style="gap:6px;max-height:260px;overflow:auto">'+state.cap.map(chk).join('')+(state.proj.length?'<span class="label" style="margin-top:6px">Projetos</span>'+state.proj.map(chk).join(''):'')+'</div></div>'+
+    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div>'+
+    (g?(m.confirm?'<div class="confirm">Excluir este objetivo? Os estudos continuam.<div class="row"><button class="btn danger solid sm" type="button" data-act="goal-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="goal-del-ask" style="align-self:flex-start">Excluir objetivo</button>'):'')+'</form>';
+}
 function renderPersonaPage(){
   var tk=state.daily.filter(function(d){return d.link==='persona';})[0],done=tk&&dailyDates(tk.id)[today()];
   var ptxt=persona();
@@ -1240,7 +1345,7 @@ function renderItem(k,it){
       '<button type="button" class="pmain" data-act="part-open" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"><span class="pnum num">'+(i+1)+'</span><span class="pbody"><b>'+esc(p.name)+'</b><small'+(late?' class="lt"':'')+'>'+st+(late?' · atrasada':'')+'</small></span></button></li>';
   }).join('');
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+done+' de '+total+' '+plural(total,'parte','partes')+' concluídas</span></div>'+
+   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+done+' de '+total+' '+plural(total,'parte','partes')+' concluídas</span>'+(goalsOf(it).length?'<span class="leads">Leva a: '+goalsOf(it).map(function(g){return '<button type="button" class="linkb" data-act="nav" data-to="map">'+esc(g.name)+'</button>';}).join(', ')+'</span>':'')+'</div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    '<div class="bar-track" role="img" aria-label="'+pct+'% das partes concluídas"><div class="bar-fill'+(pct===100?' ok':'')+'" style="width:'+pct+'%"></div></div>'+
    (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
@@ -1530,6 +1635,7 @@ function renderModal(){
   else if(m.kind==='share')h=shareModal();
   else if(m.kind==='guide')h=guideModal();
   else if(m.kind==='tasks')h=tasksModal();
+  else if(m.kind==='goal')h=goalForm(m);
   if(!h){ui.modal=null;root.innerHTML='';return;}
   root.innerHTML='<div class="overlay" data-act="overlay"><div class="sheet'+(m.kind==='import'||m.kind==='prompt'?' wide':'')+'" role="dialog" aria-modal="true">'+h+'</div></div>';
 }
@@ -2173,6 +2279,11 @@ document.addEventListener('click',function(ev){
     case 'cal-day':ui.sel=d.d;if(d.d.slice(0,7)!==ui.cal)ui.cal=d.d.slice(0,7);render();break;
     case 'guide-config':openModal({kind:'guide'});break;
     case 'tasks-edit':openModal({kind:'tasks'});break;
+    case 'goal-new':openModal({kind:'goal'});break;
+    case 'goal-edit':openModal({kind:'goal',id:d.id});break;
+    case 'goal-now':state.goalNow=d.id;commit('Etapa atual definida');break;
+    case 'goal-del-ask':ui.modal.confirm=true;renderModal();break;
+    case 'goal-del-yes':{var gid=ui.modal.id;state.goals=state.goals.filter(function(x){return x.id!==gid;});if(state.goalNow===gid)state.goalNow=state.goals[0]?state.goals[0].id:'';ui.modal=null;commit('Objetivo excluído');break;}
     case 'day-toggle':{var dt=dailyById(d.id);if(!dt||d.d>today())break;var had=state.log.some(function(e){return e.t==='daily'&&e.item===dt.id&&e.d===d.d;});
       if(had)state.log=state.log.filter(function(e){return !(e.t==='daily'&&e.item===dt.id&&e.d===d.d);});
       else state.log.push({id:uid(),d:d.d,t:'daily',k:'daily',item:dt.id,part:null,iname:dt.name,pname:dt.name,area:areaOf(dt),retro:d.d===today()?0:1});
@@ -2320,6 +2431,13 @@ document.addEventListener('submit',function(ev){
     var igrp=String(fd.get('grp')||'').trim().slice(0,40),isr=srParse(fd.get('sr')),istatus=fd.get('status')==='espera'?'espera':'';
     if(m.id){var it=findItem(m.k,m.id);if(it){it.name=name;it.due=due;it.books=books;it.status=istatus;if(igrp)it.grp=igrp;else delete it.grp;if(isr)it.sr=isr;else delete it.sr;}ui.modal=null;commit('Alterações salvas');}
     else{var nw={id:uid(),name:name,due:due,books:books,area:'prof',status:istatus,parts:[]};if(igrp)nw.grp=igrp;if(isr)nw.sr=isr;state[m.k].push(nw);ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit('Estudo criado. Agora adicione as partes.');}
+  }else if(kind==='goal'){
+    var gn=String(fd.get('name')||'').trim().slice(0,120);if(!gn)return;
+    var gl=state.cap.concat(state.proj).filter(function(x){return fd.get('l_'+x.id)==='on';}).map(function(x){return x.id;});
+    var gvals={name:gn,real:String(fd.get('real')||'').trim().slice(0,600),note:String(fd.get('note')||'').trim().slice(0,800),links:gl};
+    if(m.id){var gg=state.goals.find(function(x){return x.id===m.id;});if(gg){gg.name=gvals.name;gg.real=gvals.real;gg.note=gvals.note;gg.links=gvals.links;}}
+    else{gvals.id=uid();state.goals.push(gvals);if(!state.goalNow)state.goalNow=gvals.id;}
+    ui.modal=null;commit('Objetivo salvo');
   }else if(kind==='tasks'){
     var keep=[];
     state.daily.forEach(function(d){
