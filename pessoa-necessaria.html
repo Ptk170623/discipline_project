@@ -538,6 +538,11 @@ details.msec summary{font-size:16px;font-weight:700}
 .mgn{font-size:20px}
 .mreal{display:flex;flex-direction:column;gap:2px;font-size:14px}
 .mnote{font-size:13.5px;margin:4px 0 8px}
+.curstrip{background:var(--surface);border:2px solid var(--accent);border-radius:20px;padding:14px 16px;gap:10px}
+.curstep{display:flex;flex-direction:column;gap:3px;background:var(--accent-soft);border-radius:14px;padding:10px 12px}
+.curstep b{font-size:15px;overflow-wrap:anywhere}
+.curstep p{font-size:13.5px;overflow-wrap:anywhere;margin:2px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.curstrip .mbar{height:10px}
 .idesc{font-size:14px;margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .nbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
 .mnode.real .nbox{border-color:var(--accent)}
@@ -617,6 +622,7 @@ if(!state||typeof state!=='object')state=exampleState();
 if(typeof state.persona!=='string')state.persona='';
 if(!Array.isArray(state.goals))state.goals=[];
 if(!Array.isArray(state.ideas))state.ideas=[];
+if(typeof state.cur!=='string')state.cur='';
 if(typeof state.base!=='string')state.base='';
 ['daily','ach'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[];});
 if(!Array.isArray(state.labels))state.labels=['Discipline charge'];
@@ -1022,7 +1028,7 @@ function exampleBanner(){
   return '<div class="banner"><span>Tudo o que aparece agora é <b>exemplo</b>, para mostrar como o app funciona.</span><button class="btn sm" data-act="clear-ask">Apagar exemplos e começar</button></div>';
 }
 
-function renderHome(){return goalStrip()+tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold()+ideasFold();}
+function renderHome(){return curStrip()+goalStrip()+tasksToday()+reviewsToday()+studiesList()+matrixSection()+calendar()+upcomingFold()+ideasFold();}
 /* ---------- tarefas de hoje ---------- */
 function visibleTasks(){return state.daily.filter(function(d){return !d.off;});}
 function tasksToday(){
@@ -1209,6 +1215,24 @@ function persona(){
   else body='<div class="ruled empty">'+(canE()?'Escreva aqui quem você precisa se tornar e por que esse estudo é necessário. Este texto é para ler todos os dias.':'Ainda sem descrição.')+'</div>';
   return '<section class="persona"><div class="persona-head"><h1 class="disp">Pessoa <span class="hl">necessária</span></h1>'+
     (canE()&&!ui.editPersona?'<button class="btn sm" data-act="persona-edit">Editar texto</button>':'')+'</div>'+body+'</section>';
+}
+
+/* ---------- projeto de agora ---------- */
+function curProj(){return state.proj.find(function(x){return x.id===state.cur;})||null;}
+function curStrip(){
+  var it=curProj();
+  if(!it)return state.proj.length&&canE()?'<section class="sec curstrip" aria-label="Projeto de agora"><div class="sec-head"><h2 class="disp">Projeto de agora</h2><button class="btn sm primary" data-act="cur-pick">Escolher o projeto</button></div><p class="muted" style="font-size:14px">Escolha o projeto em que você está trabalhando agora. Ele fica aqui no topo, com o passo atual.</p></section>':'';
+  var n=it.parts.length,d=it.parts.filter(function(p){return p.done;}).length,np=nextPart(it),pct=n?Math.round(d/n*100):0;
+  return '<section class="sec curstrip" aria-label="Projeto de agora"><div class="sec-head"><span class="label">Projeto de agora</span>'+(canE()?'<button class="btn sm ghost" data-act="cur-pick">Trocar</button>':'')+'</div>'+
+    '<h2 class="disp gtitle">'+esc(it.name)+'</h2>'+
+    (n?'<span class="mbar" role="img" aria-label="'+d+' de '+n+' passos">'+it.parts.map(function(p){var c='pt';if(p.done)c+=' on';else if(p===np)c+=' nx';return '<i class="'+c+'"></i>';}).join('')+'</span>':'')+
+    (np?'<div class="curstep"><span class="label">Passo '+(it.parts.indexOf(np)+1)+' de '+n+(d?' · '+d+' '+plural(d,'feito','feitos'):'')+'</span><b>'+esc(np.name)+'</b>'+(np.note?'<p class="muted">'+esc(np.note)+'</p>':'')+'</div>':(n?'<p class="muted" style="font-size:14px">Todos os passos concluídos.</p>':'<p class="muted" style="font-size:14px">Sem passos ainda. Abra o projeto e adicione.</p>'))+
+    '<div class="row"><button class="btn sm primary" data-act="nav" data-to="item:proj:'+it.id+'">Abrir o projeto</button></div></section>';
+}
+function curPickForm(){
+  return '<form data-form="curpick" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><h2 class="disp">Projeto de agora</h2>'+closeBtn()+'</div>'+
+    '<div class="radios">'+state.proj.map(function(x){return '<label><input type="radio" name="cur" value="'+x.id+'"'+(state.cur===x.id?' checked':'')+'> <span>'+esc(x.name)+'</span></label>';}).join('')+'<label><input type="radio" name="cur" value=""'+(state.cur?'':' checked')+'> <span>Nenhum por enquanto</span></label></div>'+
+    '<div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 
 /* ---------- objetivos: o mapa (etapas) ---------- */
@@ -1405,7 +1429,7 @@ function renderItem(k,it){
    '<div class="bar-track" role="img" aria-label="'+pct+'% das partes concluídas"><div class="bar-fill'+(pct===100?' ok':'')+'" style="width:'+pct+'%"></div></div>'+
    (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
    ((fc&&fc.end)||it.due?'<div class="planrow"><span>'+(fc&&fc.end?'<b>Última repetição prevista:</b> <b class="num">'+fmtY(fc.end)+'</b>':'')+'</span><span>'+(it.due?'Prazo: <b class="num">'+fmtY(it.due)+'</b>'+(fc&&fc.end&&fc.end>it.due?' <b style="color:var(--bad)">('+diff(it.due,fc.end)+' dias depois)</b>':''):'')+'</span></div>':'')+
-   '<div class="sec-head"><h2 class="disp" style="font-size:20px">Partes, na ordem</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
+   '<div class="sec-head"><h2 class="disp" style="font-size:20px">'+(k==='proj'?'Passos, na ordem':'Partes, na ordem')+'</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Parte</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Várias</button><button class="btn sm" data-act="imp-open" data-k="'+k+'" data-into="'+it.id+'">Importar</button></span>':'')+'</div>'+
    (rows?'<div class="aibar"><span class="books">Dar a divisão em partes de contexto ao Projeto do Claude: copie o texto (ou baixe o arquivo) e cole ou anexe no Projeto. Tem a ordem das partes, as fontes e as descrições.</span><span class="row"><button class="btn sm" data-act="pr-parts" data-k="'+k+'" data-id="'+it.id+'">Copiar partes</button>'+(dl?'<button class="btn sm" data-act="parts-dl" data-k="'+k+'" data-id="'+it.id+'">Baixar .txt</button>':'')+'</span></div>':'')+
    (rows?'<ul class="plist2">'+rows+'</ul><p class="muted" style="font-size:13px">A caixa marca a parte como concluída e começa as revisões. Toque no nome para ver a descrição.</p>':'<div class="empty-state"><p>Ainda sem partes. Use + Parte, + Várias (uma por linha) ou Importar.</p></div>');
 }
@@ -1690,6 +1714,7 @@ function renderModal(){
   else if(m.kind==='share')h=shareModal();
   else if(m.kind==='guide')h=guideModal();
   else if(m.kind==='tasks')h=tasksModal();
+  else if(m.kind==='curpick')h=curPickForm();
   else if(m.kind==='goal')h=goalForm(m);
   else if(m.kind==='node')h=nodeForm(m);
   else if(m.kind==='idea')h=ideaForm();
@@ -2339,6 +2364,7 @@ document.addEventListener('click',function(ev){
     case 'guide-config':openModal({kind:'guide'});break;
     case 'tasks-edit':openModal({kind:'tasks'});break;
     case 'goal-new':openModal({kind:'goal'});break;
+    case 'cur-pick':openModal({kind:'curpick'});break;
     case 'idea-new':openModal({kind:'idea'});break;
     case 'idea-del':state.ideas=state.ideas.filter(function(x){return x.id!==d.id;});commit();break;
     case 'goal-edit':openModal({kind:'goal',id:d.id});break;
@@ -2399,7 +2425,7 @@ document.addEventListener('click',function(ev){
     case 'item-edit':openModal({kind:'item',k:d.k,id:d.id});break;
     case 'item-del-ask':case 'part-del-ask':ui.modal.confirm=true;renderModal();break;
     case 'del-no':ui.modal.confirm=false;renderModal();break;
-    case 'item-del-yes':{var m=ui.modal,it=findItem(m.k,m.id);if(it){var ids=it.parts.map(function(p){return p.id;});state[m.k]=state[m.k].filter(function(i){return i!==it;});state.reviews=state.reviews.filter(function(r){return ids.indexOf(r.part)<0;});}ui.modal=null;ui.route='list:'+m.k+(it?':'+areaOf(it):'');commit('Excluído');break;}
+    case 'item-del-yes':{var m=ui.modal,it=findItem(m.k,m.id);if(it){var ids=it.parts.map(function(p){return p.id;});state[m.k]=state[m.k].filter(function(i){return i!==it;});if(state.cur===it.id)state.cur='';state.reviews=state.reviews.filter(function(r){return ids.indexOf(r.part)<0;});}ui.modal=null;ui.route='list:'+m.k+(it?':'+areaOf(it):'');commit('Excluído');break;}
     case 'part-new':openModal({kind:'partform',k:d.k,item:d.item});break;
     case 'part-bulk':openModal({kind:'bulk',k:d.k,item:d.item});break;
     case 'part-open':openModal({kind:'part',k:d.k,item:d.item,id:d.id});break;
@@ -2508,6 +2534,8 @@ document.addEventListener('submit',function(ev){
     if(m.id){var ne=ng2.nodes.find(function(x){return x.id===m.id;});if(ne){ne.kind=nv.kind;ne.name=nv.name;ne.desc=nv.desc;ne.links=nv.links;ne.tasks=nv.tasks;}}
     else{nv.id=uid();ng2.nodes.push(nv);}
     ui.modal=null;commit('Salvo');
+  }else if(kind==='curpick'){
+    var cv=String(fd.get('cur')||'');state.cur=state.proj.some(function(x){return x.id===cv;})?cv:'';ui.modal=null;commit('Projeto de agora definido');
   }else if(kind==='goal'){
     var gn=String(fd.get('name')||'').trim().slice(0,120);if(!gn)return;
     var gl=state.cap.concat(state.proj).filter(function(x){return fd.get('l_'+x.id)==='on';}).map(function(x){return x.id;});

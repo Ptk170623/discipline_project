@@ -13,10 +13,11 @@ O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.
 3. **Calendário.** Cada dia mostra quantas tarefas **necessárias** (rótulo *Necessária*) foram feitas, e quantos trabalhos você fez em estudos
    profissionais (azul) e pessoais (laranja): partes concluídas, revisões e sessões. Em **Ajustar este dia** dá para marcar o que você fez e não marcou,
    ou dizer que algo não estava no plano. O rótulo de cada tarefa aparece na lista e se escolhe em **Escolher tarefas**.
-4. **Mapa de objetivos.** Cada objetivo é uma etapa (você trabalha numa de cada vez): as partes de trabalho formam os estudos, e os estudos levam ao objetivo. Uma etapa também pode ter capacidade real e outras características (como a presença no LinkedIn), cada uma com descrição e os estudos, projetos e tarefas que a sustentam.
+4. **Projeto de agora.** No topo da tela inicial: o projeto em que estou trabalhando, com a barra de passos e o passo atual.
+5. **Mapa de objetivos.** Cada objetivo é uma etapa (você trabalha numa de cada vez): as partes de trabalho formam os estudos, e os estudos levam ao objetivo. Uma etapa também pode ter capacidade real e outras características (como a presença no LinkedIn), cada uma com descrição e os estudos, projetos e tarefas que a sustentam.
    Cada objetivo tem o **objetivo real** (o que ele dá de verdade) e os estudos ligados. A tela inicial mostra a etapa atual, e a página de cada estudo diz a que objetivo ele leva.
-5. **Ideias para depois.** O botão **+ Ideia** (no alto) guarda uma ideia em uma ou duas frases, e a lista fica no fim da tela inicial. Elas esperam até o objetivo da Etapa 1: o app não muda antes disso.
-6. **Datas das revisões.** Ao concluir uma parte, as revisões caem em 1, 7 e 30 dias (dá para mudar). **Lembrei** leva para a próxima data.
+6. **Ideias para depois.** O botão **+ Ideia** (no alto) guarda uma ideia em uma ou duas frases, e a lista fica no fim da tela inicial. Elas esperam até o objetivo da Etapa 1: o app não muda antes disso.
+7. **Datas das revisões.** Ao concluir uma parte, as revisões caem em 1, 7 e 30 dias (dá para mudar). **Lembrei** leva para a próxima data.
    **Não lembrei** volta no dia seguinte. A tela mostra as revisões de hoje e as próximas.
 
 Não há prompts no app por enquanto: você cria os seus fora dele. As notas em markdown e o projeto de aplicação também ficam fora do app.
