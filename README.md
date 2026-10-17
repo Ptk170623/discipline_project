@@ -3,24 +3,36 @@
 App simples, em um único arquivo (`pessoa-necessaria.html`), publicado como artifact do Claude:
 https://claude.ai/artifact/EqeFFPLngiz23JeGZaRkwR
 
-O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.md). O app só cuida de seis coisas:
+O método de estudo está em [`metodo/metodo-simples.md`](metodo/metodo-simples.md).
 
-1. **Tarefas diárias.** Uma lista curta, com uma caixa para hoje. **Escolher tarefas** deixa só o que você faz de verdade (esconder ou excluir
-   várias de uma vez). **Últimos 14 dias** mostra uma grade: toque num quadrado para marcar o que você fez e não marcou, ou para desmarcar.
-2. **Estudos e a ordem das partes.** Cada estudo tem partes na ordem, e cada parte tem uma descrição (o grupo de conceitos). A caixa da parte marca
-   como concluída. Adicione partes uma a uma, várias de uma vez (uma por linha) ou por **Importar**. **Copiar partes** e **Baixar .txt** (na página do estudo)
-   exportam a divisão em partes, com a ordem, as fontes e as descrições, para dar de contexto ao Projeto do Claude.
-3. **Calendário.** Cada dia mostra quantas tarefas **necessárias** (rótulo *Necessária*) foram feitas, e quantos trabalhos você fez em estudos
-   profissionais (azul) e pessoais (laranja): partes concluídas, revisões e sessões. Em **Ajustar este dia** dá para marcar o que você fez e não marcou,
-   ou dizer que algo não estava no plano. O rótulo de cada tarefa aparece na lista e se escolhe em **Escolher tarefas**.
-4. **Projeto de agora.** No topo da tela inicial: o projeto em que estou trabalhando, com a barra de passos e o passo atual.
-5. **Mapa de objetivos.** Cada objetivo é uma etapa (você trabalha numa de cada vez): as partes de trabalho formam os estudos, e os estudos levam ao objetivo. Uma etapa também pode ter capacidade real e outras características (como a presença no LinkedIn), cada uma com descrição e os estudos, projetos e tarefas que a sustentam.
-   Cada objetivo tem o **objetivo real** (o que ele dá de verdade) e os estudos ligados. A tela inicial mostra a etapa atual, e a página de cada estudo diz a que objetivo ele leva.
-6. **Ideias para depois.** O botão **+ Ideia** (no alto) guarda uma ideia em uma ou duas frases, e a lista fica no fim da tela inicial. Elas esperam até o objetivo da Etapa 1: o app não muda antes disso.
-7. **Datas das revisões.** Ao concluir uma parte, as revisões caem em 1, 7 e 30 dias (dá para mudar). **Lembrei** leva para a próxima data.
-   **Não lembrei** volta no dia seguinte. A tela mostra as revisões de hoje e as próximas.
+## A estrutura
 
-Não há prompts no app por enquanto: você cria os seus fora dele. As notas em markdown e o projeto de aplicação também ficam fora do app.
+De cima para baixo, para objetivos profissionais e pessoais:
+
+**objetivo → objetivo real → projetos → capacidades de cada projeto → trabalho do dia (um estudo ou uma tarefa)**
+
+- **Objetivo e objetivo real.** Por exemplo, *Trabalho remoto*, e o objetivo real: tempo e dinheiro. Os objetivos profissionais são etapas (uma de
+  cada vez); os pessoais (como *Saúde* e *Cristianismo*) ficam à parte.
+- **Projeto.** Tem passos na ordem e uma lista das capacidades que exige. O **Projeto de agora** fica no topo da tela inicial.
+- **Capacidade.** Algo que preciso saber fazer (por exemplo, *Estatística*, *SQL / Data Modeling*, *English Speaking*, *Corpo forte e saudável*).
+  Uma capacidade pode servir a mais de um projeto, e um estudo pode desenvolver mais de uma capacidade.
+- **Estudo.** Um livro ou curso, com os **capítulos** na ordem. Ao terminar de ler um capítulo, marco a caixa: as revisões caem em 1, 7 e 30 dias.
+  **Lembrei** leva para a próxima data; **Não lembrei** volta no dia seguinte (limite de 2 revisões nos dias úteis e 6 no fim de semana).
+  A revisão é feita fora do app (explicar de memória, com a leitura do livro): o app só calcula as datas.
+- **Tarefa diária.** Uma lista curta, com uma caixa para hoje, rótulo e as tarefas *Necessárias*. Uma tarefa pode desenvolver uma capacidade.
+
+## O que o app mostra
+
+1. **Projeto de agora**, no topo, com a barra de passos e o passo atual.
+2. **Objetivo atual** (a etapa em que estou).
+3. **Hoje**: as tarefas do dia, com o botão da *pessoa necessária*, e as **Revisões de hoje**.
+4. **Estudos**, em grupos, com a barra de capítulos e o próximo capítulo.
+5. **Últimos 14 dias**: uma grade para marcar o que fiz e não marquei.
+6. **Calendário**: por dia, quantas tarefas necessárias foram feitas e quanto trabalho houve em estudos profissionais e pessoais. **Ajustar este dia** corrige o passado.
+7. **Mapa**: a estrutura inteira, em árvore (objetivo, projetos, capacidades, estudos e tarefas). Em cada capacidade há uma página com seus estudos e tarefas.
+8. **Ideias para depois**: o botão **+ Ideia** guarda a ideia e o app não muda por causa dela.
+
+Não há prompts nem flashcards no app: eles são feitos fora dele. As notas em markdown ficam no Obsidian.
 
 ## O que saiu da tela
 

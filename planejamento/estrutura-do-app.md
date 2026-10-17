@@ -1,4 +1,6 @@
-# Estrutura que eu quero no app (anotado em 15/10, caminhando)
+# Estrutura do app (anotado em 15/10; feita em 17/10)
+
+> Atualização: a estrutura abaixo já está no app. O resumo atual está no `README.md`.
 
 Para olhar no fim de semana e decidir o que entra e como organizar. Nos dias úteis só anoto.
 
