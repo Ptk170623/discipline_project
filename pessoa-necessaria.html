@@ -616,6 +616,8 @@ function fmtLong(s){var d=parse(s);return DIAS[d.getDay()]+', '+d.getDate()+' de
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function plural(n,a,b){return n===1?a:b;}
+function readOf(it){return it.parts.filter(function(p){return p.done;});}
+function nextRevOf(it){var best=null;it.parts.forEach(function(p){var r=reviewOf(p.id);if(r&&r.due&&(!best||r.due<best.due))best=r;});return best;}
 function un(k,n){return k==='proj'?plural(n,'passo','passos'):plural(n,'capítulo','capítulos');}
 var KIND={cap:{one:'estudo',many:'Estudos',One:'Estudo'},proj:{one:'projeto',many:'Projetos',One:'Projeto'}};
 var STAGE=['D+1','D+7','D+30','Futura'];
@@ -1084,6 +1086,7 @@ function grpOf(it,k){return String(it.grp||'').trim()||(k==='proj'?'Projetos':ar
 function nextPart(it){return it.parts.filter(function(p){return !p.done;})[0]||null;}
 function studyRow(k,it){
   var total=it.parts.length,done=it.parts.filter(function(p){return p.done;}).length,np=nextPart(it),pct=total?Math.round(done/total*100):0;
+  if(k==='cap'){var nr=nextRevOf(it);return '<li class="srow"><button type="button" class="smain" data-act="nav" data-to="item:cap:'+it.id+'"><span class="tname"><b>'+esc(it.name)+'</b>'+hidPill(it)+'</span><small>'+(done?done+' '+plural(done,'capítulo lido','capítulos lidos'):'nenhum capítulo lido ainda')+(nr?' · próxima revisão '+esc(fmtDow(nr.due)):'')+'</small></button></li>';}
   return '<li class="srow"><button type="button" class="smain" data-act="nav" data-to="item:'+k+':'+it.id+'"><span class="tname"><b>'+esc(it.name)+'</b>'+hidPill(it)+'</span>'+
     '<span class="sbar" role="img" aria-label="'+pct+'% concluído"><i class="'+(pct===100?'ok':'')+'" style="width:'+pct+'%"></i></span>'+
     '<small>'+done+' de '+total+' '+un(k,total)+(np?' · próximo: '+esc(np.name):total?' · tudo concluído':' · sem '+un(k,2)+' ainda')+'</small></button></li>';
@@ -1289,14 +1292,14 @@ function goalAll(g){
   abs.forEach(function(b){abStudies(b).forEach(function(x){add('cap',x);});});
   return a;
 }
-function goalStats(g){var t=0,d=0,all=goalAll(g);all.forEach(function(x){t+=x.it.parts.length;d+=x.it.parts.filter(function(p){return p.done;}).length;});return {t:t,d:d,n:all.length};}
+function goalStats(g){var t=0,d=0,n=0,all=goalAll(g);all.forEach(function(x){if(x.k!=='cap')return;n++;t+=x.it.parts.length;d+=readOf(x.it).length;});return {t:t,d:d,n:n};}
 function goalStrip(){
   var g=goalNow();
   if(!g)return canE()?'<section class="sec goalstrip" aria-label="Objetivo"><div class="sec-head"><h2 class="disp">Objetivo</h2><button class="btn sm primary" data-act="nav" data-to="map">Criar o mapa</button></div><p class="muted" style="font-size:14px">Dê um objetivo ao que você estuda: o mapa liga cada estudo à pessoa que você precisa ser.</p></section>':'';
   var i=state.goals.filter(function(x){return x.area!=='pess';}).indexOf(g),st=goalStats(g);
   return '<section class="sec goalstrip" aria-label="Objetivo"><div class="sec-head"><span class="label">'+(i>=0?'Etapa '+(i+1)+' · você está aqui':'Objetivo')+'</span><button class="btn sm" data-act="nav" data-to="map">Ver o mapa</button></div>'+
     '<h2 class="disp gtitle">'+esc(g.name)+'</h2>'+(g.real?'<p class="muted greal">'+esc(g.real)+'</p>':'')+
-    '<span class="muted" style="font-size:12.5px">'+st.n+' '+plural(st.n,'estudo','estudos')+' · '+st.d+' de '+st.t+' '+un('cap',st.t)+' concluídos</span></section>';
+    '<span class="muted" style="font-size:12.5px">'+st.n+' '+plural(st.n,'estudo','estudos')+' · '+st.d+' '+plural(st.d,'capítulo lido','capítulos lidos')+'</span></section>';
 }
 function partsBar(it){
   if(!it.parts.length)return '<span class="mbar empty" aria-hidden="true"></span>';
@@ -1305,14 +1308,15 @@ function partsBar(it){
 }
 function mapRow(x){
   var it=x.it,done=it.parts.filter(function(p){return p.done;}).length,np=nextPart(it);
+  if(x.k==='cap')return '<li class="mrow'+(it.status==='espera'?' wait':'')+'"><button type="button" class="mmain" data-act="nav" data-to="item:cap:'+it.id+'"><span class="mname"><b>'+esc(it.name)+'</b><small>'+(done?done+' '+plural(done,'capítulo lido','capítulos lidos'):'nenhum capítulo lido ainda')+(it.status==='espera'?' · em espera':'')+'</small></span></button></li>';
   return '<li class="mrow'+(it.status==='espera'?' wait':'')+'"><button type="button" class="mmain" data-act="nav" data-to="item:'+x.k+':'+it.id+'">'+partsBar(it)+
     '<span class="mname"><b>'+esc(it.name)+'</b><small>'+(it.parts.length?done+' de '+it.parts.length+' '+un(x.k,it.parts.length)+(np&&it.status!=='espera'?' · próximo: '+esc(np.name):''):'sem '+un(x.k,2)+' ainda')+(it.status==='espera'?' · em espera':'')+'</small></span></button></li>';
 }
 function taskMapRow(d){return '<li class="mrow"><button type="button" class="mmain" data-act="nav" data-to="daily:'+d.id+'"><span class="mname"><b>'+esc(d.name)+'</b><small>Tarefa · '+(d.label?esc(d.label)+' · ':'')+(freqOf(d)==='week'?'semanal':freqOf(d)==='month'?'mensal':'diária')+'</small></span></button></li>';}
 function abBlock(a){
   var st=abStudies(a),ts=abTasks(a),n=0,d=0;
-  st.forEach(function(x){n+=x.parts.length;d+=x.parts.filter(function(q){return q.done;}).length;});
-  var info=[];if(st.length)info.push(st.length+' '+plural(st.length,'estudo','estudos')+(n?' · '+d+' de '+n+' capítulos':''));if(ts.length)info.push(ts.length+' '+plural(ts.length,'tarefa','tarefas'));
+  st.forEach(function(x){d+=readOf(x).length;});
+  var info=[];if(st.length)info.push(st.length+' '+plural(st.length,'estudo','estudos')+(d?' · '+d+' '+plural(d,'capítulo lido','capítulos lidos'):''));if(ts.length)info.push(ts.length+' '+plural(ts.length,'tarefa','tarefas'));
   return '<li class="tcap"><div class="caphead"><button type="button" class="linkb capname" data-act="nav" data-to="ab:'+a.id+'">'+esc(a.name)+'</button><small class="muted">'+(info.length?info.join(' · '):'sem estudo nem tarefa ainda')+'</small></div>'+
     ((st.length||ts.length)?'<ul class="tl">'+st.map(function(x){return mapRow({k:'cap',it:x});}).join('')+ts.map(taskMapRow).join('')+'</ul>':'')+'</li>';
 }
@@ -1344,7 +1348,7 @@ function goalSection(g,i){
   var pess=g.area==='pess',cur=!pess&&goalNow()===g,st=goalStats(g),nodes=g.nodes||[];
   var pct=st.t?Math.round(st.d/st.t*100):0;
   var card='<div class="mgoal"><span class="label">Objetivo</span><b class="disp mgn">'+esc(g.name)+'</b>'+(g.real?'<span class="mreal"><span class="label">Objetivo real</span>'+esc(g.real)+'</span>':'<span class="muted" style="font-size:13px">Objetivo real ainda não escrito.</span>')+
-    (st.t?'<span class="bar-track" role="img" aria-label="'+pct+'% dos capítulos"><span class="bar-fill" style="width:'+pct+'%"></span></span><small class="muted">'+st.d+' de '+st.t+' '+un('cap',st.t)+' · '+st.n+' '+plural(st.n,'estudo','estudos')+'</small>':'')+'</div>';
+    (st.n?'<small class="muted">'+st.n+' '+plural(st.n,'estudo','estudos')+' · '+st.d+' '+plural(st.d,'capítulo lido','capítulos lidos')+'</small>':'')+'</div>';
   var body=nodes.length?'<div class="gmap nodes'+(cur?' cur':'')+'"><div class="mcol"><ul class="mlist mnodes">'+nodes.map(function(n){return nodeBox(g,n);}).join('')+'</ul></div>'+card+'</div>':'<div class="gmap tree'+(cur?' cur':'')+'">'+card+goalTree(g)+'</div>';
   body+=(g.note?'<p class="muted mnote">'+esc(g.note)+'</p>':'')+
     (canE()?'<div class="row"><button class="btn sm" data-act="goal-edit" data-id="'+g.id+'">Editar objetivo</button><button class="btn sm" data-act="item-new" data-k="proj" data-area="'+(pess?'pess':'prof')+'" data-goal="'+g.id+'">+ Projeto</button>'+(nodes.length?'<button class="btn sm" data-act="node-new" data-goal="'+g.id+'">+ Capacidade real / característica</button>':'')+(!pess&&!cur?'<button class="btn sm" data-act="goal-now" data-id="'+g.id+'">Estou nesta etapa</button>':'')+'</div>':'');
@@ -1352,10 +1356,50 @@ function goalSection(g,i){
   var isOpen=ui.mo[g.id]!==undefined?ui.mo[g.id]:(cur||pess);
   return '<details class="fold msec'+(cur?' cur':'')+'" data-gid="'+g.id+'"'+(isOpen?' open':'')+'><summary><span class="mstage">'+tag+'</span> '+esc(g.name)+(cur?' <span class="pill" style="margin-left:6px">você está aqui</span>':'')+'</summary>'+body+'</details>';
 }
+function exportMap(){
+  var L=[],t=today(),gi=0;
+  function done(x){return readOf(x).length;}
+  function first(t){return String(t||'').split(/\n\s*\n/)[0].trim();}
+  function studyLine(x){return '- '+x.name+' ('+done(x)+' '+plural(done(x),'capítulo lido','capítulos lidos')+(x.status==='espera'?', em espera':'')+')'+(x.books?'\n  Fontes: '+x.books.replace(/\n+/g,'; '):'')+(x.desc?'\n  '+first(x.desc).replace(/\n+/g,' '):'');}
+  L.push('# Mapa atual ('+t+')','','Objetivo → objetivo real → projetos → capacidades de cada projeto → estudos (livros) e tarefas. Este arquivo traz só o mapa: nomes, objetivo real e a primeira frase de cada descrição, sem as anotações detalhadas dos projetos.','');
+  ['prof','pess'].forEach(function(area){
+    var gs=state.goals.filter(function(g){return (g.area==='pess'?'pess':'prof')===area;});if(!gs.length)return;
+    L.push('## '+AREA[area],'');
+    gs.forEach(function(g,i){
+      L.push('### '+(area==='prof'?'Etapa '+(i+1)+' · ':'')+g.name+(area==='prof'&&goalNow()===g?' (etapa atual)':''),'');
+      L.push('Objetivo real: '+(g.real||'(ainda não escrito)'));if(g.note)L.push('Detalhes: '+g.note);L.push('');
+      goalProjs(g).forEach(function(p){
+        L.push('#### Projeto: '+p.name+(state.cur===p.id?' (projeto de agora)':'')+(p.status==='espera'?' (em espera)':''),'');
+        if(p.desc)L.push(first(p.desc),'');
+        if(p.parts.length){L.push('Passos:');p.parts.forEach(function(q,j){L.push((j+1)+'. ['+(q.done?'x':' ')+'] '+q.name);});L.push('');}
+        var ab=projAbs(p);L.push('Capacidades: '+(ab.length?ab.map(function(a){return a.name;}).join('; '):'(nenhuma ligada)'),'');
+      });
+      var da=goalAbs(g);if(da.length){L.push('Capacidades diretas (sem projeto): '+da.map(function(a){return a.name;}).join('; '),'');}
+      (g.nodes||[]).forEach(function(n){
+        L.push('#### '+(n.kind==='real'?'Capacidade real: ':'Característica: ')+n.name,'');if(n.desc)L.push(n.desc,'');
+        var nl=(n.links||[]).map(function(id){var it=abById(id)||findItem('cap',id)||findItem('proj',id);return it?it.name:null;}).filter(Boolean);
+        if(nl.length)L.push('Ligado a: '+nl.join('; '),'');
+      });
+    });
+  });
+  L.push('## Capacidades','');
+  state.ab.forEach(function(a){
+    var ps=abProjs(a),st=abStudies(a),ts=abTasks(a);
+    L.push('### '+a.name,'');if(a.desc)L.push(a.desc,'');
+    L.push('Serve a: '+(ps.length?ps.map(function(x){return x.name;}).join('; '):'(nenhum projeto)'));
+    if(st.length){L.push('Estudos:');st.forEach(function(x){L.push(studyLine(x));});}else L.push('Estudos: (nenhum ainda)');
+    if(ts.length)L.push('Tarefas: '+ts.map(function(x){return x.name;}).join('; '));
+    L.push('');
+  });
+  var linked={};state.ab.forEach(function(a){(a.studies||[]).forEach(function(id){linked[id]=1;});});
+  var free=state.cap.filter(function(x){return !linked[x.id];});
+  if(free.length){L.push('## Estudos sem capacidade','');free.forEach(function(x){L.push(studyLine(x));});L.push('');}
+  return L.join('\n');
+}
 function renderMap(){
   var prof=state.goals.filter(function(g){return g.area!=='pess';}),pess=state.goals.filter(function(g){return g.area==='pess';}),loose=looseAbs();
   return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:6px"><span class="label">O que eu preciso alcançar</span><h1 class="disp">Mapa</h1></div>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="goal-new">+ Objetivo</button><button class="btn sm" data-act="ab-new">+ Capacidade</button></span>':'')+'</div>'+
+    '<div class="page-head"><div style="display:flex;flex-direction:column;gap:6px"><span class="label">O que eu preciso alcançar</span><h1 class="disp">Mapa</h1></div>'+'<span class="row">'+(canE()?'<button class="btn sm primary" data-act="goal-new">+ Objetivo</button><button class="btn sm" data-act="ab-new">+ Capacidade</button>':'')+'<button class="btn sm" data-act="map-copy">Copiar mapa</button><button class="btn sm" data-act="map-dl">Baixar mapa (.md)</button></span></div>'+
     '<p class="muted" style="font-size:14px">De cima para baixo: o objetivo, o objetivo real, os projetos que levam a ele, as capacidades de cada projeto e, em cada capacidade, os estudos (livros) e as tarefas do dia. Os objetivos profissionais são etapas: você trabalha numa de cada vez.</p>'+
     (prof.length?'<h2 class="label" style="margin-top:6px">Profissional</h2>'+prof.map(goalSection).join(''):'')+
     (pess.length?'<h2 class="label" style="margin-top:6px">Pessoal</h2>'+pess.map(goalSection).join(''):'')+
@@ -1507,30 +1551,41 @@ function planRow(k,it){
   return '<div class="planrow"><span>'+info.join(' · ')+'</span>'+right+'</div>'+extra;
 }
 function renderItem(k,it){
-  var total=it.parts.length,done=it.parts.filter(function(p){return p.done;}).length,pct=total?Math.round(done/total*100):0,fc=endForecast(it);
-  var U=un(k,2),U1=un(k,1);
-  var rows=it.parts.map(function(p,i){
-    var r=reviewOf(p.id),st;
-    if(p.done){st='concluído em '+fmt(p.done);if(r&&r.due)st+=' · revisão '+stageName(r.stage,r.item)+' em '+fmt(r.due);else if(r&&r.stage>=3)st+=' · revisões feitas';}
-    else st=p.due?'até '+fmt(p.due):(k==='proj'?'a fazer':'a ler');
+  var isCap=k==='cap';
+  var total=it.parts.length,done=it.parts.filter(function(p){return p.done;}).length,pct=total?Math.round(done/total*100):0,fc=isCap?null:endForecast(it);
+  var U=un(k,2);
+  function stText(p){var r=reviewOf(p.id),st;
+    if(p.done){st=(isCap?'lido em ':'concluído em ')+fmt(p.done);if(r&&r.due){var lt=r.due<today();st+=' · revisão '+stageName(r.stage,r.item)+' em '+fmtDow(r.due)+(lt?' (atrasada)':'');}else if(r&&r.stage>=3)st+=' · revisões feitas';}
+    else st=p.due?'até '+fmt(p.due):(isCap?'no sumário':'a fazer');return st;}
+  function row(p,i,box){
     var late=!p.done&&p.due&&p.due<today();
-    return '<li class="prow'+(p.done?' done':'')+'">'+(canE()?'<button type="button" class="gchk" role="checkbox" aria-checked="'+(!!p.done)+'" aria-label="'+(p.done?'Reabrir ':'Concluir ')+esc(p.name)+'" data-act="part-toggle" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"></button>':'<span class="gchk static" aria-hidden="true"></span>')+
-      '<button type="button" class="pmain" data-act="part-open" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"><span class="pnum num">'+(i+1)+'</span><span class="pbody"><b>'+esc(p.name)+'</b><small'+(late?' class="lt"':'')+'>'+st+(late?' · atrasado':'')+'</small></span></button></li>';
-  }).join('');
-  var abl=k==='cap'?absOfStudy(it):[];
+    return '<li class="prow'+(p.done?' done':'')+'">'+(box&&canE()?'<button type="button" class="gchk" role="checkbox" aria-checked="'+(!!p.done)+'" aria-label="'+(p.done?'Reabrir ':'Concluir ')+esc(p.name)+'" data-act="part-toggle" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"></button>':(box?'<span class="gchk static" aria-hidden="true"></span>':''))+
+      '<button type="button" class="pmain" data-act="part-open" data-k="'+k+'" data-item="'+it.id+'" data-id="'+p.id+'"><span class="pnum num">'+(i+1)+'</span><span class="pbody"><b>'+esc(p.name)+'</b><small'+(late?' class="lt"':'')+'>'+stText(p)+(late?' · atrasado':'')+'</small></span></button></li>';}
+  var abl=isCap?absOfStudy(it):[];
   var lead=(abl.length?'<span class="leads">Desenvolve: '+abl.map(function(a){return '<button type="button" class="linkb" data-act="nav" data-to="ab:'+a.id+'">'+esc(a.name)+'</button>';}).join(', ')+'</span>':'')+
     (goalsOf(it).length?'<span class="leads">Leva a: '+goalsOf(it).map(function(g){return '<button type="button" class="linkb" data-act="nav" data-to="map">'+esc(g.name)+'</button>';}).join(', ')+'</span>':'');
   var pabs=k==='proj'?projAbs(it):[];
-  return '<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
-   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+done+' de '+total+' '+un(k,total)+' '+(k==='proj'?'concluídos':'concluídos')+'</span>'+(it.desc?'<p class="idesc">'+esc(it.desc)+'</p>':'')+lead+'</div>'+
+  var head='<button class="btn ghost back" data-act="nav" data-to="home">'+I.left+' Início</button>'+
+   '<div class="page-head"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="label">'+esc(grpOf(it,k))+'</span><h1 class="disp" style="overflow-wrap:anywhere">'+esc(it.name)+'</h1><span class="muted" style="font-size:14px">'+(isCap?done+' '+plural(done,'capítulo lido','capítulos lidos'):done+' de '+total+' '+un(k,total)+' concluídos')+'</span>'+(it.desc?'<p class="idesc">'+esc(it.desc)+'</p>':'')+lead+'</div>'+
    (canE()?'<button class="btn sm" data-act="item-edit" data-k="'+k+'" data-id="'+it.id+'">Editar</button>':'')+'</div>'+
    (it.books?'<p class="muted" style="font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere"><b>Fontes:</b> '+esc(it.books)+'</p>':'')+
+   (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'');
+  if(isCap){
+    var read=it.parts.map(function(p,i){return {p:p,i:i};}).filter(function(x){return x.p.done;}).sort(function(a,b){return a.p.done<b.p.done?1:a.p.done>b.p.done?-1:b.i-a.i;});
+    var toc=it.parts.map(function(p,i){return {p:p,i:i};}).filter(function(x){return !x.p.done;});
+    return head+
+     '<div class="sec-head"><h2 class="disp" style="font-size:20px">Capítulos lidos</h2>'+(canE()?'<button class="btn sm primary" data-act="chap-new" data-item="'+it.id+'">+ Capítulo lido</button>':'')+'</div>'+
+     (read.length?'<ul class="plist2">'+read.map(function(x){return row(x.p,x.i,false);}).join('')+'</ul><p class="muted" style="font-size:13px">O app só diz os dias de revisar cada capítulo ('+srOf(it).join(', ')+' dias depois de ler). Toque no capítulo e responda “Lembrei” ou “Não lembrei”: se não lembrar, volta no dia seguinte.</p>':'<div class="empty-state"><p>Nenhum capítulo lido ainda. Quando terminar de ler um capítulo, toque em + Capítulo lido: o app marca as datas de revisão.</p></div>')+
+     (toc.length||canE()?'<details class="fold"><summary>Sumário do livro (opcional) <span class="num muted">'+toc.length+'</span></summary>'+
+       (toc.length?'<p class="muted" style="font-size:13px;margin:8px 0">Se quiser, deixe aqui os capítulos que ainda não leu. Toque na caixa quando ler: o app marca hoje e começa as revisões.</p><ul class="plist2" style="margin-top:8px">'+toc.map(function(x){return row(x.p,x.i,true);}).join('')+'</ul>':'<p class="muted" style="font-size:13px;margin:8px 0">Sem sumário.</p>')+
+       (canE()?'<div class="row" style="margin-top:8px"><button class="btn sm" data-act="part-new" data-k="cap" data-item="'+it.id+'">+ No sumário</button><button class="btn sm" data-act="part-bulk" data-k="cap" data-item="'+it.id+'">+ Vários</button></div>':'')+'</details>':'');
+  }
+  return head+
    '<div class="bar-track" role="img" aria-label="'+pct+'% concluído"><div class="bar-fill'+(pct===100?' ok':'')+'" style="width:'+pct+'%"></div></div>'+
-   (it.status==='espera'?'<div class="waitbar"><span>Em espera.</span>'+(canE()?'<button class="btn sm" data-act="item-activate" data-k="'+k+'" data-id="'+it.id+'">Começar agora</button>':'')+'</div>':'')+
-   ((fc&&fc.end)||it.due?'<div class="planrow"><span>'+(fc&&fc.end?'<b>Última repetição prevista:</b> <b class="num">'+fmtY(fc.end)+'</b>':'')+'</span><span>'+(it.due?'Prazo: <b class="num">'+fmtY(it.due)+'</b>'+(fc&&fc.end&&fc.end>it.due?' <b style="color:var(--bad)">('+diff(it.due,fc.end)+' dias depois)</b>':''):'')+'</span></div>':'')+
-   (k==='proj'&&pabs.length?'<div class="stack"><span class="label">Capacidades do projeto</span><span class="leads">'+pabs.map(function(a){return '<button type="button" class="linkb" data-act="nav" data-to="ab:'+a.id+'">'+esc(a.name)+'</button>';}).join(', ')+'</span></div>':'')+
-   '<div class="sec-head"><h2 class="disp" style="font-size:20px">'+(k==='proj'?'Passos, na ordem':'Capítulos, na ordem')+'</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ '+(k==='proj'?'Passo':'Capítulo')+'</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Vários</button></span>':'')+'</div>'+
-   (rows?'<ul class="plist2">'+rows+'</ul><p class="muted" style="font-size:13px">'+(k==='cap'?'Ao terminar de ler um capítulo, marque a caixa: as revisões começam (explicar de memória em 1, 7 e 30 dias). Se não lembrar bem, “Não lembrei” volta no dia seguinte.':'A caixa marca o passo como concluído.')+'</p>':'<div class="empty-state"><p>Ainda sem '+U+'. Use + '+U1.charAt(0).toUpperCase()+U1.slice(1)+' ou + Vários (um por linha).</p></div>');
+   ((fc&&fc.end)||it.due?'<div class="planrow"><span>'+(fc&&fc.end?'<b>Última repetição prevista:</b> <b class="num">'+fmtY(fc.end)+'</b>':'')+'</span><span>'+(it.due?'Prazo: <b class="num">'+fmtY(it.due)+'</b>':'')+'</span></div>':'')+
+   (pabs.length?'<div class="stack"><span class="label">Capacidades do projeto</span><span class="leads">'+pabs.map(function(a){return '<button type="button" class="linkb" data-act="nav" data-to="ab:'+a.id+'">'+esc(a.name)+'</button>';}).join(', ')+'</span></div>':'')+
+   '<div class="sec-head"><h2 class="disp" style="font-size:20px">Passos, na ordem</h2>'+(canE()?'<span class="row"><button class="btn sm primary" data-act="part-new" data-k="'+k+'" data-item="'+it.id+'">+ Passo</button><button class="btn sm" data-act="part-bulk" data-k="'+k+'" data-item="'+it.id+'">+ Vários</button></span>':'')+'</div>'+
+   (total?'<ul class="plist2">'+it.parts.map(function(p,i){return row(p,i,true);}).join('')+'</ul><p class="muted" style="font-size:13px">A caixa marca o passo como concluído.</p>':'<div class="empty-state"><p>Ainda sem passos. Use + Passo ou + Vários (um por linha).</p></div>');
 }
 /* ---------- áreas: profissional / pessoal ---------- */
 var AREA={prof:'Profissional',pess:'Pessoal'};
@@ -1816,6 +1871,7 @@ function renderModal(){
   else if(m.kind==='curpick')h=curPickForm();
   else if(m.kind==='goal')h=goalForm(m);
   else if(m.kind==='ab')h=abForm(m);
+  else if(m.kind==='chap')h=chapForm(m);
   else if(m.kind==='node')h=nodeForm(m);
   else if(m.kind==='idea')h=ideaForm();
   if(!h){ui.modal=null;root.innerHTML='';return;}
@@ -1828,9 +1884,9 @@ function partModal(m){
   var r=reviewOf(p.id),i=it.parts.indexOf(p)+1;
   var revTxt='';if(m.k==='cap'&&p.done&&r)revTxt=r.due?'Próxima revisão: '+stageName(r.stage,r.item)+' em '+fmtDow(r.due):'Revisões concluídas.';
   var acts='';
-  if(canE())acts='<div class="row">'+(!p.done?'<button class="btn good lg" data-act="part-done">Concluí: começar as revisões</button>':'<button class="btn lg" data-act="part-reopen">Reabrir</button>')+'</div>';
-  return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+esc(it.name)+' · '+un(m.k,1)+' '+i+' de '+it.parts.length+'</span><h2 class="disp">'+esc(p.name)+'</h2></div>'+closeBtn()+'</div>'+
-   '<div class="facts"><div><span class="label">Status</span><b>'+(p.done?'Concluído':(m.k==='proj'?'A fazer':'A ler'))+'</b></div><div><span class="label">'+(p.done?'Concluído em':'Prazo')+'</span><b class="num">'+(p.done?fmt(p.done):(p.due?fmt(p.due):'—'))+'</b></div></div>'+
+  if(canE())acts='<div class="row">'+(!p.done?'<button class="btn good lg" data-act="part-done">'+(m.k==='cap'?'Li este capítulo: começar as revisões':'Concluí este passo')+'</button>':'<button class="btn lg" data-act="part-reopen">'+(m.k==='cap'?'Desfazer: não li':'Reabrir')+'</button>')+'</div>';
+  return '<div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+esc(it.name)+(m.k==='cap'?(p.done?' · capítulo lido':' · sumário'):' · '+un(m.k,1)+' '+i+' de '+it.parts.length)+'</span><h2 class="disp">'+esc(p.name)+'</h2></div>'+closeBtn()+'</div>'+
+   '<div class="facts"><div><span class="label">Status</span><b>'+(p.done?(m.k==='cap'?'Lido':'Concluído'):(m.k==='proj'?'A fazer':'No sumário'))+'</b></div><div><span class="label">'+(p.done?(m.k==='cap'?'Lido em':'Concluído em'):'Prazo')+'</span><b class="num">'+(p.done?fmt(p.done):(p.due?fmt(p.due):'—'))+'</b></div></div>'+
    acts+(revTxt?'<div class="revbox">'+esc(revTxt)+'</div>':'')+
    (canE()&&m.k==='cap'&&p.done&&r&&r.due?'<div class="row"><button class="btn" data-act="rev-again" data-id="'+r.id+'">Não lembrei: voltar amanhã</button><button class="btn good" data-act="rev-ok" data-id="'+r.id+'">Lembrei: próxima ('+(r.stage<2?stageName(r.stage+1,r.item):'futura')+')</button></div>':'')+
    '<div class="stack"><span class="label">Anotações</span>'+(p.note?'<div class="note">'+esc(p.note)+'</div>':'<p class="muted" style="font-size:14px">Sem anotações.</p>')+'</div>'+
@@ -1892,6 +1948,14 @@ function partForm(m){
    '<div class="row"><button class="btn primary" type="submit">'+(p?'Salvar':'Adicionar')+'</button><button class="btn" type="button" data-act="'+(p?'part-edit-cancel':'modal-close')+'">Cancelar</button></div>'+
    (p?(m.confirm?'<div class="confirm">Excluir “'+esc(p.name)+'”? A revisão ligada a ela sai da lista; o calendário continua com o histórico.<div class="row"><button class="btn danger solid sm" type="button" data-act="part-del-yes">Sim, excluir</button><button class="btn sm" type="button" data-act="del-no">Manter</button></div></div>':'<button class="btn danger sm" type="button" data-act="part-del-ask" style="align-self:flex-start">Excluir parte</button>'):'')+
    '</form>';
+}
+function chapForm(m){
+  var it=findItem('cap',m.item);if(!it)return '';
+  return '<form data-form="chap" style="display:flex;flex-direction:column;gap:14px"><div class="sheet-head"><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="label">'+esc(it.name)+'</span><h2 class="disp">Capítulo lido</h2></div>'+closeBtn()+'</div>'+
+    '<div class="field"><label for="ch-name">Capítulo</label><input type="text" id="ch-name" name="name" required maxlength="160" placeholder="Ex.: Capítulo 2 — Data and Sampling Distributions" autofocus></div>'+
+    '<div class="field"><label for="ch-date">Lido em</label><input type="date" id="ch-date" name="date" value="'+today()+'" max="'+today()+'"></div>'+
+    '<p class="muted" style="font-size:13.5px">As revisões caem em '+srOf(it).join(', ')+' dias depois de ler. Se não lembrar, volta no dia seguinte.</p>'+
+    '<div class="row"><button class="btn primary" type="submit">Registrar</button><button class="btn" type="button" data-act="modal-close">Cancelar</button></div></form>';
 }
 function bulkForm(m){
   var it=findItem(m.k,m.item);if(!it)return '';
@@ -2524,6 +2588,9 @@ document.addEventListener('click',function(ev){
       commit(msg);break;}
     case 'rev-all':ui.revAll=!ui.revAll;render();break;
     case 'item-new':openModal({kind:'item',k:d.k,area:d.area||'prof',forGoal:d.goal,forAb:d.ab});break;
+    case 'map-copy':copyText(exportMap(),'Mapa');break;
+    case 'map-dl':if(!dl){copyText(exportMap(),'Mapa');break;}dl.save({filename:'mapa-atual.md',data:exportMap()}).catch(function(e){var c=e&&e.code;if(c!=='declined')toast('Não deu para baixar aqui. Use Copiar mapa.');});break;
+    case 'chap-new':openModal({kind:'chap',item:d.item});break;
     case 'ab-new':openModal({kind:'ab'});break;
     case 'ab-edit':openModal({kind:'ab',id:d.id});break;
     case 'ab-del-ask':ui.modal.confirm=true;renderModal();break;
@@ -2634,7 +2701,7 @@ document.addEventListener('submit',function(ev){
     else{var farea=m.area==='pess'?'pess':'prof';if(m.forGoal){var fg=state.goals.find(function(x){return x.id===m.forGoal;});if(fg)farea=fg.area==='pess'?'pess':'prof';}
       var nw={id:uid(),name:name,due:due,books:books,area:farea,status:istatus,parts:[]};if(m.k==='proj')nw.caps=[];if(idesc)nw.desc=idesc;if(igrp)nw.grp=igrp;if(isr)nw.sr=isr;state[m.k].push(nw);linkAbs(nw);
       if(m.forGoal&&m.k==='proj'){var fg2=state.goals.find(function(x){return x.id===m.forGoal;});if(fg2){if(!fg2.projs)fg2.projs=[];fg2.projs.push(nw.id);}}
-      ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit(m.k==='proj'?'Projeto criado. Adicione os passos.':'Estudo criado. Agora adicione os capítulos.');}
+      ui.modal=null;ui.route='item:'+m.k+':'+nw.id;commit(m.k==='proj'?'Projeto criado. Adicione os passos.':'Estudo criado. Registre os capítulos que ler.');}
   }else if(kind==='idea'){
     var it0=String(fd.get('text')||'').trim().slice(0,500);if(!it0)return;
     state.ideas.unshift({id:uid(),t:it0,d:today()});ui.modal=null;commit('Ideia guardada. Volte ao trabalho.');
@@ -2649,6 +2716,13 @@ document.addEventListener('submit',function(ev){
     ui.modal=null;commit('Salvo');
   }else if(kind==='curpick'){
     var cv=String(fd.get('cur')||'');state.cur=state.proj.some(function(x){return x.id===cv;})?cv:'';ui.modal=null;commit('Projeto de agora definido');
+  }else if(kind==='chap'){
+    var ci=findItem('cap',m.item),cn=String(fd.get('name')||'').trim().slice(0,160);if(!ci||!cn)return;
+    var cd=String(fd.get('date')||'')||today();if(cd>today())cd=today();
+    var cp={id:uid(),name:cn,due:null,done:cd,note:''};ci.parts.push(cp);
+    addLog('done','cap',ci,cp,{d:cd,retro:cd===today()?0:1});
+    state.reviews.push({id:uid(),part:cp.id,item:ci.id,stage:0,due:addDays(cd,srOf(ci)[0])});
+    ui.modal=null;commit('Capítulo registrado. Primeira revisão em '+fmt(addDays(cd,srOf(ci)[0]))+'.');
   }else if(kind==='ab'){
     var an=String(fd.get('name')||'').trim().slice(0,120);if(!an)return;
     var av=m.id?abById(m.id):null;if(!av){av={id:uid(),studies:[],tasks:[]};state.ab.push(av);}

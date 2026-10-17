@@ -16,9 +16,10 @@ De cima para baixo, para objetivos profissionais e pessoais:
 - **Projeto.** Tem passos na ordem e uma lista das capacidades que exige. O **Projeto de agora** fica no topo da tela inicial.
 - **Capacidade.** Algo que preciso saber fazer (por exemplo, *Estatística*, *SQL / Data Modeling*, *English Speaking*, *Corpo forte e saudável*).
   Uma capacidade pode servir a mais de um projeto, e um estudo pode desenvolver mais de uma capacidade.
-- **Estudo.** Um livro ou curso, com os **capítulos** na ordem. Ao terminar de ler um capítulo, marco a caixa: as revisões caem em 1, 7 e 30 dias.
-  **Lembrei** leva para a próxima data; **Não lembrei** volta no dia seguinte (limite de 2 revisões nos dias úteis e 6 no fim de semana).
-  A revisão é feita fora do app (explicar de memória, com a leitura do livro): o app só calcula as datas.
+- **Estudo.** Um livro ou curso. Não há divisão em partes: ao terminar de ler um capítulo, toco em **+ Capítulo lido** (nome e data) e o app calcula
+  os dias de revisão: **1, 7 e 30 dias** depois de ler (dá para mudar por estudo). Na revisão eu explico o capítulo inteiro de memória, fora do app, e
+  respondo **Lembrei** (vai para a próxima data) ou **Não lembrei** (volta no dia seguinte). Limite de 2 revisões nos dias úteis e 6 no fim de semana.
+  Um **sumário do livro** (opcional) fica recolhido na página do estudo, para quem quiser deixar os capítulos que ainda não leu.
 - **Tarefa diária.** Uma lista curta, com uma caixa para hoje, rótulo e as tarefas *Necessárias*. Uma tarefa pode desenvolver uma capacidade.
 
 ## O que o app mostra
@@ -26,11 +27,12 @@ De cima para baixo, para objetivos profissionais e pessoais:
 1. **Projeto de agora**, no topo, com a barra de passos e o passo atual.
 2. **Objetivo atual** (a etapa em que estou).
 3. **Hoje**: as tarefas do dia, com o botão da *pessoa necessária*, e as **Revisões de hoje**.
-4. **Estudos**, em grupos, com a barra de capítulos e o próximo capítulo.
+4. **Estudos**, em grupos, com os capítulos lidos e a próxima revisão.
 5. **Últimos 14 dias**: uma grade para marcar o que fiz e não marquei.
 6. **Calendário**: por dia, quantas tarefas necessárias foram feitas e quanto trabalho houve em estudos profissionais e pessoais. **Ajustar este dia** corrige o passado.
 7. **Mapa**: a estrutura inteira, em árvore (objetivo, projetos, capacidades, estudos e tarefas). Em cada capacidade há uma página com seus estudos e tarefas.
-8. **Ideias para depois**: o botão **+ Ideia** guarda a ideia e o app não muda por causa dela.
+8. **Copiar mapa / Baixar mapa (.md)**, no Mapa: um arquivo com os objetivos, projetos, capacidades e estudos, para levar a outro projeto (sem as anotações detalhadas).
+9. **Ideias para depois**: o botão **+ Ideia** guarda a ideia e o app não muda por causa dela.
 
 Não há prompts nem flashcards no app: eles são feitos fora dele. As notas em markdown ficam no Obsidian.
 
